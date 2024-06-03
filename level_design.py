@@ -4,8 +4,11 @@ from typing import List, Tuple
 import pandas as pd
 
 class ActorContainer:
-    def __init__(self):
-        self.actor_list: List[Actor] = []
+    """
+    
+    """
+    def __init__(self, actor_list=[]):
+        self.actor_list = actor_list
   
     def add_actor(self, *args, **kwargs):
         actor = create_actor(*args, **kwargs)
@@ -15,7 +18,10 @@ class ActorContainer:
     def remove_actor(self, actor):
         self.actor_list.remove(actor)
     
-    def save_file(self, f):
+    def save_file(self, f: str):
+        """
+        saves the file
+        """
         fieldnames = []
         for actor in self.actor_list:
             fieldnames.append(list_actor_attributes(actor, ['image', 'pos']))
@@ -23,12 +29,21 @@ class ActorContainer:
         df = pd.DataFrame(fieldnames)
         df.to_pickle(f)
     
-    def read_file(self, f):
+    def read_file(self, f: str):
+        """
+        reads the file
+        """
         df = pd.read_pickle(f).T                        
         fieldnames = df.to_dict()
         
         for actor in fieldnames.values():
             self.add_actor(**actor)
+            
+    def colliderect(self, other_actor):
+        for actor in self.actor_list:
+            if actor.colliderect(other_actor):
+                return True
+        return False
             
     def offset_tiles(self, pos: Tuple[int, int]):
         dx, dy = pos

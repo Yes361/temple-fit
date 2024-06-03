@@ -11,10 +11,6 @@ class PoseAnalyzer:
     def __init__(self, *args, **kwargs):
         self.pose = mp_hands.Hands(*args, **kwargs)
 
-    def process_frame(self, frame):
-        landmarks = self.pose.process(frame)
-        return landmarks
-    
     @staticmethod
     def draw_hand_landmarks(frame, detection_result):
         """
@@ -23,6 +19,13 @@ class PoseAnalyzer:
         if detection_result.multi_hand_landmarks:     
             for hand_landmarks in detection_result.multi_hand_landmarks:
                 mp_drawing.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS)
+    
+    def process_frame(self, frame):
+        landmarks = self.pose.process(frame)
+        return landmarks
+    
+    # def recognize_pose(self):
+    #     pass
 
 class Camera:
     def __init__(self):
@@ -53,17 +56,21 @@ class Camera:
         """
         return self._cap.get(cv2.CAP_PROP_POS_MSEC)
     
-    def return_camera_frame(self, width, height):
+    def return_camera_frame(self, dimensions):
         """
         Read a frame from the camera
         """
         ret, frame = self._cap.read()
+        
+        if not ret:
+            return pygame.Surface(dimensions)
         
         frame = Camera.process_camera_frame(frame)
         
         detection_result = self._pose_estimator.process_frame(frame)
         PoseAnalyzer.draw_hand_landmarks(frame, detection_result)
 
+        width, height = dimensions
         surface = Camera.convert_frame_surface(frame, (width, height))
         return surface
     
