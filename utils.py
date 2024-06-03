@@ -1,16 +1,11 @@
 from pgzero.builtins import Actor
-from typing import List
-
-class ActorContainer:
-    def __init__(self):
-        self.actor_list: List[Actor] = []
-    
-    def offset_tiles(self, pos):
-        dx, dy = pos
-        for actor in self.actor_list:
-            actor.x += dx
-            actor.y += dy 
+from typing import List, Any, Tuple
             
-    def draw(self):
-        for actor in self.actor_list:
-            actor.draw()
+def list_actor_attributes(actor: Actor, field_name: List[str]) -> dict[str, Any]:
+    field = {}
+    for name in field_name:
+        field[name] = getattr(actor, name)
+    return field
+            
+# def create_Actor(*args, **kwargs):
+#     pass

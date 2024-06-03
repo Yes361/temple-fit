@@ -1,29 +1,44 @@
 from pgzero.builtins import Actor
-from utils import ActorContainer
-import csv
+from utils import list_actor_attributes
+from typing import List, Tuple
+import pandas as pd
 
-class Level(ActorContainer):
-    def place_block(self, block):
-        self.actor_list.append(block)
+class ActorContainer:
+    def __init__(self):
+        self.actor_list: List[Actor] = []
+    
+    def offset_tiles(self, pos: Tuple[int, int]):
+        dx, dy = pos
+        for actor in self.actor_list:
+            actor.x += dx
+            actor.y += dy 
+            
+    def draw(self):
+        for actor in self.actor_list:
+            actor.draw()
+            
+    def add_actor(self, *args, **kwargs):
+        actor = Actor(*args, **kwargs)
+        self.actor_list.append(actor)
+        return actor
+    
+    def remove_actor(self, actor):
+        self.actor_list.remove(actor)
     
     def save_file(self, file):
         with open(file, 'w') as f:
-            writer = csv.DictWriter(f, fieldnames=['image', 'x', 'y'], dialect='unix')
-            writer.writeheader()
+            fieldnames = []
+            for actor in self.actor_list:
+                fieldnames.append(list_actor_attributes(actor, ['image', 'pos']))
             
-            for element in self.actor_list:
-                writer.writerow({
-                    'image': element.image, 
-                    'x': element.x, 
-                    'y': element.y
-                })
+            df = pd.DataFrame(fieldnames)
+            df.to_pickle(file)
     
     def read_file(self, file):
         with open(file, 'r') as f:
-            reader = csv.DictReader(f, dialect='unix')
-            for row in reader:
-                if not row:
-                    break
-
-                self.place_block(Actor(row['image'], pos=(float(row['x']), float(row['y']))))
-                
+            df = pd.read_pickle(file).T                        
+            fieldnames = df.to_dict()
+            
+            for actor in fieldnames.values():
+                self.add_actor(**actor)
+            

@@ -4,7 +4,7 @@ from pgzhelper import *
 import sys
 import os
 
-from level_design import Level
+from level_design import ActorContainer
 from camera import Camera
 
 # assert sys.version_info <= (3, 10)
@@ -14,11 +14,13 @@ WIDTH = 800
 HEIGHT = 600
 TITLE = ''
 
-l = Level()
-# c = Camera()
-l.place_block(Actor('enemyblack1', pos=(100, 100)))
-l.save_file('level.csv')
-# l.read_file('level.csv')
+l = ActorContainer()
+# # c = Camera()
+# l.add_actor('enemyblack1', pos=(100, 100))
+# l.add_actor('enemyblack2', pos=(100, 120))
+# l.add_actor('enemyblack3', pos=(200, 200))
+# l.save_file('level.pkl')
+l.read_file('level.pkl')
 # c.initialize_camera(0)
 
 def on_mouse_down(pos, button):
