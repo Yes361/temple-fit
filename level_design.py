@@ -58,3 +58,6 @@ class ActorContainer:
         
         for actor in self.actor_list:
             actor.draw()
+            
+    def __iter__(self):
+        return iter(self.actor_list)

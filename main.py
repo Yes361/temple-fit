@@ -19,25 +19,30 @@ TITLE = ''
 c = Camera()
 c.initialize_camera(0, (640, 480))
 
-b = button('enemyblack4', topleft=(500, 500))
+scene = SceneManager()
 
-asd = SceneManager()
-asd.add_scene('b', ActorContainer([Actor('enemyblack1', pos=(100, 100), collision=True), Actor('enemyblack2', pos=(200, 200)), Actor('enemyblack3', pos=(300, 300))]), lambda: print(2))
-asd.add_scene('a', ActorContainer([Actor('enemyblack3', pos=(100, 100)), Actor('enemyblack2', pos=(200, 200)), Actor('enemyblack1', pos=(300, 300))]), lambda: print(3))
+def cam():
+    screen.blit(c.return_camera_frame((WIDTH - 100, HEIGHT - 100)), (50, 50))
+    
+def witch():
+    scene.switch_scene('cam1')
+
+scene.add_scene('cam', None, cam, ActorContainer([button('dragon_1.png', pos=(100, 100), callback=witch)]))
+scene.add_scene('cam1', None, None, ActorContainer([Actor('dragon_2.png', pos=(300, 300))]))
+
+scene.set_scene('cam')
 
 def on_mouse_down(pos, button):
     pass
 
 def on_key_down(key, unicode):
-    asd.set_scene(unicode)
+    scene.switch_scene('cam1')
 
 def update(dt):
-    b.update()
+    scene.update(dt)
 
 def draw():
-    
-    screen.blit(c.return_camera_frame((WIDTH, HEIGHT)), (0, 0))
-    
-    asd.draw_scenes()
-    b.draw()
+    screen.clear()
+    scene.draw()
+
 pgzrun.go()

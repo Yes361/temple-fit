@@ -1,6 +1,6 @@
+from actor import Actor
 from level_design import ActorContainer
 import pygame
-from actor import Actor
 
 class button(Actor):
     """
@@ -13,37 +13,78 @@ class button(Actor):
     def on_hold(self):
         pass
     
-    def on_click(self):
+    def on_click(self, pos):
         self.callback()
         
     def update(self, dt=0):
         pos = pygame.mouse.get_pos()
+        
         self.on_hover(pos)
+        if self.collidepoint(pos):
+            self.on_click(pos)
+            
+# class Menu(Actor):
+    
 
 class SceneManager:
     """
     
     """
     def __init__(self):
-        self.scenes = {}
-        self.callbacks = {}
-        self.current_scene = None
+        self.update_callback = {}
+        self.draw_callback = {}
+        self.scene_UI = {}
+        self._current_scene = None
     
-    def add_scene(self, scene_name, actor_list: ActorContainer, callback: callable = None):
-        actor_list.hidden = True
-        self.scenes[scene_name] = actor_list
-        self.callbacks[scene_name] = callback
+    def add_scene(self, scene_name, update_callback: callable, draw_callback: callable, UI_elements: ActorContainer=None):
+        self.update_callback[scene_name] = update_callback
+        self.draw_callback[scene_name] = draw_callback
+        self.scene_UI[scene_name] = UI_elements
         
+    def remove_scene(self, scene_name):
+        self.update_callback.pop(scene_name)
+        self.draw_callback.pop(scene_name)
+        self.scene_UI.pop(scene_name)
+
     def set_scene(self, scene_name):
-        if scene_name not in self.scenes:
-            return
+        self._current_scene = scene_name
         
-        for scene in self.scenes.keys():
-            self.scenes[scene].hidden = not scene == scene_name
-        
-        if fn := self.callbacks[scene_name]:
-            fn()
+    def get_scene(self):
+        return self._current_scene
+
+    def switch_scene(self, scene_name):
+        self._current_scene = scene_name
+        for name, scene in self.scene_UI.items():
+            if scene == None:
+                continue
             
-    def draw_scenes(self):
-        for scene in self.scenes.values():
-            scene.draw()
+            if name == scene_name:
+                self.show_scene(name)
+            else:
+                self.hide_scene(name)
+        
+    def show_scene(self, scene_name):
+        self.scene_UI[scene_name].hidden = False
+        
+    def hide_scene(self, scene_name):
+        self.scene_UI[scene_name].hidden = True
+    
+    def draw(self):
+        callback = self.draw_callback[self._current_scene]
+        if self._current_scene and callback:
+            callback()
+        
+        UI_elements = self.scene_UI[self._current_scene]
+        if UI_elements:
+            for UI_element in UI_elements:
+                UI_element.draw()
+        
+    def update(self, dt):
+        callback = self.update_callback[self._current_scene]
+        if self._current_scene and callback:
+            callback()
+        
+        UI_elements = self.scene_UI[self._current_scene]
+        if UI_elements:
+            for UI_element in self.scene_UI[self._current_scene]:
+                UI_element.update(dt)
