@@ -1,4 +1,4 @@
-from utils import list_actor_attributes, create_actor
+from utils import list_actor_attributes
 from typing import List, Tuple
 from actor import Actor
 import pandas as pd
@@ -12,7 +12,7 @@ class ActorContainer:
         self.hidden = False
   
     def add_actor(self, *args, **kwargs):
-        actor = create_actor(*args, **kwargs)
+        actor = Actor(*args, **kwargs)
         self.actor_list.append(actor)
         return actor
     

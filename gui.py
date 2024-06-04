@@ -1,22 +1,14 @@
+from level_design import ActorContainer
+import pygame
 from actor import Actor
 
 class button(Actor):
     """
     asds
-    """
-    def __init__(self, *args, **kwargs):
-        if 'callback' not in kwargs:
-            raise Exception('no callback')
-        
-        self.callback = kwargs.pop('callback')
-        self.hover_images = kwargs.pop('hover')
-        self.hold_images = kwargs.pop('hold')
-        self.click_images = kwargs.pop('click')
-        
-        super().__init__(*args, **kwargs)
-        
-    def on_hover(self):
-        pass
+    """ 
+    def on_hover(self, pos):
+        if self.collidepoint(pos):
+            print('l')
     
     def on_hold(self):
         pass
@@ -24,6 +16,10 @@ class button(Actor):
     def on_click(self):
         self.callback()
         
+    def update(self, dt=0):
+        pos = pygame.mouse.get_pos()
+        self.on_hover(pos)
+
 class SceneManager:
     """
     
@@ -33,7 +29,7 @@ class SceneManager:
         self.callbacks = {}
         self.current_scene = None
     
-    def add_scene(self, scene_name, actor_list, callback: callable = None):
+    def add_scene(self, scene_name, actor_list: ActorContainer, callback: callable = None):
         actor_list.hidden = True
         self.scenes[scene_name] = actor_list
         self.callbacks[scene_name] = callback

@@ -12,19 +12,10 @@ def list_actor_attributes(actor: Actor, field_name: List[str]) -> dict[str, Any]
         field[name] = getattr(actor, name)
     return field
 
-def create_actor(*args, **kwargs):
+def require_kwargs(fields, kwargs):
     """
-    Allows Custom Properties to be passed as parameters to the initialization of Actor
-    @return: An Actor
+    END ME
     """
-    expected_kwargs = set(Actor.EXPECTED_INIT_KWARGS).union(set(['pos', 'image']))
-    
-    custom_properties = set(kwargs) - expected_kwargs
-    acceptable_kwargs = set(kwargs).intersection(expected_kwargs)
-    new_kwargs = {key: kwargs[key] for key in acceptable_kwargs}
-    
-    actor = Actor(*args, **new_kwargs)
-    for property in custom_properties:
-        setattr(actor, property, kwargs[property])
-        
-    return actor
+    for field in fields:
+        if field not in kwargs:
+            raise Exception(f'{field} is required.')
