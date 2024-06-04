@@ -1,6 +1,6 @@
-from pgzero.builtins import Actor
 from utils import list_actor_attributes, create_actor
 from typing import List, Tuple
+from actor import Actor
 import pandas as pd
 
 class ActorContainer:
@@ -9,6 +9,7 @@ class ActorContainer:
     """
     def __init__(self, actor_list=[]):
         self.actor_list = actor_list
+        self.hidden = False
   
     def add_actor(self, *args, **kwargs):
         actor = create_actor(*args, **kwargs)
@@ -52,5 +53,8 @@ class ActorContainer:
             actor.y += dy
             
     def draw(self):
+        if not self.hidden:
+            return
+        
         for actor in self.actor_list:
             actor.draw()

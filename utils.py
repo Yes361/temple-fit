@@ -27,4 +27,4 @@ def create_actor(*args, **kwargs):
     for property in custom_properties:
         setattr(actor, property, kwargs[property])
         
-    return actor    
+    return actor
