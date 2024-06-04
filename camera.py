@@ -86,23 +86,25 @@ class Camera:
         """
         return self._cap.get(cv2.CAP_PROP_POS_MSEC)
     
-    def return_camera_frame(self, dimensions):
+    def isOpen(self):
+        return self._cap.isOpened()
+    
+    def return_camera_frame(self):
         """
         Read a frame from the camera
         """
-        ret, frame = self._cap.read()
-        
-        if not ret:
-            return pygame.Surface(dimensions)
-        
+        _, frame = self._cap.read()   
         frame = Camera.process_camera_frame(frame)
+        return frame
+    
+    def draw(self, dimensions):
+        frame = self.return_camera_frame()
         
         detection_result = self._pose_estimator.process_frame(frame)
         PoseAnalyzer.draw_hand_landmarks(frame, detection_result)
         self._pose_estimator.recognize_pose(frame, detection_result)
 
-        width, height = dimensions
-        surface = Camera.convert_frame_surface(frame, (width, height))
+        surface = Camera.convert_frame_surface(frame, dimensions)
         return surface
     
     @staticmethod

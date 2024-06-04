@@ -25,14 +25,3 @@ class Actor(Actor):
     
     def reset(self):
         pass
-    
-# class FrameActor:
-#     def __init__(self, frame=None):
-#         self.hidden = False
-#         self.pos = (0, 0)
-#         self.dims = (640, 480)
-#         self.frame = frame if frame else pygame.Surface(self.dims)
-        
-#     def draw(self, screen):
-#         if not self.hidden:
-#             screen.blit(self.frame, self.pos)
