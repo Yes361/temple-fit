@@ -1,5 +1,8 @@
 from utils import Actor, ActorContainer, require_kwargs
+from dataclasses import dataclass
+from typing import List
 import pygame
+import pgzero.game as game
 
 class Button(Actor):
     """
@@ -33,37 +36,36 @@ class Menu:
         self.UI_elements = ActorContainer()
         self.pos = pos
         self.dims = dims
-        
-    def draw(self, *args, **kwargs):
-        require_kwargs(['Screen'], kwargs, error_msg='%s is required.\nPass it as a keyworded argument in SceneManager.draw()')
-        
+                
+    def draw(self, *args, **kwargs):        
         surf = pygame.Surface((100, 100), masks=pygame.SRCALPHA)
         surf.fill((255, 0, 0))
         
-        screen = kwargs['Screen']
-        screen.blit(surf, (50, 50))
-        self.UI_elements.draw(screen)
+        game.screen.blit(surf, (50, 50)) # Import Screen
+        self.UI_elements.draw(*args, **kwargs)
         
     def update(self, dt):
         pass
+
+@dataclass
+class Scene:
+    update_callback: callable = None
+    draw_callback: callable = None
+    scene_UI: ActorContainer = None
 
 class SceneManager: 
     """
     
     """
     def __init__(self):
-        self.update_callback = {}
-        self.draw_callback = {}
-        self.scene_UI = {}
+        self.scenes: List
         self._current_scene = None
     
     def add_scene(self, scene_name, update_callback: callable, draw_callback: callable, UI_elements: ActorContainer=None):
         self.update_callback[scene_name] = update_callback
         self.draw_callback[scene_name] = draw_callback
         self.scene_UI[scene_name] = UI_elements
-        
-        pygame.event.Event
-        
+            
     def remove_scene(self, scene_name):
         self.update_callback.pop(scene_name)
         self.draw_callback.pop(scene_name)

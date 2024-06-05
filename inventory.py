@@ -1,4 +1,8 @@
 from utils import Actor, ActorContainer
+import pgzero.game as game
+
+class Item(Actor):
+    pass    
 
 class Slot(Actor):
     pass

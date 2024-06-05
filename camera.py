@@ -93,19 +93,21 @@ class Camera:
         """
         Read a frame from the camera
         """
-        _, frame = self._cap.read()   
+        ret, frame = self._cap.read()   
         frame = Camera.process_camera_frame(frame)
-        return frame
+        return ret, frame
     
-    def draw(self, dimensions):
-        frame = self.return_camera_frame()
+    def draw(self, dims):
+        ret, frame = self.return_camera_frame()
+        
+        if not ret:
+            return pygame.Surface(dims)
         
         detection_result = self._pose_estimator.process_frame(frame)
         PoseAnalyzer.draw_hand_landmarks(frame, detection_result)
         self._pose_estimator.recognize_pose(frame, detection_result)
 
-        surface = Camera.convert_frame_surface(frame, dimensions)
-        return surface
+        return Camera.convert_frame_surface(frame, dims)
     
     @staticmethod
     def process_camera_frame(frame):
@@ -116,11 +118,11 @@ class Camera:
         return frame
     
     @staticmethod
-    def convert_frame_surface(frame, dimensions):
+    def convert_frame_surface(frame, dims):
         """
         Convert Frame to a Pygame Surface
         """
         frame = cv2.flip(frame, 1)
         surface = pygame.surfarray.make_surface(np.rot90(frame))
-        surface = pygame.transform.scale(surface, dimensions)
+        surface = pygame.transform.scale(surface, dims)
         return surface

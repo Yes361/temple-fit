@@ -17,16 +17,19 @@ WIDTH = 800
 HEIGHT = 600
 TITLE = ""
 
-# c = Camera()
-# c.initialize_camera(0, (640, 480))
+cam1 = Camera()
+cam1.initialize_camera(0, (640, 480))
 
 scene = SceneManager()
 input_manager = inputManager()
 
+def cam():
+    screen.blit(cam1.draw((WIDTH - 100, HEIGHT - 100)), (50, 50))
+
 scene.add_scene(
     "cam",
     None,
-    None,
+    cam,
     ActorContainer([
         a := Actor("dragon_1.png", pos=(500, 500), collision=True), 
         b := Button("dragon_2.png", pos=(300, 300), callback=lambda: None),
@@ -49,8 +52,8 @@ for i in range(5):
 
 input_manager.subscribe('Global', c.move, inputManager.KEY_HOLD)
 
-def on_mouse_down(pos, button):
-    a.pos = pos
+# def on_mouse_down(pos, button):
+    # pass
 
 def on_key_down(key, unicode):
     input_manager.on_key_down(key, unicode)
@@ -62,7 +65,7 @@ def update(dt):
 
 def draw():
     screen.clear()
-    scene.draw(Screen=screen)
+    scene.draw()
 
 
 pgzrun.go()

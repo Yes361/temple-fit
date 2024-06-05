@@ -1,7 +1,14 @@
 from utils import ActorContainer, Actor
+from pgzero.builtins import Rect
+from typing import List
 
-class Tile(Actor):
-    pass
+# class World:
+#     def __init__(self):
+#         self.tiles: Actor = None
+#         self.borders: List[Rect] = []
+    
+#     def add_border(self, pos, dims):
+#         self.borders.append(Rect(*pos, *dims))
 
 class World(ActorContainer):
     def __init__(self, tile_size):
@@ -17,10 +24,17 @@ class World(ActorContainer):
         
 class LevelManager:
     def __init__(self):
-        pass
+        self.entities: Actor = []
+        self.world = []
     
     def load_level(self, f):
         pass
     
     def save_level(self, f):
+        pass
+    
+    def update(dt):
+        pass
+    
+    def draw():
         pass
