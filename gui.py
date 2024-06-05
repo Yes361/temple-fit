@@ -1,11 +1,16 @@
-from actor import Actor
-from level_design import ActorContainer
+from utils import Actor, ActorContainer, require_kwargs
 import pygame
 
-class button(Actor):
+class Button(Actor):
     """
     asds
     """ 
+    REQUIRED_KWARGS = ['callback']
+    def __init__(self, *args, **kwargs):
+        require_kwargs(Button.REQUIRED_KWARGS, kwargs)
+        self.callback = None
+        super().__init__(*args, **kwargs)
+    
     def on_hover(self, pos):
         if self.collidepoint(pos):
             print('l')
@@ -76,8 +81,7 @@ class SceneManager:
         
         UI_elements = self.scene_UI[self._current_scene]
         if UI_elements:
-            for UI_element in UI_elements:
-                UI_element.draw()
+            UI_elements.draw()
         
     def update(self, dt):
         callback = self.update_callback[self._current_scene]
@@ -86,5 +90,4 @@ class SceneManager:
         
         UI_elements = self.scene_UI[self._current_scene]
         if UI_elements:
-            for UI_element in self.scene_UI[self._current_scene]:
-                UI_element.update(dt)
+            UI_elements.update(dt)
