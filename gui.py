@@ -1,8 +1,7 @@
-from utils import Actor, ActorContainer, require_kwargs
+from utils import Actor, EventManager, ActorContainer, require_kwargs
 from dataclasses import dataclass
-from typing import List
+from typing import List, Dict
 import pygame
-import pgzero.game as game
 
 class Button(Actor):
     """
@@ -36,78 +35,20 @@ class Menu:
         self.UI_elements = ActorContainer()
         self.pos = pos
         self.dims = dims
+        self.hidden = False
                 
-    def draw(self, *args, **kwargs):        
+    def draw(self, *args, **kwargs):
+        if self.hidden:
+            return
+        
+        require_kwargs(['Screen'], kwargs, error_msg='%s is required. Pass it to the Scene Manager\'s draw function')
+        Screen = kwargs['Screen'] # Import Screen
+        
         surf = pygame.Surface((100, 100), masks=pygame.SRCALPHA)
         surf.fill((255, 0, 0))
         
-        game.screen.blit(surf, (50, 50)) # Import Screen
+        Screen.blit(surf, (50, 50))
         self.UI_elements.draw(*args, **kwargs)
-        
+
     def update(self, dt):
         pass
-
-@dataclass
-class Scene:
-    update_callback: callable = None
-    draw_callback: callable = None
-    scene_UI: ActorContainer = None
-
-class SceneManager: 
-    """
-    
-    """
-    def __init__(self):
-        self.scenes: List
-        self._current_scene = None
-    
-    def add_scene(self, scene_name, update_callback: callable, draw_callback: callable, UI_elements: ActorContainer=None):
-        self.update_callback[scene_name] = update_callback
-        self.draw_callback[scene_name] = draw_callback
-        self.scene_UI[scene_name] = UI_elements
-            
-    def remove_scene(self, scene_name):
-        self.update_callback.pop(scene_name)
-        self.draw_callback.pop(scene_name)
-        self.scene_UI.pop(scene_name)
-
-    def set_scene(self, scene_name):
-        self._current_scene = scene_name
-        
-    def get_scene(self):
-        return self._current_scene
-
-    def switch_scene(self, scene_name):
-        self._current_scene = scene_name
-        for name, scene in self.scene_UI.items():
-            if scene == None:
-                continue
-            
-            if name == scene_name:
-                self.show_scene(name)
-            else:
-                self.hide_scene(name)
-        
-    def show_scene(self, scene_name):
-        self.scene_UI[scene_name].hidden = False
-        
-    def hide_scene(self, scene_name):
-        self.scene_UI[scene_name].hidden = True
-    
-    def draw(self, *args, **kwargs):
-        callback = self.draw_callback[self._current_scene]
-        if self._current_scene and callback:
-            callback()
-        
-        UI_elements = self.scene_UI[self._current_scene]
-        if UI_elements:
-            UI_elements.draw(*args, **kwargs)
-        
-    def update(self, dt):
-        callback = self.update_callback[self._current_scene]
-        if self._current_scene and callback:
-            callback()
-        
-        UI_elements = self.scene_UI[self._current_scene]
-        if UI_elements:
-            UI_elements.update(dt)

@@ -28,3 +28,5 @@ class Collisions:
     def resolve(ActorA, ActorB):
         if not ActorA.colliderect(ActorB):
             return
+        
+        # min(ActorB.left - ActorA.right, )

@@ -24,7 +24,6 @@ def jump_jack(results, frame):
         return ((point1.x - point2.x) ** 2 + (point1.y - point2.y) ** 2) ** 0.5
 
     hand_distance = calculate_distance(left_wrist, right_wrist)
-    foot_distance = calculate_distance(left_ankle, right_ankle)
 
     if hand_distance > 0.5:  
         if prev_pose == "down":

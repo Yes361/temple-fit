@@ -1,5 +1,6 @@
 from pgzero.builtins import Actor
 from typing import List, Any, Tuple
+from abc import abstractmethod
 import pygame
 
 def list_actor_attributes(actor: Actor, field_name: List[str]) -> dict[str, Any]:
@@ -21,13 +22,34 @@ def require_kwargs(fields, kwargs, error_msg = '%s is required'):
         if field not in kwargs:
             raise Exception(error_msg % field)
 
-class Actor(Actor):
+class ActorBase:
+    def __init__(self):
+        self.hidden = False
+        
+    @abstractmethod
+    def draw(self, *args, **kwargs):
+        pass
+    
+    @abstractmethod
+    def update(self, dt):
+        pass
+    
+    @abstractmethod
+    def animate():
+        pass
+    
+    @abstractmethod
+    def reset(self):
+        pass
+        
+
+class Actor(Actor, ActorBase):
     """
     Revised Version of Actor Class
     
     Now supports resizing, passing custom properties at initialization, update(dt), and reset()
     """
-    EXPECTED_INIT_KWARGS = set(['pos', 'topleft', 'bottomleft', 'topright', 'bottomright',
+    _EXPECTED_INIT_KWARGS = set(['pos', 'topleft', 'bottomleft', 'topright', 'bottomright',
     'midtop', 'midleft', 'midbottom', 'midright', 'center'])
     
     def __init__(self, *args, **kwargs):
@@ -35,7 +57,7 @@ class Actor(Actor):
         
         keys = list(kwargs.keys())
         for key in keys:
-            if key not in Actor.EXPECTED_INIT_KWARGS:
+            if key not in Actor._EXPECTED_INIT_KWARGS:
                 setattr(self, key, kwargs[key])
                 kwargs.pop(key)
 
@@ -47,14 +69,8 @@ class Actor(Actor):
     def draw(self, *args, **kwargs):
         if not self.hidden:
             super().draw()
-            
-    def update(self, dt):
-        pass
-    
-    def reset(self):
-        pass
 
-class ActorContainer:
+class ActorContainer(ActorBase):
     """
     Actor Container is a list of Actors - Similar to Group() in CMU Academy
     """
