@@ -5,10 +5,12 @@ import sys
 import os
 
 from utils import Actor, ActorContainer
-from gui import SceneManager, Button
+from gui import SceneManager, Button, Menu
 from camera import Camera
 from input import inputManager
 from entity import Player
+
+from level_design import World
 
 os.environ["SDL_VIDEO_CENTERED"] = "1"  # Forces window to be centered on screen.
 WIDTH = 800
@@ -36,12 +38,16 @@ scene.add_scene(
     "cam1",
     None,
     None,
+    ActorContainer([t := World(64), c, Menu(1, 1)])
 )
 
-scene.set_scene("cam")
+scene.set_scene("cam1")
+
+for i in range(5):
+    for j in range(5):  
+        t.add_tile(f'a2_flora_{i * j}.png', (i, j))
 
 input_manager.subscribe('Global', c.move, inputManager.KEY_HOLD)
-input_manager.subscribe('Global', lambda x, y: print(y), inputManager.KEY_DOWN)
 
 def on_mouse_down(pos, button):
     a.pos = pos
@@ -56,7 +62,7 @@ def update(dt):
 
 def draw():
     screen.clear()
-    scene.draw()
+    scene.draw(Screen=screen)
 
 
 pgzrun.go()

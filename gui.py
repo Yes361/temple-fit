@@ -26,12 +26,28 @@ class Button(Actor):
         
         self.on_hover(pos)
         if self.collidepoint(pos):
-            self.on_click(pos)
+            self.on_click(pos) 
             
-# class Menu(Actor):
-    
+class Menu:
+    def __init__(self, pos, dims):
+        self.UI_elements = ActorContainer()
+        self.pos = pos
+        self.dims = dims
+        
+    def draw(self, *args, **kwargs):
+        require_kwargs(['Screen'], kwargs, error_msg='%s is required.\nPass it as a keyworded argument in SceneManager.draw()')
+        
+        surf = pygame.Surface((100, 100), masks=pygame.SRCALPHA)
+        surf.fill((255, 0, 0))
+        
+        screen = kwargs['Screen']
+        screen.blit(surf, (50, 50))
+        self.UI_elements.draw(screen)
+        
+    def update(self, dt):
+        pass
 
-class SceneManager:
+class SceneManager: 
     """
     
     """
@@ -45,6 +61,8 @@ class SceneManager:
         self.update_callback[scene_name] = update_callback
         self.draw_callback[scene_name] = draw_callback
         self.scene_UI[scene_name] = UI_elements
+        
+        pygame.event.Event
         
     def remove_scene(self, scene_name):
         self.update_callback.pop(scene_name)
@@ -74,14 +92,14 @@ class SceneManager:
     def hide_scene(self, scene_name):
         self.scene_UI[scene_name].hidden = True
     
-    def draw(self):
+    def draw(self, *args, **kwargs):
         callback = self.draw_callback[self._current_scene]
         if self._current_scene and callback:
             callback()
         
         UI_elements = self.scene_UI[self._current_scene]
         if UI_elements:
-            UI_elements.draw()
+            UI_elements.draw(*args, **kwargs)
         
     def update(self, dt):
         callback = self.update_callback[self._current_scene]

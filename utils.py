@@ -1,6 +1,6 @@
 from pgzero.builtins import Actor
 from typing import List, Any, Tuple
-import pandas as pd
+import pygame
 
 def list_actor_attributes(actor: Actor, field_name: List[str]) -> dict[str, Any]:
     """
@@ -13,15 +13,20 @@ def list_actor_attributes(actor: Actor, field_name: List[str]) -> dict[str, Any]
         field[name] = getattr(actor, name)
     return field
 
-def require_kwargs(fields, kwargs):
+def require_kwargs(fields, kwargs, error_msg = '%s is required'):
     """
-    END ME
+    @raises An error if a required field was not passed
     """
     for field in fields:
         if field not in kwargs:
-            raise Exception(f'{field} is required.')
+            raise Exception(error_msg % field)
 
 class Actor(Actor):
+    """
+    Revised Version of Actor Class
+    
+    Now supports resizing, passing custom properties at initialization, update(dt), and reset()
+    """
     EXPECTED_INIT_KWARGS = set(['pos', 'topleft', 'bottomleft', 'topright', 'bottomright',
     'midtop', 'midleft', 'midbottom', 'midright', 'center'])
     
@@ -35,12 +40,15 @@ class Actor(Actor):
                 kwargs.pop(key)
 
         super().__init__(*args, **kwargs)
+        
+    def resize(self, dimensions):
+        self._surf = pygame.transform.scale(self._surf, dimensions)
     
-    def draw(self):
+    def draw(self, *args, **kwargs):
         if not self.hidden:
             super().draw()
             
-    def update(self, dt=0):
+    def update(self, dt):
         pass
     
     def reset(self):
@@ -48,59 +56,35 @@ class Actor(Actor):
 
 class ActorContainer:
     """
-    
+    Actor Container is a list of Actors - Similar to Group() in CMU Academy
     """
-    def __init__(self, actor_list=[]):
-        self.actor_list = actor_list
+    def __init__(self, *args, **kwargs):
+        self.actor_list = list(*args, **kwargs) or []
         self.hidden = False
   
-    def add_actor(self, *args, **kwargs):
-        actor = Actor(*args, **kwargs)
+    def add_actor(self, actor):
         self.actor_list.append(actor)
         return actor
     
     def remove_actor(self, actor):
         self.actor_list.remove(actor)
-    
-    def save_file(self, f: str):
-        """
-        saves the file
-        """
-        fieldnames = []
-        for actor in self.actor_list:
-            fieldnames.append(list_actor_attributes(actor, ['image', 'pos']))
         
-        df = pd.DataFrame(fieldnames)
-        df.to_pickle(f)
-    
-    def read_file(self, f: str):
-        """
-        reads the file
-        """
-        df = pd.read_pickle(f).T                        
-        fieldnames = df.to_dict()
+    # TODO: z-index shenanigans
+    # def set_actor_zindex(self, actor):
+    #     pass
         
-        for actor in fieldnames.values():
-            self.add_actor(**actor)
-            
     def colliderect(self, other_actor):
         for actor in self.actor_list:
             if actor.colliderect(other_actor):
                 return True
         return False
-            
-    def offset_tiles(self, pos: Tuple[int, int]):
-        dx, dy = pos
-        for actor in self.actor_list:
-            actor.x += dx
-            actor.y += dy
-            
-    def draw(self):
+
+    def draw(self, *args, **kwargs):
         if self.hidden:
             return
         
         for actor in self.actor_list:
-            actor.draw()
+            actor.draw(*args, **kwargs)
     
     def update(self, dt):
         for actor in self.actor_list:
