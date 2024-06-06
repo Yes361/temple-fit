@@ -35,6 +35,7 @@ def jump_jack(results, frame):
     cv2.putText(frame, f'Jumping Jacks: {count}', (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
 
 class PoseAnalyzer:
+    MAX_LANDMARKS = 33
     def __init__(self, *args, **kwargs):
         self.pose = mp_pose.Pose(*args, **kwargs)
         self.landmarks = None
@@ -57,9 +58,10 @@ class PoseAnalyzer:
         
 
 class Camera:
-    def __init__(self):
+    def __init__(self, Screen=None):
         self._cap = None
         self._pose_estimator = PoseAnalyzer(min_detection_confidence = 0.85, min_tracking_confidence  = 0.85)
+        self._screen = Screen
     
     def initialize_camera(self, video_mode, dimensions):
         """
@@ -105,9 +107,23 @@ class Camera:
         detection_result = self._pose_estimator.process_frame(frame)
         PoseAnalyzer.draw_hand_landmarks(frame, detection_result)
         self._pose_estimator.recognize_pose(frame, detection_result)
+        
+        self.prompt_user(frame, detection_result)
 
         return Camera.convert_frame_surface(frame, dims)
     
+    def prompt_user(self, frame, results):
+        pose_markers = results.pose_landmarks
+        if not pose_markers:
+            return
+        
+        visible_landmarks = 0
+        for lm in pose_markers.landmark:
+            visible_landmarks += (lm.visibility > 0.5)
+        
+        if visible_landmarks < PoseAnalyzer.MAX_LANDMARKS:
+            return 'Visible'
+        
     @staticmethod
     def process_camera_frame(frame):
         """

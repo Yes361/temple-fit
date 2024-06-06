@@ -18,7 +18,7 @@ class SceneManager:
     """
     def __init__(self, predefined_scenes={}):
         self.scenes: Dict[str, Scene] = predefined_scenes
-        self._active_scenes: set[str] = set()
+        self._active_scenes: List[str] = []
     
     def subscribe(self, 
                   scene: str, 
@@ -37,24 +37,32 @@ class SceneManager:
 
     def show_scene(self, scene: str):
         assert scene in self.scenes, f'\"{scene}\" doesn\'t exist.'
-        self._active_scenes.add(scene)
-        self.scenes[scene].UI_elements.hidden = False
-        if on_show := self.scenes[scene].on_show:
+        assert scene not in self._active_scenes, f'\"{scene}\" is already visible.'
+        self._active_scenes.append(scene)
+        current_scene = self.scenes[scene]
+        
+        if current_scene.UI_elements:
+            current_scene.UI_elements.hidden = False
+        
+        if on_show := current_scene.on_show:
             on_show()
         
     def hide_scene(self, scene: str):
         assert scene in self.scenes, f'\"{scene}\" doesn\'t exist.'
+        assert scene in self._active_scenes, f'\"{scene}\" is already invisible.'
         self._active_scenes.remove(scene)
-        self.scenes[scene].UI_elements.hidden = True
-        if on_hide := self.scenes[scene].on_hide:
+        current_scene = self.scenes[scene]
+        
+        if current_scene.UI_elements:
+            current_scene.UI_elements.hidden = True
+        
+        if on_hide := current_scene.on_hide:
             on_hide()
         
     def clear_active_scenes(self):
+        for scene in self._active_scenes:
+            self.hide_scene(scene)
         self._active_scenes.clear()
-        
-        for _, scene in self.scenes.items():
-            if scene.UI_elements:
-                scene.UI_elements.hidden = True
         
     @property
     def get_active_scenes(self):
@@ -91,7 +99,6 @@ class SceneManager:
 class InputEvent:
     type: any
     callback: callable
-    group_identifer: any = None
     
 class InputManager:
     """
@@ -100,37 +107,33 @@ class InputManager:
     EVENTS = [Constants.KEY_UP, Constants.KEY_DOWN, Constants.KEY_HOLD, Constants.MOUSE_HOVER]
     def __init__(self):
         self._group = None
-        self._callbacks: List[InputEvent] = []
-        self._group_identifiers = []
-        self._group_id = 0
+        self._callbacks: Dict[any, List[InputEvent]] = {}
     
-    def subscribe(self, type, callback, group_identifier=None):
-        self._callbacks.append(InputEvent(type, callback, group_identifier))
+    def subscribe(self, type, callback: callable, group_identifier: any):
+        if group_identifier not in self._callbacks:
+            self._callbacks[group_identifier] = []
+        self._callbacks[group_identifier].append(InputEvent(type, callback))
         
-    def unsubscribe(self, callback=None, group=None):
-        for event in self._callbacks:
-            if callback and group:
-                if event.callback == callback and event.group_identifer == group:
-                    self._callbacks.remove(event)
-            elif callback:
-                if event.callback == callback:
-                    self._callbacks.remove(event)
-            elif group:
-                if event.group_identifer == group:
-                    self._callbacks.remove(event)
-            else:
-                raise Exception('pluh')
+    def unsubscribe(self, group_identifier=None, callback=None, ):
+        self._callbacks.remove(group_identifier)
     
     def clear_group(self):
         self._group = None
     
     def set_group(self, group):
+        assert group in self._callbacks, f'{group} is not subscribed.'
         self._group = group
     
     def filter_events(self, type, *args, **kwargs):
-        for event in self._callbacks:
-            if event.type == type and (self._group == None or self._group == event.group_identifer) and event.callback:
-                event.callback(*args, **kwargs)
+        if self._group:
+            for event in self._callbacks[self._group]:
+                if event.type == type and event.callback:
+                    event.callback(*args, **kwargs)
+        else:
+            for _, group in self._callbacks.items():
+                for event in group:
+                    if event.type == type and event.callback:
+                        event.callback(*args, **kwargs)
     
     def on_key_down(self, key, unicode):
         self.filter_events(Constants.KEY_DOWN, key, unicode)
