@@ -13,14 +13,21 @@ class Button(Actor):
         super().__init__(*args, **kwargs)
     
     def on_hover(self, pos):
-        if self.collidepoint(pos):
+        if self.hidden:
+            return
+        
+        if self.collidepoint(pos) and self.on_hover_callback:
             self.on_hover_callback()
     
     def on_hold(self):
         pass
     
     def on_click(self, pos):
-        self.on_click_callback()
+        if self.hidden:
+            return
+        
+        if self.on_click_callback:
+            self.on_click_callback()
         
     # def 
     def Bind(self, input_manager, group_identifer):

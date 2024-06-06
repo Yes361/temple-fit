@@ -8,6 +8,8 @@ import pygame
 class Scene: 
     update_callback: callable = None
     draw_callback: callable = None
+    on_show: callable = None
+    on_hide: callable = None
     UI_elements: ActorContainer = None
 
 class SceneManager:
@@ -18,9 +20,16 @@ class SceneManager:
         self.scenes: Dict[str, Scene] = predefined_scenes
         self._active_scenes: set[str] = set()
     
-    def subscribe(self, scene: str, update_callback: callable=None, draw_callback: callable=None, UI_elements: ActorContainer=None):
+    def subscribe(self, 
+                  scene: str, 
+                  update_callback: callable=None, 
+                  draw_callback: callable=None, 
+                  on_show: callable=None, 
+                  on_hide: callable=None, 
+                  UI_elements: ActorContainer=None
+        ):
         assert scene not in self.scenes, f'\"{scene}\" is already subscribed.'
-        self.scenes[scene] = Scene(update_callback, draw_callback, UI_elements)
+        self.scenes[scene] = Scene(update_callback, draw_callback, on_show, on_hide, UI_elements)
             
     def unsubscribe(self, scene: str):
         if scene in self.scenes:
@@ -30,11 +39,15 @@ class SceneManager:
         assert scene in self.scenes, f'\"{scene}\" doesn\'t exist.'
         self._active_scenes.add(scene)
         self.scenes[scene].UI_elements.hidden = False
+        if on_show := self.scenes[scene].on_show:
+            on_show()
         
     def hide_scene(self, scene: str):
         assert scene in self.scenes, f'\"{scene}\" doesn\'t exist.'
         self._active_scenes.remove(scene)
         self.scenes[scene].UI_elements.hidden = True
+        if on_hide := self.scenes[scene].on_hide:
+            on_hide()
         
     def clear_active_scenes(self):
         self._active_scenes.clear()
@@ -88,6 +101,7 @@ class InputManager:
     def __init__(self):
         self._group = None
         self._callbacks: List[InputEvent] = []
+        self._group_identifiers = []
         self._group_id = 0
     
     def subscribe(self, type, callback, group_identifier=None):

@@ -106,6 +106,10 @@ class Actor(Actor, ActorBase):
     'midtop', 'midleft', 'midbottom', 'midright', 'center'])
     
     def __init__(self, *args, **kwargs):
+        self.hidden = False
+        self.iterations = -1
+        self._is_playing_gif = False
+        
         keys = list(kwargs.keys())
         for key in keys:
             if key not in Actor._EXPECTED_INIT_KWARGS:
@@ -113,13 +117,9 @@ class Actor(Actor, ActorBase):
                 kwargs.pop(key)
 
         super().__init__(*args, **kwargs)
-        self.hidden = False
-        self.iterations = -1
-        # self.images = []
-        self._is_playing_gif = False
         
-        self._surf = pygame.transform.scale(self._surf, (800, 600))
-
+    def resize(self, dims):
+        self._surf = pygame.transform.scale(self._surf, dims)
     
     def draw(self, *args, **kwargs):
         if not self.hidden:
