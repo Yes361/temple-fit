@@ -19,8 +19,7 @@ def require_kwargs(fields, kwargs, error_msg = '%s is required'):
     @raises An error if a required field was not passed
     """
     for field in fields:
-        if field not in kwargs:
-            raise Exception(error_msg % field)
+        assert field in kwargs, error_msg % field
 
 class ActorBase:
     def __init__(self):
@@ -52,7 +51,7 @@ class Actor(Actor, ActorBase):
     _EXPECTED_INIT_KWARGS = set(['pos', 'topleft', 'bottomleft', 'topright', 'bottomright',
     'midtop', 'midleft', 'midbottom', 'midright', 'center'])
     
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, dims: Tuple=None, **kwargs):
         self.hidden = False
         
         keys = list(kwargs.keys())
@@ -62,6 +61,9 @@ class Actor(Actor, ActorBase):
                 kwargs.pop(key)
 
         super().__init__(*args, **kwargs)
+        
+        if dims:
+            self.resize(dims)
         
     def resize(self, dimensions):
         self._surf = pygame.transform.scale(self._surf, dimensions)

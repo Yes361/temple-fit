@@ -1,8 +1,9 @@
 from utils import Actor
-from pgzero.builtins import keyboard, keys
+from pgzero.builtins import keyboard, keys, Rect
 
 class Entity(Actor):
     def __init__(self, *args, **kwargs):
+        self.is_static = True
         super().__init__(*args, **kwargs)
     
 class Enemies(Entity):
@@ -25,8 +26,16 @@ class Player(Entity):
 
 class Collisions:
     @staticmethod
-    def resolve(ActorA, ActorB):
+    def resolve(ActorA: Rect | Actor, ActorB: Rect | Actor):
         if not ActorA.colliderect(ActorB):
             return
         
-        # min(ActorB.left - ActorA.right, )
+        overlap_x = min(ActorA.right - ActorB.left, ActorB.right - ActorA.left)
+        overlap_y = min(ActorA.bottom - ActorB.top, ActorB.bottom - ActorA.top)
+
+        if overlap_x < overlap_y:
+            sign = 1 if ActorA.centerx > ActorB.centerx else -1
+            ActorB.x -= overlap_x * sign
+        else:
+            sign = 1 if ActorA.centery > ActorB.centery else -1
+            ActorB.y -= overlap_y * sign
