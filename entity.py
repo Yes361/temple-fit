@@ -1,9 +1,9 @@
-from utils import Actor
+from helper import Actor
 from pgzero.builtins import keyboard, keys, Rect
 
 class Entity(Actor):
     def __init__(self, *args, **kwargs):
-        self.is_static = True
+        self.is_static = kwargs.get('is_static', True)
         super().__init__(*args, **kwargs)
     
 class Enemies(Entity):
@@ -26,16 +26,24 @@ class Player(Entity):
 
 class Collisions:
     @staticmethod
-    def resolve(ActorA: Rect | Actor, ActorB: Rect | Actor):
-        if not ActorA.colliderect(ActorB):
+    def resolve(EntityA: Rect | Entity, EntityB: Rect | Entity):
+        if not EntityA.colliderect(EntityB) or (EntityA.is_static and EntityB.is_static):
             return
         
-        overlap_x = min(ActorA.right - ActorB.left, ActorB.right - ActorA.left)
-        overlap_y = min(ActorA.bottom - ActorB.top, ActorB.bottom - ActorA.top)
+        overlap_x = min(EntityA.right - EntityB.left, EntityB.right - EntityA.left)
+        overlap_y = min(EntityA.bottom - EntityB.top, EntityB.bottom - EntityA.top)
 
         if overlap_x < overlap_y:
-            sign = 1 if ActorA.centerx > ActorB.centerx else -1
-            ActorB.x -= overlap_x * sign
+            sign = 1 if EntityA.centerx > EntityB.centerx else -1
+            
+            if getattr(EntityA, 'is_static', True):
+                EntityB.x -= overlap_x * sign
+            else:
+                EntityA.x += overlap_x * sign
         else:
-            sign = 1 if ActorA.centery > ActorB.centery else -1
-            ActorB.y -= overlap_y * sign
+            sign = 1 if EntityA.centery > EntityB.centery else -1
+            
+            if getattr(EntityA, 'is_static', True):
+                EntityB.y -= overlap_y * sign
+            else:
+                EntityA.y += overlap_y * sign

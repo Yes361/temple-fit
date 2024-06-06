@@ -1,27 +1,16 @@
-from dataclasses import dataclass
-from utils import ActorContainer
 from typing import Dict, Tuple, List
+from dataclasses import dataclass
+from helper import ActorContainer
 from constants import Constants
 import pygame
 
-class EventManager:
-    _instance = None
-
-    def __new__(cls, *args, **kwargs):
-        if cls._instance is None:
-            cls._instance = super(EventManager, cls).__new__(cls)
-        return cls._instance
-    
-    def __del__(self):
-        EventManager._instance = None
-    
 @dataclass
 class Scene: 
     update_callback: callable = None
     draw_callback: callable = None
     UI_elements: ActorContainer = None
 
-class SceneManager(EventManager): 
+class SceneManager:
     """
     Handles Scene Transition/Visibility and Draw/Update Callbacks
     """
@@ -29,7 +18,7 @@ class SceneManager(EventManager):
         self.scenes: Dict[str, Scene] = predefined_scenes
         self._active_scenes: set[str] = set()
     
-    def subscribe(self, scene: str, update_callback: callable, draw_callback: callable, UI_elements: ActorContainer=None):
+    def subscribe(self, scene: str, update_callback: callable=None, draw_callback: callable=None, UI_elements: ActorContainer=None):
         assert scene not in self.scenes, f'\"{scene}\" is already subscribed.'
         self.scenes[scene] = Scene(update_callback, draw_callback, UI_elements)
             
@@ -91,7 +80,7 @@ class InputEvent:
     callback: callable
     group_identifer: any = None
     
-class InputManager(EventManager):
+class InputManager:
     """
     jksadoasdksadjasdjksadjaskdad
     """
@@ -140,9 +129,8 @@ class InputManager(EventManager):
         
     def on_mouse_hover(self, pos):
         self.filter_events(Constants.MOUSE_HOVER, pos)
-        
                 
-class LevelManager(EventManager):
+class LevelManager:
     def __init__(self):
         self.entities = ActorContainer()
         self.world = []
@@ -156,7 +144,7 @@ class LevelManager(EventManager):
 input_manager = InputManager()
 scene_manager = SceneManager()
 
-class GameManager(EventManager):
+class GameManager:
     def __init__(self):
         self._input_manager = InputManager()
         self._scene_manager = SceneManager()
