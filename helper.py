@@ -106,6 +106,7 @@ class Actor(Actor, ActorBase):
         self.hidden = False
         self.iterations = -1
         self._is_playing_gif = False
+        self.gif_name = None
         
         keys = list(kwargs.keys())
         for key in keys:
@@ -129,8 +130,14 @@ class Actor(Actor, ActorBase):
         if self.is_animation_available():
             if self._is_playing_gif:
                 self.animate_gif()
-            else:
+            elif self.gif_name is None:
                 self.animate()
+                
+    def pause_gif(self, play=None):
+        if play is not None:
+            self._is_playing_gif = not play
+        else:
+            self._is_playing_gif = not self._is_playing_gif
     
     def animate_gif(self):
         if self.iterations == 0:
@@ -143,6 +150,7 @@ class Actor(Actor, ActorBase):
         self.iterations = 0
         self.images.clear()
         self._is_playing_gif = False
+        self.gif_name = None
         
     def skip_gif(self):
         self.stop_gif()
@@ -150,6 +158,7 @@ class Actor(Actor, ActorBase):
             self._gif_on_finish()
     
     def play_gif(self, gif, iterations = -1, fps=24, on_finish: callable = None,):
+        self.gif_name = gif
         self.images = cached_gifs[gif]
         self.fps = fps
         self.iterations = iterations
@@ -162,7 +171,7 @@ class ActorContainer(ActorBase):
     Actor Container is a list of Actors - Similar to Group() in CMU Academy
     """
     def __init__(self, *args):
-        self.actor_list = args if type(args) == tuple else args[0]
+        self.actor_list = args[0] if type(args[0]) == list else args
         self.hidden = False
   
     def add_actor(self, actor):
@@ -196,5 +205,14 @@ class ActorContainer(ActorBase):
     def __iter__(self):
         return iter(self.actor_list)
     
+class Singleton(object):
+    _instance = None
+    def __new__(cls, *args, **kwargs):
+        if cls._instance is None:
+            cls._instance = object.__new__(cls)
+        elif getattr(cls, '_instance_error', False):
+            raise Exception(f'{type(cls._instance).__name__} is already initialized.')
+        return cls._instance
+    
 if __name__ == '__main__':
-    extract_gif_frames(r'assets/gifs/outro_card.gif', 'images', 'outro_card')
+    extract_gif_frames(r'assets/gifs/outro_card.gif', 'images', 'outro_card') 

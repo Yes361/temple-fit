@@ -1,6 +1,6 @@
 from typing import Dict, Tuple, List
 from dataclasses import dataclass
-from helper import ActorContainer
+from helper import ActorContainer, Singleton
 from constants import Constants
 import pygame
 
@@ -12,7 +12,7 @@ class Scene:
     on_hide: callable = None
     UI_elements: ActorContainer = None
 
-class SceneManager:
+class SceneManager(Singleton):
     """
     Handles Scene Transition/Visibility and Draw/Update Callbacks
     """
@@ -100,7 +100,7 @@ class InputEvent:
     type: any
     callback: callable
     
-class InputManager:
+class InputManager(Singleton):
     """
     jksadoasdksadjasdjksadjaskdad
     """

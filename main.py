@@ -19,8 +19,8 @@ WIDTH = 662
 HEIGHT = 662
 TITLE = "I wanna kms"
 
-cam = Camera(pos=(200, 200))
-cam.initialize_camera(0, (400, 300))
+cam = Camera(pos=(0, 200))
+cam.initialize_camera(0, (600, 450))
 
 intro = Entity("dragon_3.png", pos=(WIDTH / 2, HEIGHT / 2))
 intro.fps = 24
@@ -31,7 +31,7 @@ StartScreen.Bind(input_manager, 'Start Screen')
 
 def hm(x, y):
     print(x, y)
-    intro.skip_gif()
+    intro.pause_gif()
 
 input_manager.subscribe(Constants.KEY_DOWN, hm, 'Global')
 
@@ -79,6 +79,7 @@ def update(dt):
 
 def draw():    
     screen.clear()
+    screen.fill((255, 255, 255))
     scene_manager.draw(screen)
 
 pgzrun.go()
