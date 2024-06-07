@@ -7,8 +7,8 @@ class Button(Actor):
     asds
     """ 
     def __init__(self, *args, on_click: callable = None, on_hover: callable = None, **kwargs):
-        self.on_click_callback = on_click
-        self.on_hover_callback = on_hover
+        self.event_click = on_click
+        self.event_hover = on_hover
         self._input_manager = None
         super().__init__(*args, **kwargs)
     
@@ -16,27 +16,31 @@ class Button(Actor):
         if self.hidden:
             return
         
-        if self.collidepoint(pos) and self.on_hover_callback:
-            self.on_hover_callback()
-    
-    def on_hold(self):
-        pass
-    
-    def on_click(self, pos):
+        if self.collidepoint(pos) and callable(self.event_hover):
+            self.event_hover()
+        
+    def on_click(self, pos, buttons):
         if self.hidden:
             return
         
-        if self.on_click_callback:
-            self.on_click_callback()
+        if self.collidepoint(pos) and pygame.mouse.get_pressed() and callable(self.event_click):
+            self.event_click()
+    
+    # def on_hold(self):
+    #     pass
         
-    # def 
-    def Bind(self, input_manager, group_identifer):
+    def update(self, dt):
+        super().update(dt)
+    
+    def Bind(self, input_manager, identifier):
         self._input_manager = input_manager
-        self.group_identifier = group_identifer
-        self._input_manager.subscribe(Constants.MOUSE_HOVER, self.on_hover, self.group_identifier)
+        self.identifier = identifier
+        self._input_manager.subscribe(Constants.MOUSE_HOVER, self.on_hover, self.identifier)
+        self._input_manager.subscribe(Constants.MOUSE_DOWN, self.on_click, self.identifier)
     
     def Release(self):
-        self._input_manager.unsubscribe(self.on_hover, self.group_identifier)
+        self._input_manager.unsubscribe(self.on_hover, self.identifier)
+        self._input_manager.unsubscribe(self.on_click, self.identifier)
         self._input_manager = None
     
             
@@ -47,18 +51,16 @@ class Menu(ActorBase):
         self.dims = dims
         self.hidden = False
                 
-    def draw(self, *args, **kwargs):
+    def draw(self, screen):
         if self.hidden:
             return
         
-        require_kwargs(['Screen'], kwargs, error_msg='%s is required. Pass it to the Scene Manager\'s draw function')
-        Screen = kwargs['Screen'] # Import Screen
         
         surf = pygame.Surface((100, 100), masks=pygame.SRCALPHA)
         surf.fill((255, 0, 0))
         
-        Screen.blit(surf, (50, 50))
-        self.UI_elements.draw(*args, **kwargs)
+        screen.blit(surf, (50, 50))
+        self.UI_elements.draw(screen)
 
     def update(self, dt):
         pass

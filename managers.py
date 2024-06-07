@@ -44,8 +44,8 @@ class SceneManager:
         if current_scene.UI_elements:
             current_scene.UI_elements.hidden = False
         
-        if on_show := current_scene.on_show:
-            on_show()
+        if callable(current_scene.on_show):
+            current_scene.on_show()
         
     def hide_scene(self, scene: str):
         assert scene in self.scenes, f'\"{scene}\" doesn\'t exist.'
@@ -56,8 +56,8 @@ class SceneManager:
         if current_scene.UI_elements:
             current_scene.UI_elements.hidden = True
         
-        if on_hide := current_scene.on_hide:
-            on_hide()
+        if callable(current_scene.on_hide):
+            current_scene.on_hide()
         
     def clear_active_scenes(self):
         for scene in self._active_scenes:
@@ -73,27 +73,27 @@ class SceneManager:
         self.clear_active_scenes()
         self.show_scene(scene)
     
-    def draw(self, *args, **kwargs):        
+    def draw(self, screen):        
         for scene in self._active_scenes:
             
             current_scene = self.scenes[scene]
             on_draw = current_scene.draw_callback
-            if self._active_scenes and on_draw:
-                on_draw()
+            if self._active_scenes and callable(on_draw):
+                on_draw(screen)
             
-            if UI_elements := current_scene.UI_elements:
-                UI_elements.draw(*args, **kwargs)
+            if current_scene.UI_elements:
+                current_scene.UI_elements.draw(screen)
             
     def update(self, dt):
         for scene in self._active_scenes:
             
             current_scene = self.scenes[scene]
             on_update = current_scene.update_callback
-            if self._active_scenes and on_update:
-                on_update()
+            if self._active_scenes and callable(on_update):
+                on_update(dt)
             
-            if UI_elements := current_scene.UI_elements:
-                UI_elements.update(dt)
+            if current_scene.UI_elements:
+                current_scene.UI_elements.update(dt)
 
 @dataclass
 class InputEvent:
@@ -146,23 +146,12 @@ class InputManager:
         
     def on_mouse_hover(self, pos):
         self.filter_events(Constants.MOUSE_HOVER, pos)
-                
-class LevelManager:
-    def __init__(self):
-        self.entities = ActorContainer()
-        self.world = []
-    
-    def load_level(self, f):
-        pass
-    
-    def save_level(self, f):
-        pass
+        
+    def on_mouse_down(self, pos, button):
+        self.filter_events(Constants.MOUSE_DOWN, pos, button)
+        
+    def on_mouse_up(self, pos, button):
+        self.filter_events(Constants.MOUSE_UP, pos, button)
                 
 input_manager = InputManager()
 scene_manager = SceneManager()
-
-class GameManager:
-    def __init__(self):
-        self._input_manager = InputManager()
-        self._scene_manager = SceneManager()
-        self._level_manager = LevelManager()

@@ -1,6 +1,7 @@
 import pgzrun
 from pgzero.builtins import *
 from pgzhelper import *
+import pgzero
 import os
 
 from helper import Actor, ActorContainer
@@ -11,23 +12,28 @@ from entity import Player, Entity, Collisions
 from level_design import World
 from constants import Constants
 
-os.environ["SDL_VIDEO_CENTERED"] = "1"  # Forces window to be centered on screen.
+screen: pgzero.screen.Screen
+
+os.environ["SDL_VIDEO_CENTERED"] = "1"
 WIDTH = 662
 HEIGHT = 662
 TITLE = "I wanna kms"
 
-cam = None
-def initialize_cam(screen):
-    global cam
-    cam = Camera(Screen=screen)
-    cam.initialize_camera(0, (662, 662))
+cam = Camera(pos=(200, 200))
+cam.initialize_camera(0, (400, 300))
 
 intro = Entity("dragon_3.png", pos=(WIDTH / 2, HEIGHT / 2))
 intro.fps = 24
 
-StartScreen = Button('play_button.png', (331, 331), on_hover=lambda: scene_manager.switch_scene('Camera'), hidden=True)
+StartScreen = Button('play_button.png', (331, 331), on_click=lambda: scene_manager.switch_scene('Camera'), hidden=True)
 StartScreen.scale = 0.1
 StartScreen.Bind(input_manager, 'Start Screen')
+
+def hm(x, y):
+    print(x, y)
+    intro.skip_gif()
+
+input_manager.subscribe(Constants.KEY_DOWN, hm, 'Global')
 
 def play_start_screen_animation():
     intro.play_gif(
@@ -43,26 +49,23 @@ def start_screen():
     StartScreen.hidden = False
     input_manager.set_group('Start Screen')
     
-def draw_camera():
-    screen.blit(cam.draw((400, 300)), (131, 181))
-    
 ### PARTITION
 
 scene_manager.subscribe(
     "a",
     UI_elements=ActorContainer(
-        [
-            a := Entity("dragon_1.png", pos=(300, 300), is_static=True),
-            b := Entity("dragon_1.png", pos=(300, 300), is_static=False),
-        ]
+        a := Entity("dragon_1.png", pos=(300, 300), is_static=True),
+        b := Entity("dragon_1.png", pos=(300, 300), is_static=False),
     ),
 )
-scene_manager.subscribe("Start Screen", on_show=play_start_screen_animation, UI_elements=ActorContainer([intro, StartScreen]))
-scene_manager.subscribe("Camera", draw_callback=draw_camera)
+scene_manager.subscribe("Start Screen", on_show=play_start_screen_animation, UI_elements=ActorContainer(intro, StartScreen))
+scene_manager.subscribe("Camera", UI_elements=ActorContainer(cam))
 scene_manager.show_scene('Start Screen')
 
+input_manager.set_group('Global')
+
 def on_mouse_down(pos, button):
-    pass
+    input_manager.on_mouse_down(pos, button)
 
 
 def on_key_down(key, unicode):
@@ -74,9 +77,8 @@ def update(dt):
     input_manager.on_mouse_hover(pygame.mouse.get_pos())
 
 
-def draw():
+def draw():    
     screen.clear()
-    scene_manager.draw(Screen=screen)
+    scene_manager.draw(screen)
 
-initialize_cam(screen)
 pgzrun.go()

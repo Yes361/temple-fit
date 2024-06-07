@@ -77,9 +77,6 @@ def load_gifs(path):
 cached_gifs = load_gifs(r'assets/gifs')
 
 class ActorBase:
-    def __init__(self):
-        self.hidden = False
-        
     @abstractmethod
     def draw(self, *args, **kwargs):
         pass
@@ -115,7 +112,7 @@ class Actor(Actor, ActorBase):
             if key not in Actor._EXPECTED_INIT_KWARGS:
                 setattr(self, key, kwargs[key])
                 kwargs.pop(key)
-
+        
         super().__init__(*args, **kwargs)
         
     def resize(self, dims):
@@ -137,10 +134,8 @@ class Actor(Actor, ActorBase):
     
     def animate_gif(self):
         if self.iterations == 0:
-            self.stop_gif()
-            if self._gif_on_finish:
-                self._gif_on_finish()
-                            
+            self.skip_gif()
+
         elif super().animate() == len(self.images) - 1 and self.iterations > 0:
             self.iterations -= 1
     
@@ -148,6 +143,11 @@ class Actor(Actor, ActorBase):
         self.iterations = 0
         self.images.clear()
         self._is_playing_gif = False
+        
+    def skip_gif(self):
+        self.stop_gif()
+        if self._gif_on_finish:
+            self._gif_on_finish()
     
     def play_gif(self, gif, iterations = -1, fps=24, on_finish: callable = None,):
         self.images = cached_gifs[gif]
@@ -161,8 +161,8 @@ class ActorContainer(ActorBase):
     """
     Actor Container is a list of Actors - Similar to Group() in CMU Academy
     """
-    def __init__(self, *args, **kwargs):
-        self.actor_list = list(*args, **kwargs) or []
+    def __init__(self, *args):
+        self.actor_list = args if type(args) == tuple else args[0]
         self.hidden = False
   
     def add_actor(self, actor):
