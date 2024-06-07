@@ -41,7 +41,7 @@ class SceneManager(Singleton):
         self._active_scenes.append(scene)
         current_scene = self.scenes[scene]
         
-        if current_scene.UI_elements:
+        if current_scene.UI_elements is not None:
             current_scene.UI_elements.hidden = False
         
         if callable(current_scene.on_show):
@@ -53,7 +53,7 @@ class SceneManager(Singleton):
         self._active_scenes.remove(scene)
         current_scene = self.scenes[scene]
         
-        if current_scene.UI_elements:
+        if current_scene.UI_elements is not None:
             current_scene.UI_elements.hidden = True
         
         if callable(current_scene.on_hide):
@@ -78,10 +78,10 @@ class SceneManager(Singleton):
             
             current_scene = self.scenes[scene]
             on_draw = current_scene.draw_callback
-            if self._active_scenes and callable(on_draw):
+            if self._active_scenes is not None and callable(on_draw):
                 on_draw(screen)
             
-            if current_scene.UI_elements:
+            if current_scene.UI_elements is not None:
                 current_scene.UI_elements.draw(screen)
             
     def update(self, dt):
@@ -89,10 +89,10 @@ class SceneManager(Singleton):
             
             current_scene = self.scenes[scene]
             on_update = current_scene.update_callback
-            if self._active_scenes and callable(on_update):
+            if self._active_scenes is not None and callable(on_update):
                 on_update(dt)
             
-            if current_scene.UI_elements:
+            if current_scene.UI_elements is not None:
                 current_scene.UI_elements.update(dt)
 
 @dataclass
@@ -155,3 +155,11 @@ class InputManager(Singleton):
                 
 input_manager = InputManager()
 scene_manager = SceneManager()
+
+# class GameManager:
+#     def __init__(self):
+#         self._scene_manager = scene_manager
+#         self._input_manager = input_manager
+    
+#     def load_game_actors(self, scene_name):
+#         pass

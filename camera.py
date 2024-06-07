@@ -11,6 +11,9 @@ import cv2
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
 mp_pose_landmarks = mp_pose.PoseLandmark
+
+IMPLEMENTED_ACTIONS = ['Jumping Jacks']
+DEFAULT_RESOLUTION = (800, 600)
     
 def distance(x, y):
     return (x ** 2 + y ** 2) ** 0.5
@@ -34,9 +37,7 @@ def dot_product(detection_result, pointA: int, pointB: int, pointC: int):
     edgeCB = Vector2(landmarkC.x - landmarkB.x, landmarkC.y - landmarkB.y).normalize()
     return Vector2.dot(edgeAB, edgeCB)
 
-class Recognizer(ABC):
-    ACTION_NAME = None
-    
+class Recognizer(ABC):    
     @abstractmethod
     def run(self, detection_results, time_elapsed: float) -> bool:
         pass
@@ -45,7 +46,6 @@ class JumpingJacks(Recognizer):
     """
     Welcome to ur WORST NIGHTMARE
     """
-    ACTION_NAME = 'Jumping Jacks'
     def __init__(self):    
         self.count = 0
         self.prev_pose = 'down'
@@ -63,7 +63,7 @@ class JumpingJacks(Recognizer):
             self.prev_pose = "down"
         
         return False
-    
+
 class PoseAnalyzer:
     MAX_LANDMARKS = 33
     ACTION_RECOGNIZERS = {
@@ -112,12 +112,14 @@ class Camera(Actor, Singleton):
     
     def __init__(self, *args, **kwargs):
         self._cap = None
-        self._pose_estimator = PoseAnalyzer(min_detection_confidence = 0.85, min_tracking_confidence  = 0.85)
-        self.dims = kwargs.pop('dims', (800, 600))
-        self.time_elapsed = 0
-        if kwargs.get('video_mode'):
-            self.initialize_camera(kwargs.pop('video_mode', self.dims))
+        self._pose = PoseAnalyzer(min_detection_confidence = 0.85, min_tracking_confidence  = 0.85)
+        
+        default_width, default_height = DEFAULT_RESOLUTION
+        width = kwargs.pop('width', default_width)
+        height = kwargs.pop('height', default_height)
+        
         super().__init__(self, *args, **kwargs)
+        self.width, self.height = width, height
     
     def initialize_camera(self, video_mode, dims):
         """
@@ -125,12 +127,11 @@ class Camera(Actor, Singleton):
         @param video_mode 0 = Webcam, 1 = External Webcam
         @param dimensions dimensions of the video frame
         """
-        self.dims = dims
-        width, height = dims
+        self.width, self.height = dims
         self.time_elapsed = 0
         self._cap = cv2.VideoCapture(video_mode)
-        self._cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
-        self._cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+        self._cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.width)
+        self._cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.height)
     
     def close_camera(self):
         """
@@ -158,22 +159,19 @@ class Camera(Actor, Singleton):
         ret, frame = self.return_camera_frame()
         
         if not ret:
-            return pygame.Surface(self.dims)
+            return pygame.Surface((self.width, self.height))
         
-        detection_result = self._pose_estimator.process_frame(frame)
-        self._pose_estimator.recognize_pose(frame, self.time_elapsed)
+        detection_result = self._pose.process_frame(frame)
+        self._pose.recognize_pose(frame, self.time_elapsed)
         
-        if self._pose_estimator.is_results_available():
+        if self._pose.is_results_available():
             PoseAnalyzer.draw_hand_landmarks(frame, detection_result)
             self.prompt_user(frame, detection_result)
             # Camera.get_average_brightness(frame)
             # print(find_angle_between_landmarks(self._pose_estimator.detection_result, 11, 13, 15), dot_product(self._pose_estimator.detection_result, 11, 13, 15))
         
-        self._surf = Camera.convert_frame_surface(frame, self.dims)
+        self._surf = Camera.convert_frame_surface(frame, (self.width, self.height))
         super().draw()
-        
-    def update(self, dt):
-        self.time_elapsed += dt
 
     @staticmethod
     def get_average_brightness(frame):
@@ -188,6 +186,7 @@ class Camera(Actor, Singleton):
             return
         
         visible_landmarks = 0
+        # TODO: replace this with pose's visibility
         for lm in pose_markers.landmark:
             visible_landmarks += (lm.visibility > 0.5)
         

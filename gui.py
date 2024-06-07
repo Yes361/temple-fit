@@ -1,4 +1,4 @@
-from helper import Actor, ActorBase, ActorContainer, require_kwargs
+from helper import Actor, ActorBase, ActorContainer
 from constants import Constants
 import pygame
 
@@ -31,7 +31,7 @@ class Button(Actor):
         
     def update(self, dt):
         super().update(dt)
-    
+        
     def Bind(self, input_manager, identifier):
         self._input_manager = input_manager
         self.identifier = identifier
@@ -76,21 +76,21 @@ class Item(Actor):
         self.image = self.slot_image
         self._is_slot = True
         
-    def draw(self, *args, Screen, **kwargs):
+    def draw(self, screen):
         super().draw()
         if not self._is_slot:
             return
     
         # require_kwargs(['Screen'], kwargs, error_msg='%s is required. Pass it to the Scene Manager\'s draw function')
         # Screen = kwargs['Screen']
-        Screen.draw.text(f'{self.item_count}', self.pos)
+        screen.draw.text(f'{self.item_count}', self.pos)
 
-class Inventory:
+class Inventory(ActorContainer):
     def __init__(self):
         pass
     
-    def draw():
+    def draw(self, screen):
         pass
     
-    def update():
+    def update(self, dt):
         pass

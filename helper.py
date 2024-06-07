@@ -18,13 +18,6 @@ def list_actor_attributes(actor: Actor, field_name: List[str]) -> dict[str, Any]
         field[name] = getattr(actor, name)
     return field
 
-def require_kwargs(fields, kwargs, error_msg = '%s is required'):
-    """
-    @raises An error if a required field was not passed
-    """
-    for field in fields:
-        assert field in kwargs, error_msg % field
-
 def lower_case_files(directory):
     for file in os.listdir(directory):
         os.rename(rf'{directory}\{file}', rf'{directory}\{file.lower()}')
@@ -74,7 +67,7 @@ def load_gifs(path):
         gif_images[file_name] = extract_frames_from_gif(file_name)
     return gif_images
 
-cached_gifs = load_gifs(r'assets/gifs')
+CACHED_GIFS = load_gifs(r'assets/gifs')
 
 class ActorBase:
     @abstractmethod
@@ -107,12 +100,12 @@ class Actor(Actor, ActorBase):
         self.iterations = -1
         self._is_playing_gif = False
         self.gif_name = None
+        self.time_elapsed = 0
         
         keys = list(kwargs.keys())
         for key in keys:
             if key not in Actor._EXPECTED_INIT_KWARGS:
-                setattr(self, key, kwargs[key])
-                kwargs.pop(key)
+                setattr(self, key, kwargs.pop(key))
         
         super().__init__(*args, **kwargs)
         
@@ -127,6 +120,7 @@ class Actor(Actor, ActorBase):
         return type(self.images) == list and len(self.images) > 0
     
     def update(self, dt):
+        self.time_elapsed += dt
         if self.is_animation_available():
             if self._is_playing_gif:
                 self.animate_gif()
@@ -154,12 +148,12 @@ class Actor(Actor, ActorBase):
         
     def skip_gif(self):
         self.stop_gif()
-        if self._gif_on_finish:
+        if self._gif_on_finish is not None:
             self._gif_on_finish()
     
     def play_gif(self, gif, iterations = -1, fps=24, on_finish: callable = None,):
         self.gif_name = gif
-        self.images = cached_gifs[gif]
+        self.images = CACHED_GIFS[gif]
         self.fps = fps
         self.iterations = iterations
         self._is_playing_gif = True
@@ -210,8 +204,10 @@ class Singleton(object):
     def __new__(cls, *args, **kwargs):
         if cls._instance is None:
             cls._instance = object.__new__(cls)
+            cls._instance.__init__(*args, **kwargs)
         elif getattr(cls, '_instance_error', False):
             raise Exception(f'{type(cls._instance).__name__} is already initialized.')
+        # print(getattr(cls, '_instance'))
         return cls._instance
     
 if __name__ == '__main__':

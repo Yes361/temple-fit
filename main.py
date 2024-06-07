@@ -58,11 +58,14 @@ scene_manager.subscribe(
         b := Entity("dragon_1.png", pos=(300, 300), is_static=False),
     ),
 )
+
 scene_manager.subscribe("Start Screen", on_show=play_start_screen_animation, UI_elements=ActorContainer(intro, StartScreen))
 scene_manager.subscribe("Camera", UI_elements=ActorContainer(cam))
 scene_manager.show_scene('Start Screen')
 
 input_manager.set_group('Global')
+
+# scene_manager = SceneManager()
 
 def on_mouse_down(pos, button):
     input_manager.on_mouse_down(pos, button)
