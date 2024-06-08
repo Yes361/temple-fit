@@ -5,7 +5,7 @@ import pgzero
 import os
 
 from helper import Actor, ActorContainer
-from managers import scene_manager, input_manager, SceneManager
+from managers import scene_manager, input_manager, placeholder
 from gui import Button, Menu, Item
 from camera import Camera
 from entity import Player, Entity, Collisions
@@ -84,5 +84,8 @@ def draw():
     screen.clear()
     screen.fill((255, 255, 255))
     scene_manager.draw(screen)
+
+import scenes
+print(len(placeholder.scenes))
 
 pgzrun.go()

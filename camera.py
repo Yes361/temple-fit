@@ -78,7 +78,7 @@ class PoseAnalyzer:
         
     def initialize_recognizers(self):
         self.recognizers.clear()
-        self.recognizers = {action: recognizer() for action, recognizer in PoseAnalyzer.ACTION_RECOGNIZERS.items()}
+        self.recognizers = {action: recognizer() for action, recognizer in self.ACTION_RECOGNIZERS.items()}
             
     @staticmethod
     def draw_hand_landmarks(frame, detection_result):

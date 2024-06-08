@@ -1,13 +1,40 @@
-from typing import Dict, Tuple, List
-from dataclasses import dataclass
 from helper import ActorContainer, Singleton
+from typing import Dict, Tuple, List, Type
+from dataclasses import dataclass
 from constants import Constants
+from abc import ABC, abstractmethod
 import pygame
+
+
+
+
+class placeholder(ABC):
+    scenes = []
+    def __init__(self, *args, **kwargs):
+        self.scenes.append(self)
+        
+    @abstractmethod
+    def on_show(self):
+        pass
+    
+    @abstractmethod
+    def on_hide(self):
+        pass
+    
+    @abstractmethod
+    def on_draw(self, screen):
+        pass
+    
+    @abstractmethod
+    def on_update(self, dt):
+        pass
+    
+
 
 @dataclass
 class Scene: 
-    update_callback: callable = None
-    draw_callback: callable = None
+    on_update: callable = None
+    on_draw: callable = None
     on_show: callable = None
     on_hide: callable = None
     UI_elements: ActorContainer = None
@@ -17,11 +44,19 @@ class SceneManager(Singleton):
     Handles Scene Transition/Visibility and Draw/Update Callbacks
     """
     def __init__(self, predefined_scenes={}):
-        self.scenes: Dict[str, Scene] = predefined_scenes
+        self.scenes: Dict[any, Type[Scene]] = predefined_scenes
         self._active_scenes: List[str] = []
+        
+    def subscribe_scene(self, scene_name, scene: Type[Scene | placeholder]):
+        assert scene_name not in self.scenes, f'\"{scene_name}\" is already subscribed.'
+        self.scenes[scene_name] = scene
+
+    def unsubscribe_scene(self, scene):
+        assert scene in self.scenes, f'\"{scene}\" doesn\'t exist.'
+        self.scenes.pop(scene)
     
     def subscribe(self, 
-                  scene: str, 
+                  scene, 
                   update_callback: callable=None, 
                   draw_callback: callable=None, 
                   on_show: callable=None, 
@@ -31,11 +66,11 @@ class SceneManager(Singleton):
         assert scene not in self.scenes, f'\"{scene}\" is already subscribed.'
         self.scenes[scene] = Scene(update_callback, draw_callback, on_show, on_hide, UI_elements)
             
-    def unsubscribe(self, scene: str):
-        if scene in self.scenes:
-            self.scenes.pop(scene)
+    def unsubscribe(self, scene):
+        assert scene in self.scenes, f'\"{scene}\" doesn\'t exist.'
+        self.scenes.pop(scene)
 
-    def show_scene(self, scene: str):
+    def show_scene(self, scene):
         assert scene in self.scenes, f'\"{scene}\" doesn\'t exist.'
         assert scene not in self._active_scenes, f'\"{scene}\" is already visible.'
         self._active_scenes.append(scene)
@@ -47,7 +82,7 @@ class SceneManager(Singleton):
         if callable(current_scene.on_show):
             current_scene.on_show()
         
-    def hide_scene(self, scene: str):
+    def hide_scene(self, scene):
         assert scene in self.scenes, f'\"{scene}\" doesn\'t exist.'
         assert scene in self._active_scenes, f'\"{scene}\" is already invisible.'
         self._active_scenes.remove(scene)
@@ -68,7 +103,7 @@ class SceneManager(Singleton):
     def get_active_scenes(self):
         return self._active_scenes
 
-    def switch_scene(self, scene: str):
+    def switch_scene(self, scene):
         assert scene in self.scenes, f'\"{scene}\" doesn\'t exist.'
         self.clear_active_scenes()
         self.show_scene(scene)
@@ -77,7 +112,7 @@ class SceneManager(Singleton):
         for scene in self._active_scenes:
             
             current_scene = self.scenes[scene]
-            on_draw = current_scene.draw_callback
+            on_draw = current_scene.on_draw
             if self._active_scenes is not None and callable(on_draw):
                 on_draw(screen)
             
@@ -88,7 +123,7 @@ class SceneManager(Singleton):
         for scene in self._active_scenes:
             
             current_scene = self.scenes[scene]
-            on_update = current_scene.update_callback
+            on_update = current_scene.on_update
             if self._active_scenes is not None and callable(on_update):
                 on_update(dt)
             
