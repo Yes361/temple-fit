@@ -80,12 +80,10 @@ class Item(Actor):
         super().draw()
         if not self._is_slot:
             return
-    
-        # require_kwargs(['Screen'], kwargs, error_msg='%s is required. Pass it to the Scene Manager\'s draw function')
-        # Screen = kwargs['Screen']
+
         screen.draw.text(f'{self.item_count}', self.pos)
 
-class Inventory(ActorContainer):
+class Inventory(Actor):
     def __init__(self):
         pass
     

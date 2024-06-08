@@ -9,7 +9,6 @@ class Scene:
     def __init__(self, scene, *args, **kwargs):
         scene_manager.subscribe(scene, self)
         self.scene_name = scene
-        self.Actors = ActorContainer()
         
     @abstractmethod
     def on_show(self):
@@ -25,14 +24,6 @@ class Scene:
     
     @abstractmethod
     def on_update(self, dt):
-        pass
-    
-    @abstractmethod
-    def load_actors(self):
-        pass
-    
-    @abstractmethod
-    def del_actors(self):
         pass
     
 class SceneManager:
@@ -57,11 +48,9 @@ class SceneManager:
     def show_scene(self, scene):
         assert scene in self.scenes, f'\"{scene}\" doesn\'t exist.'
         assert scene not in self._active_scenes, f'\"{scene}\" is already visible.'
+        
         self._active_scenes.append(scene)
         current_scene = self.scenes[scene]
-        
-        if current_scene.Actors is not None:
-            current_scene.Actors.hidden = False
         
         if callable(current_scene.on_show):
             current_scene.on_show()
@@ -69,11 +58,9 @@ class SceneManager:
     def hide_scene(self, scene):
         assert scene in self.scenes, f'\"{scene}\" doesn\'t exist.'
         assert scene in self._active_scenes, f'\"{scene}\" is already invisible.'
+        
         self._active_scenes.remove(scene)
         current_scene = self.scenes[scene]
-        
-        if current_scene.Actors is not None:
-            current_scene.Actors.hidden = True
         
         if callable(current_scene.on_hide):
             current_scene.on_hide()
@@ -96,23 +83,15 @@ class SceneManager:
         for scene in self._active_scenes:
             
             current_scene = self.scenes[scene]
-            on_draw = current_scene.on_draw
-            if self._active_scenes is not None and callable(on_draw):
-                on_draw(screen)
-            
-            if current_scene.Actors is not None:
-                current_scene.Actors.draw(screen)
+            if self._active_scenes is not None and callable(current_scene.on_draw):
+                current_scene.on_draw(screen)
             
     def update(self, dt):
         for scene in self._active_scenes:
             
             current_scene = self.scenes[scene]
-            on_update = current_scene.on_update
-            if self._active_scenes is not None and callable(on_update):
-                on_update(dt)
-            
-            if current_scene.Actors is not None:
-                current_scene.Actors.update(dt)
+            if self._active_scenes is not None and callable(current_scene.on_update):
+                current_scene.on_update(dt)
 
 @dataclass
 class InputEvent:

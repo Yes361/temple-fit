@@ -5,7 +5,7 @@ import pgzero
 import os
 
 from managers import scene_manager, input_manager, SceneManager
-import Game
+import Scenes
 
 screen: pgzero.screen.Screen
 
@@ -30,7 +30,6 @@ def update(dt):
 
 def draw():    
     screen.clear()
-    screen.fill((255, 255, 255))
     scene_manager.draw(screen)
 
 pgzrun.go()
