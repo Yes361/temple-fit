@@ -1,6 +1,6 @@
 from pgzero.builtins import Actor
 from pgzhelper import Actor
-from typing import List, Any
+from typing import *
 from abc import abstractmethod
 from PIL import Image
 import pygame
@@ -165,22 +165,26 @@ class ActorContainer(ActorBase):
     Actor Container is a list of Actors - Similar to Group() in CMU Academy
     """
     def __init__(self, *args):
-        self.actor_list = args[0] if type(args[0]) == list else args
+        self._actor_list: Dict[any, Type[Actor]] = {}
+        if any(args):
+            self._actor_list = args[0] if type(args[0]) == list else args
         self.hidden = False
   
-    def add_actor(self, actor):
-        self.actor_list.append(actor)
+    def add_actor(self, name: any, actor: Type[Actor]):
+        assert name not in self._actor_list, f'\"{name}\" is already added.'
+        self._actor_list[name] = actor
         return actor
     
-    def remove_actor(self, actor):
-        self.actor_list.remove(actor)
+    def remove_actor(self, name: any):
+        assert name in self._actor_list, f'\"{name}\" doesn\'t exist.'
+        self._actor_list.remove(name)
         
     # TODO: z-index shenanigans
-    # def set_actor_zindex(self, actor):
+    # def set_actor_zindex(self, name):
     #     pass
         
-    def colliderect(self, other_actor):
-        for actor in self.actor_list:
+    def colliderect(self, other_actor: Type[Actor]):
+        for actor in self._actor_list.values():
             if actor.colliderect(other_actor):
                 return True
         return False
@@ -189,26 +193,36 @@ class ActorContainer(ActorBase):
         if self.hidden:
             return
         
-        for actor in self.actor_list:
+        for actor in self._actor_list.values():
             actor.draw(*args, **kwargs)
     
     def update(self, dt):
-        for actor in self.actor_list:
+        for actor in self._actor_list.values():
             actor.update(dt)
             
+    def clear(self):
+        self._actor_list.clear()
+        
     def __iter__(self):
-        return iter(self.actor_list)
+        return iter(self._actor_list)
     
-class Singleton(object):
-    _instance = None
-    def __new__(cls, *args, **kwargs):
-        if cls._instance is None:
-            cls._instance = object.__new__(cls)
-            cls._instance.__init__(*args, **kwargs)
-        elif getattr(cls, '_instance_error', False):
-            raise Exception(f'{type(cls._instance).__name__} is already initialized.')
-        # print(getattr(cls, '_instance'))
-        return cls._instance
+    def __getitem__(self, item):
+        return self._actor_list[item]
     
+    def __setitem__(self, item, value):
+        self._actor_list[item] = value
+    
+    
+# class Singleton:
+#     _instance = None
+#     def __new__(cls, *args, **kwargs):
+#         if cls._instance is None:
+#             cls._instance = super().__new__(cls, *args, **kwargs)
+#             # cls._instance.__init__(*args, **kwargs)
+#         elif getattr(cls, '_instance_error', False):
+#             raise Exception(f'{type(cls._instance).__name__} is already initialized.')
+#         # print(getattr(cls, '_instance'))
+#         return cls._instance
+        
 if __name__ == '__main__':
     extract_gif_frames(r'assets/gifs/outro_card.gif', 'images', 'outro_card') 

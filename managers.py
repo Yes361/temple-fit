@@ -1,17 +1,15 @@
-from helper import ActorContainer, Singleton
+from helper import ActorContainer
 from typing import Dict, Tuple, List, Type
 from dataclasses import dataclass
 from constants import Constants
 from abc import ABC, abstractmethod
 import pygame
 
-
-
-
-class placeholder(ABC):
-    scenes = []
-    def __init__(self, *args, **kwargs):
-        self.scenes.append(self)
+class Scene:
+    def __init__(self, scene, *args, **kwargs):
+        scene_manager.subscribe(scene, self)
+        self.scene_name = scene
+        self.Actors = ActorContainer()
         
     @abstractmethod
     def on_show(self):
@@ -29,17 +27,15 @@ class placeholder(ABC):
     def on_update(self, dt):
         pass
     
-
-
-@dataclass
-class Scene: 
-    on_update: callable = None
-    on_draw: callable = None
-    on_show: callable = None
-    on_hide: callable = None
-    UI_elements: ActorContainer = None
-
-class SceneManager(Singleton):
+    @abstractmethod
+    def load_actors(self):
+        pass
+    
+    @abstractmethod
+    def del_actors(self):
+        pass
+    
+class SceneManager:
     """
     Handles Scene Transition/Visibility and Draw/Update Callbacks
     """
@@ -47,28 +43,16 @@ class SceneManager(Singleton):
         self.scenes: Dict[any, Type[Scene]] = predefined_scenes
         self._active_scenes: List[str] = []
         
-    def subscribe_scene(self, scene_name, scene: Type[Scene | placeholder]):
+    def subscribe(self, scene_name, scene: Type[Scene]):
         assert scene_name not in self.scenes, f'\"{scene_name}\" is already subscribed.'
         self.scenes[scene_name] = scene
 
-    def unsubscribe_scene(self, scene):
-        assert scene in self.scenes, f'\"{scene}\" doesn\'t exist.'
-        self.scenes.pop(scene)
-    
-    def subscribe(self, 
-                  scene, 
-                  update_callback: callable=None, 
-                  draw_callback: callable=None, 
-                  on_show: callable=None, 
-                  on_hide: callable=None, 
-                  UI_elements: ActorContainer=None
-        ):
-        assert scene not in self.scenes, f'\"{scene}\" is already subscribed.'
-        self.scenes[scene] = Scene(update_callback, draw_callback, on_show, on_hide, UI_elements)
-            
     def unsubscribe(self, scene):
         assert scene in self.scenes, f'\"{scene}\" doesn\'t exist.'
         self.scenes.pop(scene)
+        
+    def list_all_scenes(self):
+        return self.scenes.keys()
 
     def show_scene(self, scene):
         assert scene in self.scenes, f'\"{scene}\" doesn\'t exist.'
@@ -76,8 +60,8 @@ class SceneManager(Singleton):
         self._active_scenes.append(scene)
         current_scene = self.scenes[scene]
         
-        if current_scene.UI_elements is not None:
-            current_scene.UI_elements.hidden = False
+        if current_scene.Actors is not None:
+            current_scene.Actors.hidden = False
         
         if callable(current_scene.on_show):
             current_scene.on_show()
@@ -88,8 +72,8 @@ class SceneManager(Singleton):
         self._active_scenes.remove(scene)
         current_scene = self.scenes[scene]
         
-        if current_scene.UI_elements is not None:
-            current_scene.UI_elements.hidden = True
+        if current_scene.Actors is not None:
+            current_scene.Actors.hidden = True
         
         if callable(current_scene.on_hide):
             current_scene.on_hide()
@@ -116,8 +100,8 @@ class SceneManager(Singleton):
             if self._active_scenes is not None and callable(on_draw):
                 on_draw(screen)
             
-            if current_scene.UI_elements is not None:
-                current_scene.UI_elements.draw(screen)
+            if current_scene.Actors is not None:
+                current_scene.Actors.draw(screen)
             
     def update(self, dt):
         for scene in self._active_scenes:
@@ -127,15 +111,15 @@ class SceneManager(Singleton):
             if self._active_scenes is not None and callable(on_update):
                 on_update(dt)
             
-            if current_scene.UI_elements is not None:
-                current_scene.UI_elements.update(dt)
+            if current_scene.Actors is not None:
+                current_scene.Actors.update(dt)
 
 @dataclass
 class InputEvent:
     type: any
     callback: callable
     
-class InputManager(Singleton):
+class InputManager:
     """
     jksadoasdksadjasdjksadjaskdad
     """

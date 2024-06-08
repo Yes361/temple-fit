@@ -1,4 +1,4 @@
-from helper import Actor, Singleton
+from helper import Actor
 from pygame.math import Vector2
 from abc import abstractmethod, ABC
 from math import acos, degrees
@@ -107,9 +107,7 @@ class PoseAnalyzer:
             if recognizer.run(self.detection_result, time_elapsed):
                 print(f'You just did a {action} ! You\'ve done {recognizer.count} {action} !')
 
-class Camera(Actor, Singleton):
-    _instance_error = True
-    
+class Camera(Actor):    
     def __init__(self, *args, **kwargs):
         self._cap = None
         self._pose = PoseAnalyzer(min_detection_confidence = 0.85, min_tracking_confidence  = 0.85)
