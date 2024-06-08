@@ -9,10 +9,10 @@ class StartScreen(Scene):
         super().__init__('Start Screen', self)
         
     def on_draw(self, screen):
-        return super().on_draw(screen)
+        pass
     
     def on_hide(self):
-        return super().on_hide()
+        pass
     
     def on_show(self):
         self.load_actors()
@@ -24,10 +24,9 @@ class StartScreen(Scene):
                 on_finish=self.start_screen
             ),
         )
-        super().on_show()
     
     def on_update(self, dt):
-        super().on_update(dt)
+        pass
     
     def load_actors(self):
         self.Actors.add_actor('intro', Actor("dragon_3.png", pos=(self.WIDTH / 2, self.HEIGHT / 2)))
