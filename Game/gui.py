@@ -23,11 +23,12 @@ class Button(Actor):
         if self.hidden:
             return
         
-        if self.collidepoint(pos) and pygame.mouse.get_pressed() and callable(self.event_click):
+        if self.collidepoint(pos) and any(buttons) and callable(self.event_click):
             self.event_click()
-    
-    # def on_hold(self):
-    #     pass
+            
+    def handle_mouse_input(self):
+        self.on_hover(pygame.mouse.get_pos())
+        self.on_click(pygame.mouse.get_pressed())
         
     def update(self, dt):
         super().update(dt)

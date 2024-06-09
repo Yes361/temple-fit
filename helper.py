@@ -1,4 +1,4 @@
-from pgzero.builtins import Actor
+from pgzero.builtins import Actor, sounds
 from pgzhelper import Actor
 from typing import *
 from abc import abstractmethod
@@ -67,7 +67,22 @@ def load_gifs(path):
         gif_images[file_name] = extract_frames_from_gif(file_name)
     return gif_images
 
+def play_sound(sound: str):
+    getattr(sounds, sound).play()
+
+# TODO: Sync Assets and Images Folder function
+def sync_assets_and_images(asset_folder_path):
+    pass
+
 CACHED_GIFS = load_gifs(r'assets/gifs')
+
+def read_dialogue_lines(asset_folder_path):
+    dialogue = {}
+    for file in os.listdir(asset_folder_path):
+        file_name = re.match(r'^\d+_(.+)\.txt$', file).group(1)
+        dialogue_lines = open(os.path.join(asset_folder_path, file), 'r').read().split('\n')
+        dialogue[file_name] = list(filter(lambda line: (line != '\n') and (line != ''), dialogue_lines))
+    return dialogue
 
 class ActorBase:
     @abstractmethod
@@ -159,7 +174,6 @@ class Actor(Actor, ActorBase):
         self._is_playing_gif = True
         self._gif_on_finish = on_finish
         
-
 class ActorContainer(ActorBase):
     """
     Actor Container is a list of Actors - Similar to Group() in CMU Academy
@@ -170,12 +184,12 @@ class ActorContainer(ActorBase):
             self._actor_list = args[0] if type(args[0]) == list else args
         self.hidden = False
   
-    def add_actor(self, name: any, actor: Type[Actor]):
+    def add(self, name: any, actor: Type[ActorBase]):
         assert name not in self._actor_list, f'\"{name}\" is already added.'
         self._actor_list[name] = actor
         return actor
     
-    def remove_actor(self, name: any):
+    def remove(self, name: any):
         assert name in self._actor_list, f'\"{name}\" doesn\'t exist.'
         self._actor_list.remove(name)
         
@@ -183,7 +197,7 @@ class ActorContainer(ActorBase):
     # def set_actor_zindex(self, name):
     #     pass
         
-    def colliderect(self, other_actor: Type[Actor]):
+    def colliderect(self, other_actor: Type[ActorBase]):
         for actor in self._actor_list.values():
             if actor.colliderect(other_actor):
                 return True
@@ -196,12 +210,18 @@ class ActorContainer(ActorBase):
         for actor in self._actor_list.values():
             actor.draw(*args, **kwargs)
     
-    def update(self, dt):
+    def update(self, dt, *args, **kwargs):
         for actor in self._actor_list.values():
-            actor.update(dt)
+            actor.update(dt, *args, **kwargs)
             
     def clear(self):
         self._actor_list.clear()
+        
+    def exclude_actor(self, name):
+        list_of_actors = list(self._actor_list.keys())
+        for actor in list_of_actors:
+            if actor is not name:
+                self.remove(actor)
         
     def __iter__(self):
         return iter(self._actor_list)
@@ -225,4 +245,5 @@ class ActorContainer(ActorBase):
 #         return cls._instance
         
 if __name__ == '__main__':
-    extract_gif_frames(r'assets/gifs/outro_card.gif', 'images', 'outro_card') 
+    # extract_gif_frames(r'assets/gifs/outro_card.gif', 'images', 'outro_card') 
+    print(read_dialogue_lines(r'assets/Dialogue'))

@@ -1,14 +1,12 @@
-from helper import ActorContainer
-from typing import Dict, Tuple, List, Type
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from constants import Constants
-from abc import ABC, abstractmethod
+from typing import *
 import pygame
 
 class Scene:
     def __init__(self, scene, *args, **kwargs):
         scene_manager.subscribe(scene, self)
-        self.scene_name = scene
         
     @abstractmethod
     def on_show(self):
@@ -42,10 +40,12 @@ class SceneManager:
         assert scene in self.scenes, f'\"{scene}\" doesn\'t exist.'
         self.scenes.pop(scene)
         
+    # def set_scene_data(self, ):
+        
     def list_all_scenes(self):
         return self.scenes.keys()
 
-    def show_scene(self, scene):
+    def show_scene(self, scene, *args, **kwargs):
         assert scene in self.scenes, f'\"{scene}\" doesn\'t exist.'
         assert scene not in self._active_scenes, f'\"{scene}\" is already visible.'
         
@@ -53,7 +53,7 @@ class SceneManager:
         current_scene = self.scenes[scene]
         
         if callable(current_scene.on_show):
-            current_scene.on_show()
+            current_scene.on_show(*args, **kwargs)
         
     def hide_scene(self, scene):
         assert scene in self.scenes, f'\"{scene}\" doesn\'t exist.'
@@ -74,10 +74,10 @@ class SceneManager:
     def get_active_scenes(self):
         return self._active_scenes
 
-    def switch_scene(self, scene):
+    def switch_scene(self, scene, *args, **kwargs):
         assert scene in self.scenes, f'\"{scene}\" doesn\'t exist.'
         self.clear_active_scenes()
-        self.show_scene(scene)
+        self.show_scene(scene, *args, **kwargs)
     
     def draw(self, screen):        
         for scene in self._active_scenes:
