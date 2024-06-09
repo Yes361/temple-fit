@@ -1,4 +1,4 @@
-from helper import ActorContainer, Actor, ActorBase
+from helper import ActorContainer, Actor, AbstractActor
 from pgzero.builtins import Rect
 from typing import List
 
@@ -13,7 +13,7 @@ class World(ActorContainer):
     #     tile.resize((self.tile_size, self.tile_size))
     #     self.add_actor(tile)
         
-class LevelManager(ActorBase):
+class LevelManager(AbstractActor):
     def __init__(self):
         self.entities = ActorContainer()
         self.world = []

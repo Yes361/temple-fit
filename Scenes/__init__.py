@@ -1,9 +1,10 @@
-from .start_screen import StartScreen
+from .start import StartScreen
+from .globals import Global
 from Game import Camera
-from managers import scene_manager
+from managers import game_manager
 
-cam = Camera(pos=(0, 200))
-cam.initialize_camera(0, (600, 450))
+Global.cam = Camera(pos=(0, 200))
+Global.cam.initialize_camera(0, (600, 450))
 
 StartScreen()
-scene_manager.show_scene('Start Screen')
+game_manager.show_scene('Start Screen')

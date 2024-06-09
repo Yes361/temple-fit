@@ -84,13 +84,21 @@ def read_dialogue_lines(asset_folder_path):
         dialogue[file_name] = list(filter(lambda line: (line != '\n') and (line != ''), dialogue_lines))
     return dialogue
 
-class ActorBase:
+class AbstractActor:
     @abstractmethod
     def draw(self, *args, **kwargs):
         pass
     
     @abstractmethod
     def update(self, dt):
+        pass
+    
+    @abstractmethod
+    def on_show(self, *args, **kwargs):
+        pass
+    
+    @abstractmethod
+    def on_hide(self):
         pass
     
     @abstractmethod
@@ -101,7 +109,7 @@ class ActorBase:
     def reset(self):
         pass
 
-class Actor(Actor, ActorBase):
+class Actor(Actor, AbstractActor):
     """
     Revised Version of Actor Class
     
@@ -117,8 +125,7 @@ class Actor(Actor, ActorBase):
         self.gif_name = None
         self.time_elapsed = 0
         
-        keys = list(kwargs.keys())
-        for key in keys:
+        for key in kwargs.copy():
             if key not in Actor._EXPECTED_INIT_KWARGS:
                 setattr(self, key, kwargs.pop(key))
         
@@ -174,30 +181,31 @@ class Actor(Actor, ActorBase):
         self._is_playing_gif = True
         self._gif_on_finish = on_finish
         
-class ActorContainer(ActorBase):
+class ActorContainer(AbstractActor):
     """
     Actor Container is a list of Actors - Similar to Group() in CMU Academy
     """
-    def __init__(self, *args):
-        self._actor_list: Dict[any, Type[Actor]] = {}
-        if any(args):
-            self._actor_list = args[0] if type(args[0]) == list else args
-        self.hidden = False
+    def __init__(self, *, hidden=False, on_show=None, on_hide=None, **kwargs):
+        self._actor_list: Dict[any, Type[Actor | GUIElement | ActorContainer]] = {}
+        for name, actor in kwargs.items():
+            self._actor_list[name] = actor
+        self.hidden = hidden
+        self.on_enter = on_show
+        self.on_exit = on_hide
   
-    def add(self, name: any, actor: Type[ActorBase]):
+    def add(self, name: any, actor: Type[AbstractActor]):
         assert name not in self._actor_list, f'\"{name}\" is already added.'
         self._actor_list[name] = actor
-        return actor
     
-    def remove(self, name: any):
-        assert name in self._actor_list, f'\"{name}\" doesn\'t exist.'
-        self._actor_list.remove(name)
+    def remove(self, actor: any):
+        assert actor in self._actor_list, f'\"{actor}\" doesn\'t exist.'
+        self._actor_list.pop(actor)
         
     # TODO: z-index shenanigans
     # def set_actor_zindex(self, name):
     #     pass
         
-    def colliderect(self, other_actor: Type[ActorBase]):
+    def colliderect(self, other_actor: Type[AbstractActor]):
         for actor in self._actor_list.values():
             if actor.colliderect(other_actor):
                 return True
@@ -214,35 +222,56 @@ class ActorContainer(ActorBase):
         for actor in self._actor_list.values():
             actor.update(dt, *args, **kwargs)
             
+    # TODO: Implement on_show and on_hide for Actors and ActorContainer
+    # def on_show(self, *args, **kwargs):
+    #     if callable()
+    
+    # def on_hide(self):
+    #     pass
+            
     def clear(self):
-        self._actor_list.clear()
-        
-    def exclude_actor(self, name):
-        list_of_actors = list(self._actor_list.keys())
-        for actor in list_of_actors:
-            if actor is not name:
-                self.remove(actor)
+        for name in self._actor_list.copy():
+            try:
+                self._actor_list[name].clear()
+            except:
+                pass
+            finally:
+                actor = self._actor_list.pop(name)
+                
+    def __getattr__(self, property):
+        if property in self.__dict__:
+            return self.__dict__[property]
+        elif property in self._actor_list:
+            # setattr(self, property, ) # Cache result?
+            return self.get_actor(property)
+        else:
+            AttributeError(f'{property} is not in {self.__class__.__name__}')
+            
+    def get_actor(self, item):
+        assert item in self._actor_list, f'\"{item}\" is not added.'
+        return self._actor_list[item]
         
     def __iter__(self):
-        return iter(self._actor_list)
+        return iter(self._actor_list.values())
     
     def __getitem__(self, item):
-        return self._actor_list[item]
+        return self.get_actor(item)
     
     def __setitem__(self, item, value):
         self._actor_list[item] = value
+
+class GUIElement(Actor):
+    @abstractmethod
+    def on_click(self):
+        pass
     
+    @abstractmethod
+    def on_hover(self):
+        pass
     
-# class Singleton:
-#     _instance = None
-#     def __new__(cls, *args, **kwargs):
-#         if cls._instance is None:
-#             cls._instance = super().__new__(cls, *args, **kwargs)
-#             # cls._instance.__init__(*args, **kwargs)
-#         elif getattr(cls, '_instance_error', False):
-#             raise Exception(f'{type(cls._instance).__name__} is already initialized.')
-#         # print(getattr(cls, '_instance'))
-#         return cls._instance
+    @abstractmethod
+    def on_hold(self):
+        pass
         
 if __name__ == '__main__':
     # extract_gif_frames(r'assets/gifs/outro_card.gif', 'images', 'outro_card') 

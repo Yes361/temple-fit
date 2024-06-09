@@ -1,12 +1,10 @@
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
-from constants import Constants
 from typing import *
 import pygame
 
 class Scene:
-    def __init__(self, scene, *args, **kwargs):
-        scene_manager.subscribe(scene, self)
+    def __init__(self, scene):
+        game_manager.subscribe(scene, self)
         
     @abstractmethod
     def on_show(self):
@@ -24,13 +22,50 @@ class Scene:
     def on_update(self, dt):
         pass
     
-class SceneManager:
+    @abstractmethod
+    def on_key_down(self, key, unicode):
+        pass
+    
+    @abstractmethod
+    def on_key_up(self, key, unicode):
+        pass
+    
+    @abstractmethod
+    def on_key_hold(self, dt):
+        pass
+    
+    @abstractmethod
+    def on_mouse_down(self, pos, button):
+        pass 
+    
+    @abstractmethod
+    def on_mouse_move(self, pos, rel, buttons):
+        pass
+    
+    @abstractmethod
+    def on_mouse_hold(self, pos, buttons):
+        pass
+    
+    @abstractmethod
+    def on_mouse_up(self, pos, buttons):
+        pass
+    
+    @abstractmethod
+    def on_mouse_hover(self, pos):
+        pass
+    
+    @abstractmethod
+    def on_music_end(self):
+        pass
+    
+class GameManager:
     """
     Handles Scene Transition/Visibility and Draw/Update Callbacks
     """
     def __init__(self, predefined_scenes={}):
         self.scenes: Dict[any, Type[Scene]] = predefined_scenes
         self._active_scenes: List[str] = []
+        self._event_stack = []
         
     def subscribe(self, scene_name, scene: Type[Scene]):
         assert scene_name not in self.scenes, f'\"{scene_name}\" is already subscribed.'
@@ -45,25 +80,27 @@ class SceneManager:
     def list_all_scenes(self):
         return self.scenes.keys()
 
-    def show_scene(self, scene, *args, **kwargs):
+    def show_scene(self, scene, *args, switch_event_scene: bool = True, **kwargs):
         assert scene in self.scenes, f'\"{scene}\" doesn\'t exist.'
         assert scene not in self._active_scenes, f'\"{scene}\" is already visible.'
         
+        if switch_event_scene:
+            self._event_stack.append(scene)
+        
         self._active_scenes.append(scene)
         current_scene = self.scenes[scene]
+        current_scene.on_show(*args, **kwargs)
         
-        if callable(current_scene.on_show):
-            current_scene.on_show(*args, **kwargs)
-        
-    def hide_scene(self, scene):
+    def hide_scene(self, scene, *args, **kwargs):
         assert scene in self.scenes, f'\"{scene}\" doesn\'t exist.'
         assert scene in self._active_scenes, f'\"{scene}\" is already invisible.'
         
         self._active_scenes.remove(scene)
         current_scene = self.scenes[scene]
         
-        if callable(current_scene.on_hide):
-            current_scene.on_hide()
+        current_scene.on_hide(*args, **kwargs)
+        if len(self._event_stack) > 0:
+            self._event_stack.pop()
         
     def clear_active_scenes(self):
         for scene in self._active_scenes:
@@ -77,87 +114,41 @@ class SceneManager:
     def switch_scene(self, scene, *args, **kwargs):
         assert scene in self.scenes, f'\"{scene}\" doesn\'t exist.'
         self.clear_active_scenes()
-        self.show_scene(scene, *args, **kwargs)
+        
+        if len(self._event_stack) > 0:
+            self._event_stack.pop()
+        self.show_scene(scene, *args, switch_event_scene=True, **kwargs)
     
     def draw(self, screen):        
         for scene in self._active_scenes:
             
             current_scene = self.scenes[scene]
-            if self._active_scenes is not None and callable(current_scene.on_draw):
-                current_scene.on_draw(screen)
+            current_scene.on_draw(screen)
             
     def update(self, dt):
         for scene in self._active_scenes:
             
             current_scene = self.scenes[scene]
-            if self._active_scenes is not None and callable(current_scene.on_update):
-                current_scene.on_update(dt)
-
-@dataclass
-class InputEvent:
-    type: any
-    callback: callable
-    
-class InputManager:
-    """
-    jksadoasdksadjasdjksadjaskdad
-    """
-    EVENTS = [Constants.KEY_UP, Constants.KEY_DOWN, Constants.KEY_HOLD, Constants.MOUSE_HOVER]
-    def __init__(self):
-        self._group = None
-        self._callbacks: Dict[any, List[InputEvent]] = {}
-    
-    def subscribe(self, type, callback: callable, group_identifier: any):
-        if group_identifier not in self._callbacks:
-            self._callbacks[group_identifier] = []
-        self._callbacks[group_identifier].append(InputEvent(type, callback))
-        
-    def unsubscribe(self, group_identifier=None, callback=None, ):
-        self._callbacks.remove(group_identifier)
-    
-    def clear_group(self):
-        self._group = None
-    
-    def set_group(self, group):
-        assert group in self._callbacks, f'{group} is not subscribed.'
-        self._group = group
-    
-    def filter_events(self, type, *args, **kwargs):
-        if self._group:
-            for event in self._callbacks[self._group]:
-                if event.type == type and event.callback:
-                    event.callback(*args, **kwargs)
-        else:
-            for _, group in self._callbacks.items():
-                for event in group:
-                    if event.type == type and event.callback:
-                        event.callback(*args, **kwargs)
-    
+            current_scene.on_update(dt)
+            
+        current_event = self.current_event()
+        self.scenes[current_event].on_mouse_hold(pygame.mouse.get_pos(), pygame.mouse.get_pressed())
+        self.scenes[current_event].on_mouse_hover(pygame.mouse.get_pos())
+        self.scenes[current_event].on_key_hold(dt)
+                
+    def current_event(self):
+        return self._event_stack[-1]
+                
     def on_key_down(self, key, unicode):
-        self.filter_events(Constants.KEY_DOWN, key, unicode)
-        
-    def on_key_up(self, key, unicode):
-        self.filter_events(Constants.KEY_UP, key, unicode)
+        self.scenes[self.current_event()].on_key_down(key, unicode)
     
-    def on_key_hold(self, dt):
-        self.filter_events(Constants.KEY_HOLD)
-        
-    def on_mouse_hover(self, pos):
-        self.filter_events(Constants.MOUSE_HOVER, pos)
+    def on_mouse_move(self, pos, button, rel):
+        self.scenes[self.current_event()].on_mouse_move(pos, button, rel)
         
     def on_mouse_down(self, pos, button):
-        self.filter_events(Constants.MOUSE_DOWN, pos, button)
-        
-    def on_mouse_up(self, pos, button):
-        self.filter_events(Constants.MOUSE_UP, pos, button)
-                
-input_manager = InputManager()
-scene_manager = SceneManager()
-
-# class GameManager:
-#     def __init__(self):
-#         self._scene_manager = scene_manager
-#         self._input_manager = input_manager
+        self.scenes[self.current_event()].on_mouse_down(pos, button)
     
-#     def load_game_actors(self, scene_name):
-#         pass
+    def on_mouse_up(self, pos, button):
+        self.scenes[self.current_event()].on_mouse_up(pos, button)
+          
+game_manager = GameManager()
