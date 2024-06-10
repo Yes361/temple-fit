@@ -150,7 +150,7 @@ class Camera(Actor):
         frame = Camera.process_camera_frame(frame)
         return ret, frame
     
-    def draw(self, screen):
+    def draw(self, *args, **kwargs):
         if self.hidden:
             return
         

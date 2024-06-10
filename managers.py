@@ -102,8 +102,6 @@ class GameManager:
         assert scene in self.scenes, f'\"{scene}\" doesn\'t exist.'
         self.scenes.pop(scene)
         
-    # def set_scene_data(self, ):
-        
     def list_all_scenes(self):
         return self.scenes.keys()
 
@@ -115,17 +113,15 @@ class GameManager:
             self._event_stack.append(scene)
         
         self._active_scenes.append(scene)
-        current_scene = self.scenes[scene]
-        current_scene.on_show(*args, **kwargs)
+        self.scenes[scene].on_show(*args, **kwargs)
         
     def hide_scene(self, scene, *args, **kwargs):
         assert scene in self.scenes, f'\"{scene}\" doesn\'t exist.'
         assert scene in self._active_scenes, f'\"{scene}\" is already invisible.'
         
         self._active_scenes.remove(scene)
-        current_scene = self.scenes[scene]
         
-        current_scene.on_hide(*args, **kwargs)
+        self.scenes[scene].on_hide(*args, **kwargs)
         if len(self._event_stack) > 0:
             self._event_stack.pop()
         
@@ -134,11 +130,11 @@ class GameManager:
             self.hide_scene(scene)
         self._active_scenes.clear()
         
-    @property
     def get_active_scenes(self):
         return self._active_scenes
 
     def switch_scene(self, scene, *args, **kwargs):
+        assert scene not in self._active_scenes, f'\"{scene}\" is already active.'
         assert scene in self.scenes, f'\"{scene}\" doesn\'t exist.'
         self.clear_active_scenes()
         

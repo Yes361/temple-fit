@@ -8,15 +8,15 @@ class StartScreen(Scene):
     def __init__(self, *args, **kwargs):
         super().__init__(self.SCENE_NAME)
 
-    def on_draw(self, screen):
-        pass
-
     def on_hide(self):
         pass
 
     def on_show(self):
         pass
 
+    def on_draw(self, screen):
+        pass
+    
     def on_update(self, dt):
         pass
         

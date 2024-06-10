@@ -3,43 +3,37 @@ from managers import Scene
 from Game import camera
 from pgzero.builtins import Rect
 
-all_actors = ActorContainer(
-    UI_element = ActorContainer(),
-    Actors = ActorContainer()   
-)
-Actors = all_actors.Actor 
-UI_element = all_actors.UI_element
-
-backdrop = Actor('battle-backdrop')
-backdrop.resize((662, 662))
-
-battle_tab = Actor('battle_scene_tab')
-battle_tab.scale = 0.2
-battle_tab.left = 0
-battle_tab.top = 662 - battle_tab.height
-
-character = Actor('character')
 
 class battle(Scene):
     SCENE_NAME = 'Battle'
     
     def __init__(self, **kwargs):
         super().__init__(self.SCENE_NAME)
-        self.globals = kwargs
+            
+    def on_show(self):
+        global backdrop, character
         
+        camera.resize((300, 300 * 3 / 4))
+        camera.pos=(50, 50)
+        
+        backdrop = Actor('battle-backdrop')
+        backdrop.resize((662, 662))
+
+        character = Actor('character', pos=(200, 400))    
+        
+    def on_hide(self):
+        del backdrop
+        del character
+    
     def on_draw(self, screen):
-        backdrop.draw(screen)
-        camera.draw(screen)
-        character.draw(screen)
-        screen.draw.filled_rect(Rect((200, 500), (100, 100)), (255, 255, 255))
-        battle_tab.draw(screen)
+        backdrop.draw()
+        camera.draw()
+        character.draw()
+        screen.draw.filled_rect(Rect((100, 500), (200, 100)), (255, 255, 255))
+        screen.draw.filled_rect(Rect((400, 450), (200, 100)), (255, 255, 255))
     
     def on_update(self, dt):
         pass
-    
-    def on_hide(self):
-        pass
-    
-    def on_show(self):
-        camera.resize((300, 300 * 3 / 4))
-        camera.pos=(200, 50)
+        
+    def on_key_down(self, key, unicode):
+        print(key, unicode)

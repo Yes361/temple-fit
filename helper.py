@@ -121,7 +121,7 @@ class Actor(Actor, AbstractActor):
     
     def __init__(self, *args, **kwargs):
         self.hidden = False
-        self.iterations = -1
+        self.iterations = 0
         self._is_playing_gif = False
         self.gif_name = None
         self.time_elapsed = 0
@@ -182,6 +182,9 @@ class Actor(Actor, AbstractActor):
         self.iterations = iterations
         self._is_playing_gif = True
         self._gif_on_finish = on_finish
+        
+    def get_weak_ref(self):
+        return weakref.proxy(self)  
         
 class ActorContainer(AbstractActor):
     """
