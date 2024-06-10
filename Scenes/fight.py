@@ -1,50 +1,45 @@
-from managers import Scene, game_manager
-from helper import Actor, ActorContainer
-from Game import Button
+from helper import ActorContainer, Actor
+from managers import Scene
+from Game import camera
+from pgzero.builtins import Rect
 
-All_actors = ActorContainer(
-    Actors = ActorContainer(),
-    UI_elements = ActorContainer(hidden=True)
+all_actors = ActorContainer(
+    UI_element = ActorContainer(),
+    Actors = ActorContainer()   
 )
+Actors = all_actors.Actor 
+UI_element = all_actors.UI_element
 
-Actors = All_actors.Actors
-UI_elements = All_actors.UI_elements
+backdrop = Actor('battle-backdrop')
+backdrop.resize((662, 662))
 
-def load_ui_elements():
-    button = Button("play_button", (331, 340), on_click=None)
-    button.scale = 0.1
-        
-    UI_elements.add("Start", button)
+battle_tab = Actor('battle_scene_tab')
+battle_tab.scale = 0.2
+battle_tab.left = 0
+battle_tab.top = 662 - battle_tab.height
 
-def load_actors():
-    Actors.add("Intro", Actor("dragon_1"))
-    load_ui_elements()
+character = Actor('character')
 
-def show_starting_screen_menu():
-    UI_elements.hidden = False
-
-class StartScreen(Scene):
-    SCENE_NAME = 'Start Screen'
+class battle(Scene):
+    SCENE_NAME = 'Battle'
     
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
         super().__init__(self.SCENE_NAME)
-
-    def on_draw(self, screen):
-        All_actors.draw(screen)
-
-    def on_hide(self):
-        All_actors.clear()
-
-    def on_show(self):
-        load_actors()
-        handle_starting_screen_animation()
-
-    def on_update(self, dt):
-        Actors.update(dt)
+        self.globals = kwargs
         
-    def on_mouse_down(self, pos, button):
-        for actor in UI_elements:
-            actor.on_click(pos, button)
-            
-    def on_key_down(self, key, unicode):
+    def on_draw(self, screen):
+        backdrop.draw(screen)
+        camera.draw(screen)
+        character.draw(screen)
+        screen.draw.filled_rect(Rect((200, 500), (100, 100)), (255, 255, 255))
+        battle_tab.draw(screen)
+    
+    def on_update(self, dt):
         pass
+    
+    def on_hide(self):
+        pass
+    
+    def on_show(self):
+        camera.resize((300, 300 * 3 / 4))
+        camera.pos=(200, 50)

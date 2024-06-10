@@ -3,6 +3,7 @@ from pgzhelper import Actor
 from typing import *
 from abc import abstractmethod
 from PIL import Image
+import weakref
 import pygame
 import os
 import re
@@ -132,6 +133,7 @@ class Actor(Actor, AbstractActor):
         super().__init__(*args, **kwargs)
         
     def resize(self, dims):
+        self.width, self.height = dims
         self._surf = pygame.transform.scale(self._surf, dims)
     
     def draw(self, *args, **kwargs):
@@ -188,18 +190,24 @@ class ActorContainer(AbstractActor):
     def __init__(self, *, hidden=False, on_show=None, on_hide=None, **kwargs):
         self._actor_list: Dict[any, Type[Actor | GUIElement | ActorContainer]] = {}
         for name, actor in kwargs.items():
-            self._actor_list[name] = actor
+            self.add(name, actor)
         self.hidden = hidden
         self.on_enter = on_show
         self.on_exit = on_hide
   
     def add(self, name: any, actor: Type[AbstractActor]):
+        """
+        Adds an Actor to the Actor Container
+        @returns: Weak reference of the actor that is to be used
+        """
         assert name not in self._actor_list, f'\"{name}\" is already added.'
         self._actor_list[name] = actor
+        return self.get_weak_actor(name)
     
-    def remove(self, actor: any):
-        assert actor in self._actor_list, f'\"{actor}\" doesn\'t exist.'
-        self._actor_list.pop(actor)
+    def remove(self, name: any):
+        assert name in self._actor_list, f'\"{name}\" doesn\'t exist.'
+        actor = self._actor_list.pop(name)
+        del actor
         
     # TODO: z-index shenanigans
     # def set_actor_zindex(self, name):
@@ -231,34 +239,37 @@ class ActorContainer(AbstractActor):
             
     def clear(self):
         for name in self._actor_list.copy():
-            try:
-                self._actor_list[name].clear()
-            except:
-                pass
-            finally:
-                actor = self._actor_list.pop(name)
-                
+            actor = self._actor_list.get(name)
+            if isinstance(actor, ActorContainer):
+                actor.clear()
+                continue
+            
+            self.remove(name)
+            
     def __getattr__(self, property):
         if property in self.__dict__:
             return self.__dict__[property]
         elif property in self._actor_list:
             # setattr(self, property, ) # Cache result?
-            return self.get_actor(property)
+            return self.get_weak_actor(property)
         else:
             AttributeError(f'{property} is not in {self.__class__.__name__}')
             
-    def get_actor(self, item):
+    def get_weak_actor(self, item):
         assert item in self._actor_list, f'\"{item}\" is not added.'
-        return self._actor_list[item]
+        return weakref.proxy(self._actor_list[item])
         
     def __iter__(self):
         return iter(self._actor_list.values())
     
     def __getitem__(self, item):
-        return self.get_actor(item)
+        return self.get_weak_actor(item)
     
     def __setitem__(self, item, value):
         self._actor_list[item] = value
+        
+    def __len__(self):
+        return len(self._actor_list)
 
 class GUIElement(Actor):
     @abstractmethod

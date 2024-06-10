@@ -79,7 +79,7 @@ class PoseAnalyzer:
     def initialize_recognizers(self):
         self.recognizers.clear()
         self.recognizers = {action: recognizer() for action, recognizer in self.ACTION_RECOGNIZERS.items()}
-            
+    
     @staticmethod
     def draw_hand_landmarks(frame, detection_result):
         """
@@ -208,3 +208,5 @@ class Camera(Actor):
         surface = pygame.surfarray.make_surface(np.rot90(frame))
         surface = pygame.transform.scale(surface, dims)
         return surface
+    
+camera = Camera()

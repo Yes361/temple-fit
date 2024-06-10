@@ -28,3 +28,6 @@ class Button(GUIElement):
     def update(self, dt):
         self.on_hover(pygame.mouse.get_pos())
         super().update(dt)
+        
+class HealthBar:
+    pass

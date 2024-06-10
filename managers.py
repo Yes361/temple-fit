@@ -1,11 +1,27 @@
 from abc import ABC, abstractmethod
+from helper import ActorContainer
 from typing import *
 import pygame
 
 class Scene:
-    def __init__(self, scene):
+    def __init__(self, scene, *args, **kwargs):
         game_manager.subscribe(scene, self)
-        
+        self.globals = kwargs
+        self.all_actors = ActorContainer(
+            UI_element = ActorContainer(),
+            Actors = ActorContainer()   
+        )
+        self.Actors = self.all_actors.Actor
+        self.UI_element = self.all_actors.UI_element
+    
+    @abstractmethod
+    def load_actors():
+        pass
+    
+    @abstractmethod
+    def delete_actors():
+        pass
+    
     @abstractmethod
     def on_show(self):
         pass
@@ -34,9 +50,12 @@ class Scene:
     def on_key_hold(self, dt):
         pass
     
-    @abstractmethod
     def on_mouse_down(self, pos, button):
-        pass 
+        if self.UI_element.hidden:
+            return
+        
+        for actor in self.UI_element:
+            actor.on_click(pos, button)
     
     @abstractmethod
     def on_mouse_move(self, pos, rel, buttons):
@@ -44,7 +63,11 @@ class Scene:
     
     @abstractmethod
     def on_mouse_hold(self, pos, buttons):
-        pass
+        if self.UI_element.hidden:
+            return
+        
+        for actor in self.UI_element:
+            actor.on_hold(pos, buttons)
     
     @abstractmethod
     def on_mouse_up(self, pos, buttons):
@@ -52,7 +75,11 @@ class Scene:
     
     @abstractmethod
     def on_mouse_hover(self, pos):
-        pass
+        if self.UI_element.hidden:
+            return
+        
+        for actor in self.UI_element:
+            actor.on_hover(pos)
     
     @abstractmethod
     def on_music_end(self):
