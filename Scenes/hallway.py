@@ -1,5 +1,5 @@
 from managers import Scene
-from Game import LevelManager
+from Game import LevelManager, Text
 
 class hallway(Scene):
     SCENE_NAME = 'hallway'
@@ -9,8 +9,9 @@ class hallway(Scene):
         self.globals = kwargs
     
     def on_show(self):
-        global level
+        global level, text
         level = LevelManager()
+        # text = Text('Hello my name is Raiyan', (300, 300), 10, angle=45)
     
     def on_update(self, dt):
         level.update(dt)

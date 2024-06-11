@@ -37,7 +37,7 @@ class StartScreen(Scene):
             a=Button(
                 "play_button.png",
                 pos=(331, 450),
-                on_click=lambda x, y: game_manager.switch_scene('Battle'),
+                on_click=lambda x, y: game_manager.switch_scene('hallway'),
                 scale=0.1,
                 hover_frame='character.png'
             ),

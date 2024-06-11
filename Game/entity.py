@@ -29,3 +29,6 @@ class Player(Entity):
             
     def update(self, dt):
         self.move(dt)
+        
+    def on_collide(self, collision):
+        print('hi')

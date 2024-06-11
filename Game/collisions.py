@@ -30,16 +30,16 @@ class Collisions:
     def __init__(self, *args):
         self.rect_list: List[Tuple[any, callable]] = [] if len(args) == 0 else args
 
-    def add(self, collider: Type[Collider | ColliderRect], callback: callable):
-        self.rect_list.append((collider, callback))
+    def add(self, collider: Type[Collider | ColliderRect]):
+        self.rect_list.append(collider)
         
     def remove(self, collider: Type[Collider | ColliderRect]):
-        self.rect_list = [(rect, cb) for rect, cb in self.rect_list if rect != collider]
+        self.rect_list = [rect for rect in self.rect_list if rect != collider]
 
     def resolve_entity_collisions(self, entity: Type[Collider]):
-        for collider, collision_callback in self.rect_list:
-            if Collisions.resolve_collision(entity, collider) and callable(collision_callback):
-                collision_callback(CollisionData(entity, collider))
+        for collider in self.rect_list:
+            if Collisions.resolve_collision(entity, collider):
+                entity.on_collide(CollisionData(entity, collider))
 
     @staticmethod
     def resolve_collision(ColliderA: Type[Collider], ColliderB: Type[Collider | ColliderRect]):
@@ -48,9 +48,7 @@ class Collisions:
         
         if not (ColliderA.is_static or ColliderB.is_static):
             return True
-        
-        print(ColliderA.is_static, ColliderB.is_static)
-        
+            
         if ColliderA.is_passable or ColliderB.is_passable:
             return True
         
