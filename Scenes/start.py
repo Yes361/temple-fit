@@ -8,6 +8,8 @@ def fade_ui_elements():
     ui_elements.hidden = False
     ui_elements.opacity = 0
     animate(ui_elements, opacity=255)
+    for elm in ui_elements:
+        elm.animate_starting_targets(tween='out_elastic', pos=(elm.x, -50))
 
 
 class StartScreen(Scene):
@@ -27,8 +29,28 @@ class StartScreen(Scene):
         ui_elements = ActorContainer(
             play_button=Button(
                 "play_button.png",
-                pos=(331, 331),
-                on_click=lambda x, y: game_manager.switch_scene('Narrative'),
+                pos=(331, 410),
+                on_click=lambda x, y: game_manager.switch_scene('Battle'),
+                scale=0.1,
+                hover_frame='character'
+            ),
+            a=Button(
+                "play_button.png",
+                pos=(331, 450),
+                on_click=lambda x, y: game_manager.switch_scene('Battle'),
+                scale=0.1,
+                hover_frame='character.png'
+            ),
+            b=Button(
+                "play_button.png",
+                pos=(331, 490),
+                on_click=lambda x, y: game_manager.switch_scene('Battle'),
+                scale=0.1,
+            ),
+            c=Button(
+                "play_button.png",
+                pos=(331, 530),
+                on_click=lambda x, y: game_manager.switch_scene('Battle'),
                 scale=0.1,
             ),
             hidden=True,

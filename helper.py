@@ -1,4 +1,4 @@
-from pgzero.builtins import Actor, sounds
+from pgzero.builtins import Actor, sounds, animate
 from pgzhelper import Actor
 from typing import *
 from abc import abstractmethod
@@ -162,7 +162,7 @@ class Actor(Actor, AbstractActor):
     
     def is_animation_available(self):
         return type(self.images) == list and len(self.images) > 0
-    
+            
     def update(self, dt):
         self.time_elapsed += dt
         if self.is_animation_available():
@@ -170,6 +170,14 @@ class Actor(Actor, AbstractActor):
                 self.animate_gif()
             elif self.gif_name is None:
                 self.animate()
+                
+    def animate_starting_targets(self, duration=1, tween='linear', on_finished=1, **kwargs):
+        saved_attributes = {}
+        for attr in kwargs:
+            saved_attributes[attr] = getattr(self, attr)
+            setattr(self, attr, kwargs[attr])
+        
+        self.anim_instance = animate(self, tween, duration, **saved_attributes)
                 
     def pause_gif(self, play=None):
         if play is not None:
@@ -191,6 +199,10 @@ class Actor(Actor, AbstractActor):
         self.gif_name = None
         
     def skip_gif(self):
+        if not self.is_animation_available():
+            return
+        
+        self.image = self.images[-1]
         self.stop_gif()
         if self._gif_on_finish is not None:
             self._gif_on_finish()
@@ -310,15 +322,15 @@ class ActorContainer(AbstractActor):
 
 class GUIElement(Actor):
     @abstractmethod
-    def on_click(self, pos, button):
+    def on_click(self, pos, button) -> bool:
         pass
     
     @abstractmethod
-    def on_hover(self):
+    def on_hover(self) -> bool:
         pass
     
     @abstractmethod
-    def on_hold(self):
+    def on_hold(self) -> bool:
         pass
         
 if __name__ == '__main__':

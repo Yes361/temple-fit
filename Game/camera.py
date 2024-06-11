@@ -150,7 +150,7 @@ class Camera(Actor):
         frame = Camera.process_camera_frame(frame)
         return ret, frame
     
-    def draw(self, *args, **kwargs):
+    def draw(self, screen, *args, border=(0, 0, 0), **kwargs):
         if self.hidden:
             return
         
@@ -163,10 +163,8 @@ class Camera(Actor):
         self._pose.recognize_pose(frame, self.time_elapsed)
         
         if self._pose.is_results_available():
-            PoseAnalyzer.draw_hand_landmarks(frame, detection_result)
+            PoseAnalyzer.draw_hand_landmarks(frame, detection_result) # Debug
             self.prompt_user(frame, detection_result)
-            # Camera.get_average_brightness(frame)
-            # print(find_angle_between_landmarks(self._pose_estimator.detection_result, 11, 13, 15), dot_product(self._pose_estimator.detection_result, 11, 13, 15))
         
         self._surf = Camera.convert_frame_surface(frame, (self.width, self.height))
         super().draw()
