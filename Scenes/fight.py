@@ -22,15 +22,10 @@ class battle(Scene):
         character = Actor('character', pos=(200, 400))    
         
     def on_hide(self):
-        del backdrop
-        del character
+        pass
     
     def on_draw(self, screen):
-        backdrop.draw()
-        camera.draw()
-        character.draw()
-        screen.draw.filled_rect(Rect((100, 500), (200, 100)), (255, 255, 255))
-        screen.draw.filled_rect(Rect((400, 450), (200, 100)), (255, 255, 255))
+        pass
     
     def on_update(self, dt):
         pass

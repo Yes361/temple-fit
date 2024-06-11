@@ -7,12 +7,12 @@ class Scene:
     def __init__(self, scene, *args, **kwargs):
         game_manager.subscribe(scene, self)
         self.globals = kwargs
-        self.all_actors = ActorContainer(
-            UI_element = ActorContainer(),
-            Actors = ActorContainer()   
-        )
-        self.Actors = self.all_actors.Actor
-        self.UI_element = self.all_actors.UI_element
+        # self.all_actors = ActorContainer(
+        #     UI_element = ActorContainer(),
+        #     Actors = ActorContainer()   
+        # )
+        # self.Actors = self.all_actors.Actor
+        # self.UI_element = self.all_actors.UI_element
     
     @abstractmethod
     def load_actors():
@@ -50,12 +50,14 @@ class Scene:
     def on_key_hold(self, dt):
         pass
     
+    @abstractmethod
     def on_mouse_down(self, pos, button):
-        if self.UI_element.hidden:
-            return
+        # if self.UI_element.hidden:
+        #     return
         
-        for actor in self.UI_element:
-            actor.on_click(pos, button)
+        # for actor in self.UI_element:
+        #     actor.on_click(pos, button)
+        pass
     
     @abstractmethod
     def on_mouse_move(self, pos, rel, buttons):
@@ -63,11 +65,12 @@ class Scene:
     
     @abstractmethod
     def on_mouse_hold(self, pos, buttons):
-        if self.UI_element.hidden:
-            return
+        # if self.UI_element.hidden:
+        #     return
         
-        for actor in self.UI_element:
-            actor.on_hold(pos, buttons)
+        # for actor in self.UI_element:
+        #     actor.on_hold(pos, buttons)
+        pass
     
     @abstractmethod
     def on_mouse_up(self, pos, buttons):
@@ -75,11 +78,12 @@ class Scene:
     
     @abstractmethod
     def on_mouse_hover(self, pos):
-        if self.UI_element.hidden:
-            return
+        # if self.UI_element.hidden:
+        #     return
         
-        for actor in self.UI_element:
-            actor.on_hover(pos)
+        # for actor in self.UI_element:
+        #     actor.on_hover(pos)
+        pass
     
     @abstractmethod
     def on_music_end(self):

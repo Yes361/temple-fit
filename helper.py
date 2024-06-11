@@ -95,20 +95,32 @@ class AbstractActor:
         pass
     
     @abstractmethod
-    def on_show(self, *args, **kwargs):
-        pass
-    
-    @abstractmethod
-    def on_hide(self):
-        pass
-    
-    @abstractmethod
     def animate(self):
         pass
     
     @abstractmethod
     def reset(self):
         pass
+    
+    @abstractmethod
+    def hide(self):
+        pass
+    
+    @abstractmethod
+    def show(self):
+        pass
+    
+    @property
+    def hidden(self) -> bool:
+        return self._hidden
+    
+    @hidden.setter
+    def hidden(self, value):
+        self._hidden = value
+        if value:
+            self.hide()
+        else:
+            self.show()
 
 class Actor(Actor, AbstractActor):
     """
@@ -125,18 +137,26 @@ class Actor(Actor, AbstractActor):
         self._is_playing_gif = False
         self.gif_name = None
         self.time_elapsed = 0
+        self.opacity = 255
         
+        removed_kwargs = {}
         for key in kwargs.copy():
             if key not in Actor._EXPECTED_INIT_KWARGS:
-                setattr(self, key, kwargs.pop(key))
+                removed_kwargs[key] = kwargs.pop(key)
         
         super().__init__(*args, **kwargs)
+        
+        for key in removed_kwargs:
+            setattr(self, key, removed_kwargs[key])
         
     def resize(self, dims):
         self.width, self.height = dims
         self._surf = pygame.transform.scale(self._surf, dims)
     
     def draw(self, *args, **kwargs):
+        if self._surf.get_alpha() != self.opacity:
+            self._surf.set_alpha(self.opacity)
+            
         if not self.hidden:
             super().draw()
     
@@ -175,13 +195,16 @@ class Actor(Actor, AbstractActor):
         if self._gif_on_finish is not None:
             self._gif_on_finish()
     
-    def play_gif(self, gif, iterations = -1, fps=24, on_finish: callable = None,):
-        self.gif_name = gif
-        self.images = CACHED_GIFS[gif]
+    def play_animation(self, images, fps, iterations):
+        self.images = images
         self.fps = fps
         self.iterations = iterations
+    
+    def play_gif(self, gif, iterations = -1, fps=24, on_finish: callable = None,):
+        self.gif_name = gif
         self._is_playing_gif = True
         self._gif_on_finish = on_finish
+        self.play_animation(CACHED_GIFS[gif], fps, iterations)
         
     def get_weak_ref(self):
         return weakref.proxy(self)  
@@ -190,13 +213,24 @@ class ActorContainer(AbstractActor):
     """
     Actor Container is a list of Actors - Similar to Group() in CMU Academy
     """
-    def __init__(self, *, hidden=False, on_show=None, on_hide=None, **kwargs):
+    def __init__(self, **kwargs):
         self._actor_list: Dict[any, Type[Actor | GUIElement | ActorContainer]] = {}
+        self.hidden = kwargs.pop('hidden', False)
+        self.on_enter = kwargs.pop('on_show', None)
+        self.on_exit = kwargs.pop('on_hide', None)
+        self._opacity = 255
         for name, actor in kwargs.items():
             self.add(name, actor)
-        self.hidden = hidden
-        self.on_enter = on_show
-        self.on_exit = on_hide
+            
+    @property
+    def opacity(self):
+        return self._opacity
+    
+    @opacity.setter
+    def opacity(self, value):
+        self._opacity = value
+        for actor in self._actor_list.values():
+            actor.opacity = value
   
     def add(self, name: any, actor: Type[AbstractActor]):
         """
@@ -276,7 +310,7 @@ class ActorContainer(AbstractActor):
 
 class GUIElement(Actor):
     @abstractmethod
-    def on_click(self):
+    def on_click(self, pos, button):
         pass
     
     @abstractmethod

@@ -3,13 +3,24 @@ import pgzero.screen
 import os
 
 from managers import game_manager, GameManager
-import Scenes
+from Scenes import *
 
 screen: pgzero.screen.Screen
 os.environ["SDL_VIDEO_CENTERED"] = "1"
 WIDTH = 662
 HEIGHT = 662
 TITLE = "I wanna kms"
+
+from Game import camera
+
+camera.initialize_camera(0, (600, 450))
+
+StartScreen()
+battle()
+hallway()
+Narrative()
+
+game_manager.show_scene('Start Screen')
 
 def on_mouse_down(pos, button):
     game_manager.on_mouse_down(pos, button)
