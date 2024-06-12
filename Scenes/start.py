@@ -9,7 +9,7 @@ def fade_ui_elements():
     ui_elements.opacity = 0
     animate(ui_elements, opacity=255)
     for elm in ui_elements:
-        elm.animate_starting_targets(tween='out_elastic', pos=(elm.x, -50))
+        elm.animate_starting_targets(tween='bounce_end', pos=(elm.x, -50))
 
 
 class StartScreen(Scene):

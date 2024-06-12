@@ -4,6 +4,7 @@ import os
 
 from managers import game_manager, GameManager
 from Scenes import *
+from Game import camera
 
 screen: pgzero.screen.Screen
 os.environ["SDL_VIDEO_CENTERED"] = "1"
@@ -11,14 +12,12 @@ WIDTH = 662
 HEIGHT = 662
 TITLE = "I wanna kms"
 
-from Game import camera
-
 camera.initialize_camera(0, (600, 450))
 
 StartScreen()
-battle()
-hallway()
 Narrative()
+hallway()
+battle()
 
 game_manager.show_scene('Start Screen')
 

@@ -162,9 +162,28 @@ class Actor(Actor, AbstractActor):
     
     def is_animation_available(self):
         return type(self.images) == list and len(self.images) > 0
+    
+    @property
+    def image_name(self):
+        return self.image
+    
+    @image_name.setter
+    def image_name(self, new_image):
+        if new_image != self.image:
+            self.image = new_image
+            
+    @property
+    def anim(self):
+        return self.images
+    
+    @anim.setter
+    def anim(self, anim):
+        if anim != self.images:
+            self.images = anim
             
     def update(self, dt):
         self.time_elapsed += dt
+        self.scale = self.scale # HACK
         if self.is_animation_available():
             if self._is_playing_gif:
                 self.animate_gif()
@@ -231,8 +250,67 @@ class ActorContainer(AbstractActor):
         self.on_enter = kwargs.pop('on_show', None)
         self.on_exit = kwargs.pop('on_hide', None)
         self._opacity = 255
+        self._x = 0
+        self._y = 0
+        self._pos = (0, 0)
         for name, actor in kwargs.items():
             self.add(name, actor)
+            
+    @property
+    def x(self):
+        return self._x
+    
+    @x.getter
+    def x(self):
+        self._x = 0
+        if len(self._actor_list) == 0:
+            return self._x
+        
+        x_avg = 0
+        for actor in self._actor_list.values():
+            x_avg += actor.x
+        x_avg /= len(self._actor_list)
+        self._x = x_avg
+        
+        return self._x
+    
+    @x.setter
+    def x(self, value):
+        dx = value - self._x
+        for actor in self._actor_list.values():
+            actor.x += dx
+    
+    @property
+    def y(self):
+        return self._y
+    
+    @y.getter
+    def y(self):
+        self._y = 0
+        if len(self._actor_list) == 0:
+            return self._y
+        
+        y_avg = 0
+        for actor in self._actor_list.values():
+            y_avg += actor.y
+        y_avg /= len(self._actor_list)
+        self._y = y_avg
+        return self._y
+    
+    @y.setter
+    def y(self, value):
+        dy = value - self._y
+        for actor in self._actor_list.values():
+            actor.y += dy
+    
+    @property
+    def pos(self):
+        return self._pos
+    
+    @pos.setter
+    def pos(self, value: Tuple):
+        self.x, self.y = value
+        self._pos = value
             
     @property
     def opacity(self):
@@ -279,6 +357,11 @@ class ActorContainer(AbstractActor):
         for actor in self._actor_list.values():
             actor.update(dt, *args, **kwargs)
             
+    def offset(self, pos):
+        dx, dy = pos
+        self.x += dx
+        self.y += dy
+            
     # TODO: Implement on_show and on_hide for Actors and ActorContainer
     # def on_show(self, *args, **kwargs):
     #     if callable()
@@ -320,7 +403,7 @@ class ActorContainer(AbstractActor):
     def __len__(self):
         return len(self._actor_list)
 
-class GUIElement(Actor):
+class GUIElement(AbstractActor):
     @abstractmethod
     def on_click(self, pos, button) -> bool:
         pass
@@ -335,4 +418,5 @@ class GUIElement(Actor):
         
 if __name__ == '__main__':
     # extract_gif_frames(r'assets/gifs/outro_card.gif', 'images', 'outro_card') 
-    print(read_dialogue_lines(r'assets/Dialogue'))
+    # print(read_dialogue_lines(r'assets/Dialogue'))
+    lower_case_files(r'images')

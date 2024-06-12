@@ -1,12 +1,13 @@
 from helper import ActorContainer, Actor
 from managers import Scene
-from Game import camera, HealthBar
+from Game import camera, HealthBar, Text, CheckList
 from pgzero.builtins import Rect
 
 def create_battle_icon():
-    character = Actor('character', pos=(200, 400))
-    a = HealthBar(pos=(331, 331), images=['healthbar_1', 'healthbar_2', 'healthbar_3', 'healthbar_4', 'healthbar_5', 'healthbar_6'], scale=0.6)
-    return character, a
+    return ActorContainer(
+        character = Actor('character', pos=(331, 300)),
+        a = HealthBar(pos=(331, 361), images=['healthbar_1', 'healthbar_2', 'healthbar_3', 'healthbar_4', 'healthbar_5', 'healthbar_6'], scale=0.6)
+    )
 
 class battle(Scene):
     SCENE_NAME = 'Battle'
@@ -15,7 +16,7 @@ class battle(Scene):
         super().__init__(self.SCENE_NAME)
             
     def on_show(self):
-        global backdrop, character, a, b
+        global backdrop, a, b, c
         
         camera.resize((300, 300 * 3 / 4))
         camera.pos=(50, 50)
@@ -23,8 +24,12 @@ class battle(Scene):
         backdrop = Actor('battle-backdrop')
         backdrop.resize((662, 662))
 
-        character, a = create_battle_icon()
-        # b = HealthBar()
+        a = create_battle_icon()
+        a.pos = (200, 200)
+        b = create_battle_icon()
+        
+        c = CheckList((50, 331), spacing=50)
+        c.create_new_objective('5', 'PLS OH GOD HELP ME')
         
     def on_hide(self):
         pass
@@ -32,11 +37,13 @@ class battle(Scene):
     def on_draw(self, screen):
         backdrop.draw()
         camera.draw(screen)
-        # screen.draw.rect(Rect(()), (255, 255, 255))
-        # b.draw()
-    
+        a.draw()
+        b.draw()
+        c.draw(screen)
+        
     def on_update(self, dt):
         pass
         
     def on_key_down(self, key, unicode):
-        a.change_counter(1)
+        # a.change_counter(1)
+        pass

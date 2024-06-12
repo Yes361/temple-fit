@@ -1,7 +1,9 @@
-from helper import GUIElement
+from helper import GUIElement, Actor
+from dataclasses import dataclass
+from typing import Dict
 import pygame
 
-class Button(GUIElement):
+class Button(Actor, GUIElement):
     """
     asds
     """ 
@@ -35,11 +37,12 @@ class Button(GUIElement):
         self.on_hover(pygame.mouse.get_pos())
         super().update(dt)
         
-class HealthBar(GUIElement):
-    def __init__(self, *args, counter_default=0, images=[], **kwargs):
+class HealthBar(Actor, GUIElement):
+    def __init__(self, *args, counter_default=0, images=[], on_change=None, **kwargs):
         if len(images) == 0:
             raise Exception('Health Bar should have an image')
         self._counter_value = counter_default
+        self.on_change = on_change
         super().__init__(images[0], *args, **kwargs)
         self.images = images
         
@@ -59,8 +62,32 @@ class HealthBar(GUIElement):
         
     def change_counter(self, amount):
         self.counter_value += amount
+        if callable(self.on_change):
+            self.on_change(self.counter_value, amount)
             
     def set_counter(self, amount):
         if amount > len(self.images) or amount < 0:
             raise Exception(f'{amount} is out of bounds')
         self.counter_value = amount
+    
+@dataclass    
+class Objective:
+    exercise: str
+    required_count: int = None
+    max_duration: int = -1
+    completed: bool = False
+        
+class CheckList(GUIElement):
+    def __init__(self, pos, /, *, spacing=10, **text_styles):
+        self.pos=pos
+        self.exercises: Dict[any, Objective] = {}
+        self.spacing = spacing
+        self.text_styles = text_styles
+        
+    def create_new_objective(self, id, *args, **kwargs):
+        self.exercises[id] = Objective(*args, **kwargs)
+        
+    def draw(self, screen):
+        start_x, start_y = self.pos
+        for idx, objective in enumerate(self.exercises.values()):
+            screen.draw.text(objective.exercise, pos=(start_x, start_y + idx * self.spacing), **self.text_styles)
