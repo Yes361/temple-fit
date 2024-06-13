@@ -29,7 +29,7 @@ class battle(Scene):
         b = create_battle_icon()
         
         c = CheckList((50, 331), spacing=50)
-        c.create_new_objective('5', 'PLS OH GOD HELP ME')
+        c.create_new_objective('5', 'rah')
         
     def on_hide(self):
         pass

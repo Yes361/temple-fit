@@ -419,4 +419,5 @@ class GUIElement(AbstractActor):
 if __name__ == '__main__':
     # extract_gif_frames(r'assets/gifs/outro_card.gif', 'images', 'outro_card') 
     # print(read_dialogue_lines(r'assets/Dialogue'))
-    lower_case_files(r'images')
+    # lower_case_files(r'images')
+    pass
