@@ -1,4 +1,4 @@
-from pgzero.builtins import Actor, sounds, animate
+from pgzero.builtins import Actor, sounds, animate, Rect
 from pgzhelper import Actor
 from typing import *
 from abc import abstractmethod
@@ -85,6 +85,8 @@ def read_dialogue_lines(asset_folder_path):
         dialogue[file_name] = list(filter(lambda line: (line != '\n') and (line != ''), dialogue_lines))
     return dialogue
 
+CACHED_DIALOGUE = read_dialogue_lines(r'assets/Dialogue')
+
 class AbstractActor:
     @abstractmethod
     def draw(self, *args, **kwargs):
@@ -121,6 +123,12 @@ class AbstractActor:
             self.hide()
         else:
             self.show()
+    
+    @hidden.getter
+    def hidden(self):
+        if not (self, '_hidden'):
+            self._hidden = False
+        return self._hidden
 
 class Actor(Actor, AbstractActor):
     """
@@ -131,13 +139,13 @@ class Actor(Actor, AbstractActor):
     _EXPECTED_INIT_KWARGS = set(['pos', 'topleft', 'bottomleft', 'topright', 'bottomright',
     'midtop', 'midleft', 'midbottom', 'midright', 'center'])
     
-    def __init__(self, *args, **kwargs):
-        self.hidden = False
+    def __init__(self, *args, hidden=False, opacity=255, dims=None, **kwargs):
+        self.hidden = hidden
         self.iterations = 0
         self._is_playing_gif = False
         self.gif_name = None
         self.time_elapsed = 0
-        self.opacity = 255
+        self.opacity = opacity
         
         removed_kwargs = {}
         for key in kwargs.copy():
@@ -145,11 +153,27 @@ class Actor(Actor, AbstractActor):
                 removed_kwargs[key] = kwargs.pop(key)
         
         super().__init__(*args, **kwargs)
-        
+        if dims is not None:
+            self.dims = dims
+            
         for key in removed_kwargs:
             setattr(self, key, removed_kwargs[key])
         
+    @property
+    def dims(self):
+        return self._dims
+    
+    @dims.setter
+    def dims(self, value):
+        self.resize(value)
+        
+    @dims.getter
+    def dims(self):
+        self._dims = self.width, self.height
+        return self._dims
+        
     def resize(self, dims):
+        self._dims = dims
         self.width, self.height = dims
         self._surf = pygame.transform.scale(self._surf, dims)
     
@@ -238,24 +262,48 @@ class Actor(Actor, AbstractActor):
         self.play_animation(CACHED_GIFS[gif], fps, iterations)
         
     def get_weak_ref(self):
-        return weakref.proxy(self)  
+        return weakref.proxy(self)
+
+class Rect(Rect, AbstractActor):
+    def __init__(self, pos, dims, /, *, scale=1, fill=(255, 255, 255), border=(255, 255, 255)):
+        self.fill = fill
+        self.border = border
+        self._pos = pos
+        
+        super().__init__(pos, dims)        
+        
+    @property
+    def pos(self):
+        return self._pos
+    
+    @pos.setter
+    def pos(self, pos):
+        self._pos = pos
+        self.x, self.y = pos
+        
+    def draw(self, screen):
+        screen.draw.rect(self, self.border)
+        screen.draw.filled_rect(self, self.fill)
         
 class ActorContainer(AbstractActor):
     """
     Actor Container is a list of Actors - Similar to Group() in CMU Academy
     """
-    def __init__(self, **kwargs):
+    def __init__(self, pos=(0, 0), /, *, hidden=False, on_show=None, on_hide=None, **kwargs):
         self._actor_list: Dict[any, Type[Actor | GUIElement | ActorContainer]] = {}
-        self.hidden = kwargs.pop('hidden', False)
-        self.on_enter = kwargs.pop('on_show', None)
-        self.on_exit = kwargs.pop('on_hide', None)
+        self.hidden = hidden
+        self.on_enter = on_show
+        self.on_exit = on_hide
         self._opacity = 255
         self._x = 0
         self._y = 0
-        self._pos = (0, 0)
+        self._pos = pos
+        
         for name, actor in kwargs.items():
             self.add(name, actor)
-            
+
+    
+    
     @property
     def x(self):
         return self._x
@@ -276,7 +324,7 @@ class ActorContainer(AbstractActor):
     
     @x.setter
     def x(self, value):
-        dx = value - self._x
+        dx = value - self.x
         for actor in self._actor_list.values():
             actor.x += dx
     
@@ -299,7 +347,7 @@ class ActorContainer(AbstractActor):
     
     @y.setter
     def y(self, value):
-        dy = value - self._y
+        dy = value - self.y
         for actor in self._actor_list.values():
             actor.y += dy
     
@@ -363,10 +411,10 @@ class ActorContainer(AbstractActor):
         self.y += dy
             
     # TODO: Implement on_show and on_hide for Actors and ActorContainer
-    # def on_show(self, *args, **kwargs):
+    # def show(self, *args, **kwargs):
     #     if callable()
     
-    # def on_hide(self):
+    # def hide(self):
     #     pass
             
     def clear(self):
@@ -420,4 +468,4 @@ if __name__ == '__main__':
     # extract_gif_frames(r'assets/gifs/outro_card.gif', 'images', 'outro_card') 
     # print(read_dialogue_lines(r'assets/Dialogue'))
     # lower_case_files(r'images')
-    pass
+    print(CACHED_DIALOGUE)

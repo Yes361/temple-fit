@@ -1,13 +1,7 @@
-from helper import ActorContainer, Actor
+from helper import ActorContainer, Actor, Rect
 from managers import Scene
 from Game import camera, HealthBar, Text, CheckList
-from pgzero.builtins import Rect
-
-def create_battle_icon():
-    return ActorContainer(
-        character = Actor('character', pos=(331, 300)),
-        a = HealthBar(pos=(331, 361), images=['healthbar_1', 'healthbar_2', 'healthbar_3', 'healthbar_4', 'healthbar_5', 'healthbar_6'], scale=0.6)
-    )
+import pygame
 
 class battle(Scene):
     SCENE_NAME = 'Battle'
@@ -16,20 +10,18 @@ class battle(Scene):
         super().__init__(self.SCENE_NAME)
             
     def on_show(self):
-        global backdrop, a, b, c
+        global backdrop, player_sprite, player_sprite_name, enemy_sprite, enemy_sprite_name
         
-        camera.resize((300, 300 * 3 / 4))
-        camera.pos=(50, 50)
+        backdrop = Actor('tmp0', topleft=(0, 0), dims=(662, 662))
         
-        backdrop = Actor('battle-backdrop')
-        backdrop.resize((662, 662))
-
-        a = create_battle_icon()
-        a.pos = (200, 200)
-        b = create_battle_icon()
+        player_sprite = Actor('character-battle-sprite', topleft=(131, 282), scale=1)
+        player_sprite_name = 'Player TMP'
         
-        c = CheckList((50, 331), spacing=50)
-        c.create_new_objective('5', 'rah')
+        enemy_sprite = Actor('character-battle-sprite', topleft=(371, 109), scale=1)
+        enemy_sprite_name = 'Enemy TMP'
+        
+        camera.resize((216, 216 * 3 / 4))
+        camera.topleft = (355, 386)
         
     def on_hide(self):
         pass
@@ -37,9 +29,14 @@ class battle(Scene):
     def on_draw(self, screen):
         backdrop.draw()
         camera.draw(screen)
-        a.draw()
-        b.draw()
-        c.draw(screen)
+        
+        player_sprite.draw(screen)
+        enemy_sprite.draw(screen)
+        
+        screen.draw.text(player_sprite_name, (player_sprite.x, player_sprite.y - 20))
+        screen.draw.text(enemy_sprite_name, (enemy_sprite.x, enemy_sprite.y - 20))
+        print(pygame.mouse.get_pos())
+        
         
     def on_update(self, dt):
         pass

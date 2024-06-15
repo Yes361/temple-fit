@@ -1,7 +1,6 @@
-from helper import ActorContainer, Actor, AbstractActor
+from helper import ActorContainer, Actor, AbstractActor, Rect
 from .collisions import Collisions, ColliderRect
 from .entity import Entity, Player
-from pgzero.builtins import Rect
 from typing import List
         
 class LevelManager(AbstractActor):

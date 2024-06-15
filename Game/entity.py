@@ -1,6 +1,6 @@
-from pgzero.builtins import keyboard, keys, Rect
+from pgzero.builtins import keyboard, keys
 from .collisions import Collider
-from helper import Actor
+from helper import Actor, Rect
 
 DEFAULT_ENTITY_SPEED = 2
 

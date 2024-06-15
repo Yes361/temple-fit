@@ -24,7 +24,7 @@ class StartScreen(Scene):
     def on_show(self):
         global intro, ui_elements
 
-        intro = Actor("character", pos=(331, 331))
+        intro = Actor("character-battle-sprite", pos=(331, 331))
 
         ui_elements = ActorContainer(
             play_button=Button(
@@ -50,7 +50,7 @@ class StartScreen(Scene):
             c=Button(
                 "play_button.png",
                 pos=(331, 530),
-                on_click=lambda x, y: game_manager.switch_scene('Battle'),
+                on_click=lambda x, y: game_manager.switch_scene('Narrative'),
                 scale=0.1,
             ),
             hidden=True,

@@ -28,6 +28,10 @@ def find_angle_between_landmarks(detection_result, pointA: int, pointB: int, poi
     edgeAC = distance_between_landmarks(detection_result, pointA, pointC)
     edgeCB = distance_between_landmarks(detection_result, pointC, pointB)
     angle = degrees(acos((edgeCB ** 2 + edgeAB ** 2 - edgeAC ** 2) / (2 * edgeAB * edgeCB)))
+    if angle > 180:
+        angle = 360 - angle
+    if angle < 0:
+        angle += 360
     return angle
 
 def dot_product(detection_result, pointA: int, pointB: int, pointC: int):
@@ -42,43 +46,43 @@ class Recognizer(ABC):
     def run(self, detection_results, time_elapsed: float) -> bool:
         pass
 
-# class JumpingJacks(Recognizer):
-#     """
-#     Welcome to ur WORST NIGHTMARE
-#     """
-#     def __init__(self):    
-#         self.count = 0
-#         self.prev_pose = 'down'
+class JumpingJacks(Recognizer):
+    """
+    Welcome to ur WORST NIGHTMARE
+    """
+    def __init__(self):    
+        self.count = 0
+        self.prev_pose = 'extended'
     
-#     def run(self, detection_results, time_elapsed: float) -> bool:
-#         hand_distance = distance_between_landmarks(detection_results, mp_pose_landmarks.LEFT_WRIST, mp_pose_landmarks.RIGHT_WRIST)
-#         foot_distance = distance_between_landmarks(detection_results, mp_pose_landmarks.LEFT_ANKLE, mp_pose_landmarks.RIGHT_ANKLE)
+    def run(self, detection_results, time_elapsed: float) -> bool:
+        hand_angle = find_angle_between_landmarks(detection_results, mp_pose_landmarks.LEFT_WRIST, mp_pose_landmarks.NOSE, mp_pose_landmarks.RIGHT_WRIST)
+        feet_angle = find_angle_between_landmarks(detection_results, mp_pose_landmarks.LEFT_ANKLE, mp_pose_landmarks.NOSE, mp_pose_landmarks.RIGHT_ANKLE)
         
-#         if hand_distance > 0.5:
-#             if self.prev_pose == "down":
-#                 self.prev_pose = "up"
-#                 self.count += 1
-#                 return True
-#         else:   
-#             self.prev_pose = "down"
-        
-#         return False
+        if hand_angle > 90 and feet_angle > 90: 
+            if self.prev_pose == 'not extended':
+                self.prev_pose = 'extended'
+                self.count += 1
+                return True
+        else:
+            self.prev_pose = 'not extended'
+            
+        return False
 
 class PoseAnalyzer:
     MAX_LANDMARKS = 33
-    # ACTION_RECOGNIZERS = {
-    #     'Jumping Jacks': JumpingJacks
-    # }
+    ACTION_RECOGNIZERS = {
+        'Jumping Jacks': JumpingJacks
+    }
     
     def __init__(self, *args, **kwargs):
         self.pose = mp_pose.Pose(*args, **kwargs)
         self.detection_result = None
-    #     self.recognizers: Dict[str, any] = {}
-    #     self.initialize_recognizers()
+        self.recognizers: Dict[str, any] = {}
+        self.initialize_recognizers()
         
-    # def initialize_recognizers(self):
-    #     self.recognizers.clear()
-    #     self.recognizers = {action: recognizer() for action, recognizer in self.ACTION_RECOGNIZERS.items()}
+    def initialize_recognizers(self):
+        self.recognizers.clear()
+        self.recognizers = {action: recognizer() for action, recognizer in self.ACTION_RECOGNIZERS.items()}
     
     @staticmethod
     def draw_hand_landmarks(frame, detection_result):
@@ -103,11 +107,9 @@ class PoseAnalyzer:
         if not self.detection_result:
             return
         
-        # for action, recognizer in self.recognizers.items():
-        #     if recognizer.run(self.detection_result, time_elapsed):
-        #         print(f'You just did a {action} ! You\'ve done {recognizer.count} {action} !')
-        
-        print('rah')
+        for action, recognizer in self.recognizers.items():
+            if recognizer.run(self.detection_result, time_elapsed):
+                print(f'You just did a {action} ! You\'ve done {recognizer.count} {action} !')
 
 class Camera(Actor):    
     def __init__(self, *args, **kwargs):

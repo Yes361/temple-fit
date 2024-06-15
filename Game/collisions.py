@@ -1,8 +1,7 @@
 from typing import List, Tuple, Type
 from dataclasses import dataclass
 from abc import abstractmethod
-from pgzero.builtins import Rect
-from helper import Actor
+from helper import Actor, Rect
 
     
 class Collider(Actor):

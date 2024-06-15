@@ -83,7 +83,10 @@ class CheckList(GUIElement):
         self.exercises: Dict[any, Objective] = {}
         self.spacing = spacing
         self.text_styles = text_styles
-        
+    
+    def check_objectives(self, counter, duration):
+        pass
+    
     def create_new_objective(self, id, *args, **kwargs):
         self.exercises[id] = Objective(*args, **kwargs)
         
