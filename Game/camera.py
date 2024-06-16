@@ -2,7 +2,7 @@ from helper import Actor
 from pygame.math import Vector2
 from abc import abstractmethod, ABC
 from math import acos, degrees
-from typing import Dict, List
+from typing import Dict, List, Type
 import mediapipe as mp
 import numpy as np
 import pygame
@@ -45,6 +45,14 @@ class Recognizer(ABC):
     @abstractmethod
     def run(self, detection_results, time_elapsed: float) -> bool:
         pass
+    
+    @abstractmethod
+    def report_stats(self):
+        pass
+    
+    @abstractmethod
+    def reset(self):
+        pass
 
 class JumpingJacks(Recognizer):
     """
@@ -58,7 +66,7 @@ class JumpingJacks(Recognizer):
         hand_angle = find_angle_between_landmarks(detection_results, mp_pose_landmarks.LEFT_WRIST, mp_pose_landmarks.NOSE, mp_pose_landmarks.RIGHT_WRIST)
         feet_angle = find_angle_between_landmarks(detection_results, mp_pose_landmarks.LEFT_ANKLE, mp_pose_landmarks.NOSE, mp_pose_landmarks.RIGHT_ANKLE)
         
-        if hand_angle > 90 and feet_angle > 90: 
+        if hand_angle > 90: 
             if self.prev_pose == 'not extended':
                 self.prev_pose = 'extended'
                 self.count += 1
@@ -67,17 +75,23 @@ class JumpingJacks(Recognizer):
             self.prev_pose = 'not extended'
             
         return False
+    
+    def report_stats(self):
+        return self.count
+    
+    def reset(self):
+        self.count = 0
 
 class PoseAnalyzer:
     MAX_LANDMARKS = 33
     ACTION_RECOGNIZERS = {
-        'Jumping Jacks': JumpingJacks
+        'jumping jacks': JumpingJacks
     }
     
     def __init__(self, *args, **kwargs):
         self.pose = mp_pose.Pose(*args, **kwargs)
         self.detection_result = None
-        self.recognizers: Dict[str, any] = {}
+        self.recognizers: Dict[str, Type[Recognizer]] = {}
         self.initialize_recognizers()
         
     def initialize_recognizers(self):
@@ -109,12 +123,27 @@ class PoseAnalyzer:
         
         for action, recognizer in self.recognizers.items():
             if recognizer.run(self.detection_result, time_elapsed):
-                print(f'You just did a {action} ! You\'ve done {recognizer.count} {action} !')
+                print(f'You just did a {action} ! You\'ve done {recognizer.report_stats()} {action} !')
+                
+    def report_stats(self, action: str=None):
+        if action is None:
+            return {action: recognizer.report_stats() for action, recognizer in self.recognizers.items()}
+        else:
+            assert action.lower() in self.ACTION_RECOGNIZERS, f'\"{action.lower()}\" is not a supported action'
+            return self.recognizers[action.lower()].report_stats()
+    
+    def reset_recognizer(self, action: str):
+        assert action.lower() in self.ACTION_RECOGNIZERS, f'\"{action.lower()}\" is not a supported action'
+        self.recognizers[action.lower()].reset()
+        
+    def reset_all_recognizers(self):
+        for recognizer in self.recognizers.values():
+            recognizer.reset()
 
 class Camera(Actor):    
     def __init__(self, *args, **kwargs):
         self._cap = None
-        self._pose = PoseAnalyzer(min_detection_confidence = 0.85, min_tracking_confidence  = 0.85)
+        self.pose = PoseAnalyzer(min_detection_confidence = 0.85, min_tracking_confidence  = 0.85)
         
         default_width, default_height = DEFAULT_RESOLUTION
         width = kwargs.pop('width', default_width)
@@ -163,10 +192,10 @@ class Camera(Actor):
         if not ret:
             return pygame.Surface((self.width, self.height))
         
-        detection_result = self._pose.process_frame(frame)
-        self._pose.recognize_pose(frame, self.time_elapsed)
+        detection_result = self.pose.process_frame(frame)
+        self.pose.recognize_pose(frame, self.time_elapsed)
         
-        if self._pose.is_results_available():
+        if self.pose.is_results_available():
             PoseAnalyzer.draw_hand_landmarks(frame, detection_result) # Debug
             self.prompt_user(frame, detection_result)
         
@@ -212,3 +241,4 @@ class Camera(Actor):
         return surface
     
 camera = Camera()
+pose = camera.pose
