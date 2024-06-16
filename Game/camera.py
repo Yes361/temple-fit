@@ -1,8 +1,6 @@
-from helper import Actor
-from pygame.math import Vector2
-from abc import abstractmethod, ABC
-from math import acos, degrees
+from .actions import JumpingJacks, Squats, BicepCurls, Recognizer, find_angle_between_landmarks
 from typing import Dict, List, Type
+from helper import Actor
 import mediapipe as mp
 import numpy as np
 import pygame
@@ -10,82 +8,16 @@ import cv2
 
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
-mp_pose_landmarks = mp_pose.PoseLandmark
 
-IMPLEMENTED_ACTIONS = ['Jumping Jacks']
 DEFAULT_RESOLUTION = (800, 600)
-    
-def distance(x, y):
-    return (x ** 2 + y ** 2) ** 0.5
-    
-def distance_between_landmarks(detection_result, pointA: int, pointB: int):
-    landmarks = detection_result.landmark
-    landmarkA, landmarkB = landmarks[pointA], landmarks[pointB]
-    return distance(landmarkA.x - landmarkB.x, landmarkA.y - landmarkB.y)
-
-def find_angle_between_landmarks(detection_result, pointA: int, pointB: int, pointC: int):
-    edgeAB = distance_between_landmarks(detection_result, pointA, pointB)
-    edgeAC = distance_between_landmarks(detection_result, pointA, pointC)
-    edgeCB = distance_between_landmarks(detection_result, pointC, pointB)
-    angle = degrees(acos((edgeCB ** 2 + edgeAB ** 2 - edgeAC ** 2) / (2 * edgeAB * edgeCB)))
-    if angle > 180:
-        angle = 360 - angle
-    if angle < 0:
-        angle += 360
-    return angle
-
-def dot_product(detection_result, pointA: int, pointB: int, pointC: int):
-    landmarks = detection_result.landmark
-    landmarkA, landmarkB, landmarkC = landmarks[pointA], landmarks[pointB], landmarks[pointC]
-    edgeAB = Vector2(landmarkA.x - landmarkB.x, landmarkA.y - landmarkB.y).normalize()
-    edgeCB = Vector2(landmarkC.x - landmarkB.x, landmarkC.y - landmarkB.y).normalize()
-    return Vector2.dot(edgeAB, edgeCB)
-
-class Recognizer(ABC):    
-    @abstractmethod
-    def run(self, detection_results, time_elapsed: float) -> bool:
-        pass
-    
-    @abstractmethod
-    def report_stats(self):
-        pass
-    
-    @abstractmethod
-    def reset(self):
-        pass
-
-class JumpingJacks(Recognizer):
-    """
-    Welcome to ur WORST NIGHTMARE
-    """
-    def __init__(self):    
-        self.count = 0
-        self.prev_pose = 'extended'
-    
-    def run(self, detection_results, time_elapsed: float) -> bool:
-        hand_angle = find_angle_between_landmarks(detection_results, mp_pose_landmarks.LEFT_WRIST, mp_pose_landmarks.NOSE, mp_pose_landmarks.RIGHT_WRIST)
-        feet_angle = find_angle_between_landmarks(detection_results, mp_pose_landmarks.LEFT_ANKLE, mp_pose_landmarks.NOSE, mp_pose_landmarks.RIGHT_ANKLE)
-        
-        if hand_angle > 90: 
-            if self.prev_pose == 'not extended':
-                self.prev_pose = 'extended'
-                self.count += 1
-                return True
-        else:
-            self.prev_pose = 'not extended'
-            
-        return False
-    
-    def report_stats(self):
-        return self.count
-    
-    def reset(self):
-        self.count = 0
 
 class PoseAnalyzer:
     MAX_LANDMARKS = 33
     ACTION_RECOGNIZERS = {
-        'jumping jacks': JumpingJacks
+        'jumping jacks': JumpingJacks,
+        # 'lunges': Squats,
+        'bicep curls': BicepCurls,
+        'squats': Squats
     }
     
     def __init__(self, *args, **kwargs):
@@ -196,7 +128,8 @@ class Camera(Actor):
         self.pose.recognize_pose(frame, self.time_elapsed)
         
         if self.pose.is_results_available():
-            PoseAnalyzer.draw_hand_landmarks(frame, detection_result) # Debug
+            PoseAnalyzer.draw_hand_landmarks(frame, detection_result)
+            # cv2.putText(frame, f'{find_angle_between_landmarks(detection_result.pose_landmarks, mp_pose.PoseLandmark.LEFT_SHOULDER,  mp_pose.PoseLandmark.LEFT_ELBOW,  mp_pose.PoseLandmark.LEFT_WRIST)}', (10, 30), cv2.FONT_HERSHEY_SCRIPT_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
             self.prompt_user(frame, detection_result)
         
         self._surf = Camera.convert_frame_surface(frame, (self.width, self.height))
