@@ -1,16 +1,16 @@
-from helper import AbstractActor
+from helper import AbstractActor, Rect
 from pgzero.builtins import animate
 
 class Text(AbstractActor):
-    def __init__(self, *args, bounding_box=None, dialogue_lines=None, **kwargs):
-        self.dialogue: list = []
+    def __init__(self, *args, bounding_box: Rect=None, **kwargs):
         self.bounding_box = bounding_box
-        if dialogue_lines:
-            self.load_dialogue_lines(dialogue_lines, *args, **kwargs)
+        if bounding_box is not None:
+            self.animate_typewriter(bounding_box.pos, *args, **kwargs)
         else:
             self.animate_typewriter(*args, **kwargs)
         
-    def animate_typewriter(self, text: str, pos, /, *, time=0, time_per_char=0, tween='linear', on_finished=None, **styles):
+    def animate_typewriter(self, pos, text: str, /, *, time=0, time_per_char=0, tween='linear', on_finished=None, **styles):
+        print(pos, text)
         self._char_index = 0
         self._text = text
         self.time_per_char = time_per_char
@@ -18,22 +18,12 @@ class Text(AbstractActor):
         self._anim = animate(self, tween, time + time_per_char * len(text), on_finished, _char_index=len(text))
         self.styles = styles
         
-    def load_dialogue_lines(self, lines: list, *args, **kwargs):
-        self.dialogue = lines
-        self.animate_typewriter(self.dialogue.pop(0), *args, **kwargs)
-        
     def stop(self):
         self._anim.stop(complete=False)
         
     def skip(self):
         self._anim.stop(complete=True)
         
-    def next_line(self):
-        duration = self._anim.duration
-        # tween = self._anim.function
-        if len(self.dialogue) > 0:
-            self.animate_typewriter(self.dialogue.pop(0), self.pos, time=duration, time_per_char=self.time_per_char, **self.styles)
-
     def draw(self, screen):
         current_index = int(self._char_index)
         text = self._text[0:current_index]
@@ -42,9 +32,22 @@ class Text(AbstractActor):
         else:
             screen.draw.textbox(text, self.bounding_box, **self.styles)
             
-        if not self._anim.running:
-            self.next_line()
+class Dialogue(Text):
+    def __init__(self, *args, dialogue: list=[], **kwargs):
+        self.dialogue = dialogue
+        super().__init__(self.dialogue.pop(0), *args, **kwargs)
+    
+    def next_line(self):
+        if len(self.dialogue) > 0:
+            self.animate_typewriter(self.pos, self.dialogue.pop(0), time_per_char=self.time_per_char, **self.styles)
             
-class Dialogue:
-    def __init__(self):
-        pass
+    def next(self):
+        if self._anim.running:
+            self.skip()
+        else:
+            self.next_line()
+
+    def is_complete(self):
+        if self._anim.running:
+            return True
+        return len(self.dialogue) > 0

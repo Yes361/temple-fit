@@ -1,6 +1,6 @@
 from managers import Scene, game_manager
 from helper import Actor, ActorContainer, Rect, CACHED_DIALOGUE
-from Game import Button, Text
+from Game import Button, Dialogue
 
 class Narrative(Scene):
     SCENE_NAME = "Narrative"
@@ -24,7 +24,7 @@ class Narrative(Scene):
         text_box.scale = 0.3
         text_box.resize((450, 95))
         
-        text_anim = Text((370, 600), time_per_char=0.01, bounding_box=Rect((200, 560), (450, 95)), dialogue_lines=CACHED_DIALOGUE['start'], color='black')
+        text_anim = Dialogue(time_per_char=0.02, bounding_box=Rect((220, 565), (425, 75)), dialogue=CACHED_DIALOGUE['start'], color='black')
         ui_elements = ActorContainer()
 
     def on_draw(self, screen):
@@ -41,4 +41,5 @@ class Narrative(Scene):
         pass
 
     def on_key_down(self, key, unicode):
-        pass
+        if text_anim.is_complete():
+            text_anim.next()

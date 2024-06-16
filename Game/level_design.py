@@ -5,7 +5,7 @@ from typing import List
         
 class LevelManager(AbstractActor):
     def __init__(self, *args, **kwargs):
-        self.entities = ActorContainer(player=Player('character.png', pos=(300, 300), animation_frames={
+        self.entities = ActorContainer(player=Player('characterb_59', pos=(300, 300), animation_frames={
             'up': ['characterb_94', 'characterb_95', 'characterb_96'],
             'down': ['characterb_58', 'characterb_59', 'characterb_60'],
             'right': ['characterb_82', 'characterb_83', 'characterb_84'],
@@ -13,16 +13,11 @@ class LevelManager(AbstractActor):
             'idle': ['characterb_59']
         }, scale=2))
         
-        self.world: Actor = kwargs.get('world', Actor('hallway.png', pos=(331, 331), scale=0.2))
+        self.world: Actor = Actor('hallway.png', pos=(331, 331), scale=0.2)
         
         self.camera = [self.entities.x, self.entities.y]
+        self.camera
         self.colliders = Collisions(ColliderRect((self.world.topleft[0], self.world.topleft[1] - 100), (500, 100), is_static=True)) 
-            
-    def load_level(self, f):
-        pass
-    
-    def save_level(self, f):
-        pass
     
     def update(self, dt):
         self.entities.update(dt)
