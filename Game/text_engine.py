@@ -1,16 +1,16 @@
-from helper import AbstractActor, Rect
+from helper import AbstractActor, Actor, Rect
 from pgzero.builtins import animate
 
 class Text(AbstractActor):
     def __init__(self, *args, bounding_box: Rect=None, **kwargs):
         self.bounding_box = bounding_box
+        self.hidden = False
         if bounding_box is not None:
             self.animate_typewriter(bounding_box.pos, *args, **kwargs)
         else:
             self.animate_typewriter(*args, **kwargs)
         
     def animate_typewriter(self, pos, text: str, /, *, time=0, time_per_char=0, tween='linear', on_finished=None, **styles):
-        print(pos, text)
         self._char_index = 0
         self._text = text
         self.time_per_char = time_per_char
@@ -25,6 +25,9 @@ class Text(AbstractActor):
         self._anim.stop(complete=True)
         
     def draw(self, screen):
+        if self.hidden:
+            return
+        
         current_index = int(self._char_index)
         text = self._text[0:current_index]
         if self.bounding_box is None:
@@ -33,13 +36,24 @@ class Text(AbstractActor):
             screen.draw.textbox(text, self.bounding_box, **self.styles)
             
 class Dialogue(Text):
-    def __init__(self, *args, dialogue: list=[], **kwargs):
+    def __init__(self, actor_ref: Actor, characters: dict, dialogue: list, *args, **kwargs):
         self.dialogue = dialogue
+        self.actor_ref = actor_ref.get_weak_ref()
+        self.characters = characters
         super().__init__(self.dialogue.pop(0), *args, **kwargs)
     
     def next_line(self):
         if len(self.dialogue) > 0:
-            self.animate_typewriter(self.pos, self.dialogue.pop(0), time_per_char=self.time_per_char, **self.styles)
+            line = self.dialogue.pop(0)
+            if ':' in line:
+                colon = line.index(':')
+                character = line[0:colon].strip()
+                
+                assert character in self.characters, 'After searching far and wide, across multiple galaxies and dimensions, in the tiniest of crevices, I can not find this character in the list of characters you\' provided'
+                self.actor_ref.image = self.characters[character]
+                line = line[colon + 1:].strip()
+                
+            self.animate_typewriter(self.pos, line, time_per_char=self.time_per_char, **self.styles)
             
     def next(self):
         if self._anim.running:
@@ -49,5 +63,5 @@ class Dialogue(Text):
 
     def is_complete(self):
         if self._anim.running:
-            return True
-        return len(self.dialogue) > 0
+            return False
+        return len(self.dialogue) == 0

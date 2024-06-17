@@ -1,7 +1,7 @@
 from managers import Scene, game_manager
 from helper import Actor, ActorContainer
 from pgzero.builtins import animate
-from Game import Button
+from Game import Button, camera
 
 
 def fade_ui_elements():
@@ -36,20 +36,14 @@ class StartScreen(Scene):
             ),
             a=Button(
                 "play_button.png",
-                pos=(331, 450),
+                pos=(331, 520),
                 on_click=lambda x, y: game_manager.switch_scene('hallway'),
                 scale=0.1,
                 hover_frame='character.png'
             ),
             b=Button(
                 "play_button.png",
-                pos=(331, 490),
-                on_click=lambda x, y: game_manager.switch_scene('Battle'),
-                scale=0.1,
-            ),
-            c=Button(
-                "play_button.png",
-                pos=(331, 530),
+                pos=(331, 630),
                 on_click=lambda x, y: game_manager.switch_scene('Narrative'),
                 scale=0.1,
             ),

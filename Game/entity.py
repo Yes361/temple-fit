@@ -45,8 +45,9 @@ class Player(Entity):
         if keyboard[keys.A] or keyboard[keys.LEFT]:
             self.x -= self.speed
             anim = 'left'
-            
-        self.anim = self.animation_frames[anim]
+        
+        if self.images != self.animation_frames[anim]:
+            self.images = self.animation_frames[anim]
             
     def update(self, dt):
         self.move(dt)

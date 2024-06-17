@@ -90,11 +90,11 @@ class Camera(Actor):
         @param video_mode 0 = Webcam, 1 = External Webcam
         @param dimensions dimensions of the video frame
         """
-        self.width, self.height = dims
+        width, height = dims
         self.time_elapsed = 0
         self._cap = cv2.VideoCapture(video_mode)
-        self._cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.width)
-        self._cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.height)
+        self._cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+        self._cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
     
     def close_camera(self):
         """
@@ -174,4 +174,4 @@ class Camera(Actor):
         return surface
     
 camera = Camera()
-pose = camera.pose
+Pose = camera.pose

@@ -143,6 +143,7 @@ class Actor(Actor, AbstractActor):
         self.hidden = hidden
         self.iterations = 0
         self._is_playing_gif = False
+        self._image_name = ''
         self.gif_name = None
         self.time_elapsed = 0
         self.opacity = opacity
@@ -187,27 +188,15 @@ class Actor(Actor, AbstractActor):
     def is_animation_available(self):
         return type(self.images) == list and len(self.images) > 0
     
-    @property
-    def image_name(self):
-        return self.image
-    
-    @image_name.setter
-    def image_name(self, new_image):
-        if new_image != self.image:
-            self.image = new_image
-            
-    @property
-    def anim(self):
-        return self.images
-    
-    @anim.setter
-    def anim(self, anim):
-        if anim != self.images:
-            self.images = anim
+    # https://gist.github.com/Susensio/979259559e2bebcd0273f1a95d7c1e79
+    @Actor.image.setter
+    def image(self, image):
+        if self._image_name != image:
+            super(Actor, type(self)).image.fset(self, image)
+            self.scale = self.scale # HACK
             
     def update(self, dt):
         self.time_elapsed += dt
-        self.scale = self.scale # HACK
         if self.is_animation_available():
             if self._is_playing_gif:
                 self.animate_gif()
@@ -467,5 +456,5 @@ class GUIElement(AbstractActor):
 if __name__ == '__main__':
     # extract_gif_frames(r'assets/gifs/outro_card.gif', 'images', 'outro_card') 
     # print(read_dialogue_lines(r'assets/Dialogue'))
-    # lower_case_files(r'images')
-    print(CACHED_DIALOGUE)
+    lower_case_files(r'images')
+    # print(CACHED_DIALOGUE)

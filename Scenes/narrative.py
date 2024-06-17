@@ -1,6 +1,7 @@
 from managers import Scene, game_manager
 from helper import Actor, ActorContainer, Rect, CACHED_DIALOGUE
 from Game import Button, Dialogue
+from pgzero.builtins import keyboard, keys
 
 class Narrative(Scene):
     SCENE_NAME = "Narrative"
@@ -12,20 +13,21 @@ class Narrative(Scene):
         pass
 
     def on_show(self):
-        global backdrop, sprite, ui_elements, text_box, text_anim
+        global backdrop, sprite, ui_elements, text_box, text_anim, next_button
 
-        backdrop = Actor('narrative_backdrop')
-        backdrop.resize((662, 662))
-        backdrop.topleft = (0, 0)
+        backdrop = Actor('narrative_backdrop', topleft=(0, 0), dims=(662, 662))
         
-        sprite = Actor('narrative_icon', pos=(70, 550))
-        sprite.scale = 0.15
-        text_box = Actor('narrative_text_box', pos=(370, 600))
-        text_box.scale = 0.3
+        sprite = Actor('narrative_icon', pos=(100, 580))
+        sprite.scale = 1
+        
+        text_box = Actor('narrative_text_box', pos=(370, 600), scale=0.3)
         text_box.resize((450, 95))
         
-        text_anim = Dialogue(time_per_char=0.02, bounding_box=Rect((220, 565), (425, 75)), dialogue=CACHED_DIALOGUE['start'], color='black')
+        text_anim = Dialogue(sprite, {'MC': 'character-battle-sprite', 'Mayor': 'narrative_icon', 'Merchant': 'narrative_icon'}, CACHED_DIALOGUE['start'], time_per_char=0.02, bounding_box=Rect((220, 565), (425, 75)), color='black')
         ui_elements = ActorContainer()
+        
+        next_button = Button('play_button', pos=(550, 500), on_click=lambda x, y: game_manager.switch_scene('hallway'))
+        next_button.hidden = True
 
     def on_draw(self, screen):
         backdrop.draw()
@@ -33,13 +35,21 @@ class Narrative(Scene):
         text_box.draw()
         text_anim.draw(screen)
         ui_elements.draw()
+        next_button.draw()
 
     def on_update(self, dt):
         ui_elements.update(dt)
+        next_button.update(dt)
 
     def on_mouse_down(self, pos, button):
-        pass
+        next_button.on_click(pos, button)
 
     def on_key_down(self, key, unicode):
-        if text_anim.is_complete():
-            text_anim.next()
+        if keyboard.SPACE:
+            if not text_anim.is_complete():
+                text_anim.next()
+            else:
+                text_anim.hidden = True
+                sprite.hidden = True
+                text_box.hidden = True
+                next_button.hidden = False

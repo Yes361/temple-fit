@@ -5,9 +5,10 @@ from helper import Actor, Rect
 
     
 class Collider(Actor):
-    def __init__(self, *args, is_static=False, is_passable=False, **kwargs):
+    def __init__(self, *args, is_static=False, is_passable=False, fn=None, **kwargs):
         self.is_static = is_static
         self.is_passable = is_passable
+        self.fn = fn
         super().__init__(*args, **kwargs)
     
     @abstractmethod
@@ -15,9 +16,10 @@ class Collider(Actor):
         pass
         
 class ColliderRect(Rect):
-    def __init__(self, *args, is_static=False, is_passable=False, **kwargs):
+    def __init__(self, *args, is_static=True, is_passable=False, fn=None, **kwargs):
         self.is_static = is_static
         self.is_passable = is_passable
+        self.fn = fn
         super().__init__(*args, **kwargs)
         
 @dataclass
@@ -27,7 +29,7 @@ class CollisionData:
 
 class Collisions:
     def __init__(self, *args):
-        self.rect_list: List[Tuple[any, callable]] = [] if len(args) == 0 else args
+        self.rect_list: List[Tuple[any, Type[Collider | ColliderRect]]] = [] if len(args) == 0 else args
 
     def add(self, collider: Type[Collider | ColliderRect]):
         self.rect_list.append(collider)
@@ -39,6 +41,8 @@ class Collisions:
         for collider in self.rect_list:
             if Collisions.resolve_collision(entity, collider):
                 entity.on_collide(CollisionData(entity, collider))
+                if callable(collider.fn):
+                    collider.fn()
 
     @staticmethod
     def resolve_collision(ColliderA: Type[Collider], ColliderB: Type[Collider | ColliderRect]):
