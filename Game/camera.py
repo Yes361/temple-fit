@@ -19,6 +19,7 @@ class PoseAnalyzer:
         'bicep curls': BicepCurls,
         'squats': Squats
     }
+    IMPLEMENTED_ACTIONS = list(ACTION_RECOGNIZERS.keys())
     
     def __init__(self, *args, **kwargs):
         self.pose = mp_pose.Pose(*args, **kwargs)
@@ -28,6 +29,7 @@ class PoseAnalyzer:
         
     def initialize_recognizers(self):
         self.recognizers.clear()
+        self.active_recognizers = PoseAnalyzer.ACTION_RECOGNIZERS.keys()
         self.recognizers = {action: recognizer() for action, recognizer in self.ACTION_RECOGNIZERS.items()}
     
     @staticmethod
@@ -53,9 +55,12 @@ class PoseAnalyzer:
         if not self.detection_result:
             return
         
-        for action, recognizer in self.recognizers.items():
-            if recognizer.run(self.detection_result, time_elapsed):
-                print(f'You just did a {action} ! You\'ve done {recognizer.report_stats()} {action} !')
+        for action in self.active_recognizers:
+            if self.recognizers[action].run(self.detection_result, time_elapsed):
+                print(f'You just did a {action} ! You\'ve done {self.recognizers[action].report_stats()} {action} !')\
+                    
+    def set_active_recognizer(self, *active_list):
+        self.active_recognizers = active_list[0] if type(active_list[0]) == list else active_list
                 
     def report_stats(self, action: str=None):
         if action is None:

@@ -252,6 +252,11 @@ class Actor(Actor, AbstractActor):
         
     def get_weak_ref(self):
         return weakref.proxy(self)
+    
+    def copy_basic_attr(self, other: Type[Actor], attrs=['scale']):
+        for attr in attrs:
+            value = getattr(self, attr)
+            setattr(self, attr, value)
 
 class Rect(Rect, AbstractActor):
     def __init__(self, pos, dims, /, *, scale=1, fill=(255, 255, 255), border=(255, 255, 255)):
@@ -452,6 +457,10 @@ class GUIElement(AbstractActor):
     @abstractmethod
     def on_hold(self) -> bool:
         pass
+        
+def schedule(on_finish, duration): # monke patch
+    dummy_object = Actor('battle_scene_tab')
+    return animate(dummy_object, duration=duration, on_finished=on_finish, pos=(20, 20))
         
 if __name__ == '__main__':
     # extract_gif_frames(r'assets/gifs/outro_card.gif', 'images', 'outro_card') 

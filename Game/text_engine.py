@@ -40,19 +40,22 @@ class Dialogue(Text):
         self.dialogue = dialogue
         self.actor_ref = actor_ref.get_weak_ref()
         self.characters = characters
-        super().__init__(self.dialogue.pop(0), *args, **kwargs)
+        super().__init__(self.parse_dialogue_line(self.dialogue.pop(0)), *args, **kwargs)
+    
+    def parse_dialogue_line(self, line):
+        if ':' in line:
+            colon = line.index(':')
+            character = line[0:colon].strip()
+            
+            assert character in self.characters, 'After searching far and wide, across multiple galaxies and dimensions, in the tiniest of crevices, I can not find this character in the list of characters you\' provided'
+            self.actor_ref.image = self.characters[character]
+            line = line[colon + 1:].strip()
+        return line
     
     def next_line(self):
         if len(self.dialogue) > 0:
-            line = self.dialogue.pop(0)
-            if ':' in line:
-                colon = line.index(':')
-                character = line[0:colon].strip()
-                
-                assert character in self.characters, 'After searching far and wide, across multiple galaxies and dimensions, in the tiniest of crevices, I can not find this character in the list of characters you\' provided'
-                self.actor_ref.image = self.characters[character]
-                line = line[colon + 1:].strip()
-                
+            line = self.parse_dialogue_line(self.dialogue.pop(0))
+
             self.animate_typewriter(self.pos, line, time_per_char=self.time_per_char, **self.styles)
             
     def next(self):

@@ -1,16 +1,27 @@
 from pgzero.builtins import keyboard, keys
 from .collisions import Collider
+from .gui import HealthBar
 from helper import Actor, Rect
+from typing import Type
 
 DEFAULT_ENTITY_SPEED = 2
 
 class Entity(Collider):
-    def __init__(self, *args, **kwargs):
-        self.speed = kwargs.pop('speed', DEFAULT_ENTITY_SPEED)
-        self.animations = kwargs.pop('animation', {})
+    def __init__(self, *args, healthbar: HealthBar=None, speed=DEFAULT_ENTITY_SPEED, animation={}, **kwargs):
+        self.speed = speed
+        self.health = healthbar
+        self.animations = animation
         super().__init__(*args, **kwargs)
+        
+        
+    def draw(self, screen):
+        if self.hidden:
+            return
+        
+        self.health.draw(screen)
+        super().draw()
     
-class Enemies(Entity):
+class Enemy(Entity):
     pass
 
 class Player(Entity):
