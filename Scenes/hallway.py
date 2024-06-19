@@ -75,7 +75,64 @@ class Item(Entity):
         if self.colliderect(player):
             levels[level_manager.current_level]["entities"].scroll.hidden = True
             counter += 1
+            
+left_rooms = [
+    ColliderRect(
+        (-1080 * 662 / 1080 / 2, -1080 * 662 / 1080 / 2 - 81),
+        (1080 * 662 / 1080, 81),
+    ),
+    ColliderRect(
+        (-1080 * 662 / 1080 / 2, 1080 * 662 / 1080 / 2), (1080 * 662 / 1080, 81)
+    ),
+    ColliderRect(
+        (-1080 * 662 / 1080 / 2 - 81, -1080 * 662 / 1080 / 2),
+        (81, 1080 * 662 / 1080),
+    ),
+    ColliderRect(
+        (1080 * 662 / 1080 / 2, -1080 * 662 / 1080 / 2), (81, 1080 * 662 / 1080)
+    ),
+    ColliderRect(
+        (1080 * 662 / 1080 / 2 - 81, -1080 * 662 / 1080 / 2), (81, 82 * 3)
+    ),
+    ColliderRect(
+        (1080 * 662 / 1080 / 2 - 81, -1080 * 662 / 1080 / 2 + 82 * 4), (81, 82 * 3)
+    ),
+    ColliderRect(
+        (1080 * 662 / 1080 / 2 - 81 - 1, -1080 * 662 / 1080 / 2 + 81 * 4),
+        (81, 81 * 2),
+        fn=lambda: level_manager.load_level("floor", player_pos=(0, 0)),
+    ),
+]
 
+right_rooms = [
+    ColliderRect(
+        (-1080 * 662 / 1080 / 2, -1080 * 662 / 1080 / 2 - 81),
+        (1080 * 662 / 1080, 81),
+    ),
+    ColliderRect(
+        (-1080 * 662 / 1080 / 2, 1080 * 662 / 1080 / 2),
+        (1080 * 662 / 1080, 81),
+    ),
+    ColliderRect(
+        (-1080 * 662 / 1080 / 2 - 81, -1080 * 662 / 1080 / 2),
+        (81, 1080 * 662 / 1080),
+    ),
+    ColliderRect(
+        (1080 * 662 / 1080 / 2, -1080 * 662 / 1080 / 2),
+        (81, 1080 * 662 / 1080),
+    ),
+    ColliderRect(
+        (-1080 * 662 / 1080 / 2, -1080 * 662 / 1080 / 2), (81, 82 * 3)
+    ),
+    ColliderRect(
+        (-1080 * 662 / 1080 / 2 , -1080 * 662 / 1080 / 2 + 82 * 4), (81, 82 * 3)
+    ),
+    ColliderRect(
+        (-1080 * 662 / 1080 / 2 + 1, -1080 * 662 / 1080 / 2 + 81 * 4),
+        (81, 81 * 2),
+        fn=lambda: level_manager.load_level("floor", player_pos=(0, 0)),
+    ),
+]
 
 levels = {
     "floor": {
@@ -128,103 +185,23 @@ levels = {
     },
     "room1": {
         "world": Actor("stone_left.png", scale=662 / 1080),
-        "colliders": [
-            ColliderRect(
-                (-1080 * 662 / 1080 / 2, -1080 * 662 / 1080 / 2 - 81),
-                (1080 * 662 / 1080, 81),
-            ),
-            ColliderRect(
-                (-1080 * 662 / 1080 / 2, 1080 * 662 / 1080 / 2), (1080 * 662 / 1080, 81)
-            ),
-            ColliderRect(
-                (-1080 * 662 / 1080 / 2 - 81, -1080 * 662 / 1080 / 2),
-                (81, 1080 * 662 / 1080),
-            ),
-            ColliderRect(
-                (1080 * 662 / 1080 / 2, -1080 * 662 / 1080 / 2), (81, 1080 * 662 / 1080)
-            ),
-            ColliderRect(
-                (1080 * 662 / 1080 / 2 - 81, -1080 * 662 / 1080 / 2), (81, 82 * 3)
-            ),
-            ColliderRect(
-                (1080 * 662 / 1080 / 2 - 81, -1080 * 662 / 1080 / 2 + 82 * 4), (81, 82 * 3)
-            ),
-            ColliderRect(
-                (1080 * 662 / 1080 / 2 - 81 - 1, -1080 * 662 / 1080 / 2 + 81 * 4),
-                (81, 81 * 2),
-                fn=lambda: level_manager.load_level("floor", player_pos=(0, 0)),
-            ),
-        ],
+        "colliders": left_rooms,
         "entities": ActorContainer(
             enemy=Enemy("green_moth", pos=(-200, 0), scale=0.15),
             scroll=Item("green_moth", scale=0.15, pos=(0, 0)),
         ),
     },
     "room2": {
-        "world": Actor("netherite_right.png", scale=662 / 1080),
-        "colliders": [
-            ColliderRect(
-                (-1080 * 662 / 1080 / 2, -1080 * 662 / 1080 / 2 - 81),
-                (1080 * 662 / 1080, 81),
-            ),
-            ColliderRect(
-                (-1080 * 662 / 1080 / 2, 1080 * 662 / 1080 / 2),
-                (1080 * 662 / 1080, 81),
-            ),
-            ColliderRect(
-                (-1080 * 662 / 1080 / 2 - 81, -1080 * 662 / 1080 / 2),
-                (81, 1080 * 662 / 1080),
-            ),
-            ColliderRect(
-                (1080 * 662 / 1080 / 2, -1080 * 662 / 1080 / 2),
-                (81, 1080 * 662 / 1080),
-            ),
-            ColliderRect(
-                (-1080 * 662 / 1080 / 2, -1080 * 662 / 1080 / 2), (81, 82 * 3)
-            ),
-            ColliderRect(
-                (-1080 * 662 / 1080 / 2 , -1080 * 662 / 1080 / 2 + 82 * 4), (81, 82 * 3)
-            ),
-            ColliderRect(
-                (-1080 * 662 / 1080 / 2 + 1, -1080 * 662 / 1080 / 2 + 81 * 4),
-                (81, 81 * 2),
-                fn=lambda: level_manager.load_level("floor", player_pos=(0, 0)),
-            ),
-        ],
+        "world": Actor("stone_right.png", scale=662 / 1080),
+        "colliders": right_rooms,
         "entities": ActorContainer(
             enemy=Enemy("red_hood", pos=(+200, 0), scale=0.15),
             scroll=Item("red_hood", scale=0.15, pos=(0, 0)),
         ),
     },
     "room3": {
-        "world": Actor("wood_left.png", scale=662 / 1080),
-        "colliders": [
-            ColliderRect(
-                (-1080 * 662 / 1080 / 2, -1080 * 662 / 1080 / 2 - 81),
-                (1080 * 662 / 1080, 81),
-            ),
-            ColliderRect(
-                (-1080 * 662 / 1080 / 2, 1080 * 662 / 1080 / 2), (1080 * 662 / 1080, 81)
-            ),
-            ColliderRect(
-                (-1080 * 662 / 1080 / 2 - 81, -1080 * 662 / 1080 / 2),
-                (81, 1080 * 662 / 1080),
-            ),
-            ColliderRect(
-                (1080 * 662 / 1080 / 2, -1080 * 662 / 1080 / 2), (81, 1080 * 662 / 1080)
-            ),
-            ColliderRect(
-                (1080 * 662 / 1080 / 2 - 81, -1080 * 662 / 1080 / 2), (81, 82 * 3)
-            ),
-            ColliderRect(
-                (1080 * 662 / 1080 / 2 - 81, -1080 * 662 / 1080 / 2 + 82 * 4), (81, 82 * 3)
-            ),
-            ColliderRect(
-                (1080 * 662 / 1080 / 2 - 81 - 1, -1080 * 662 / 1080 / 2 + 81 * 4),
-                (81, 81 * 2),
-                fn=lambda: level_manager.load_level("floor", player_pos=(0, 0)),
-            ),
-        ],
+        "world": Actor("stone_left.png", scale=662 / 1080),
+        "colliders": left_rooms,
         "entities": ActorContainer(
             enemy=Enemy("green_moth", pos=(-200, 0), scale=0.15),
             scroll=Item("green_moth", scale=0.15, pos=(0, 0)),
@@ -232,138 +209,31 @@ levels = {
     },
     "room4": {
         "world": Actor("stone_right.png", scale=662 / 1080),
-        "colliders": [
-            ColliderRect(
-                (-1080 * 662 / 1080 / 2, -1080 * 662 / 1080 / 2 - 81),
-                (1080 * 662 / 1080, 81),
-            ),
-            ColliderRect(
-                (-1080 * 662 / 1080 / 2, 1080 * 662 / 1080 / 2),
-                (1080 * 662 / 1080, 81),
-            ),
-            ColliderRect(
-                (-1080 * 662 / 1080 / 2 - 81, -1080 * 662 / 1080 / 2),
-                (81, 1080 * 662 / 1080),
-            ),
-            ColliderRect(
-                (1080 * 662 / 1080 / 2, -1080 * 662 / 1080 / 2),
-                (81, 1080 * 662 / 1080),
-            ),
-            ColliderRect(
-                (-1080 * 662 / 1080 / 2, -1080 * 662 / 1080 / 2), (81, 82 * 3)
-            ),
-            ColliderRect(
-                (-1080 * 662 / 1080 / 2 , -1080 * 662 / 1080 / 2 + 82 * 4), (81, 82 * 3)
-            ),
-            ColliderRect(
-                (-1080 * 662 / 1080 / 2 + 1, -1080 * 662 / 1080 / 2 + 81 * 4),
-                (81, 81 * 2),
-                fn=lambda: level_manager.load_level("floor", player_pos=(0, 0)),
-            ),
-        ],
+        "colliders": right_rooms,
         "entities": ActorContainer(
             enemy=Enemy("red_hood", pos=(+200, 0), scale=0.15),
             scroll=Item("red_hood", scale=0.15, pos=(0, 0)),
         ),
     },
     "room5": {
-        "world": Actor("quartz_left.png", scale=662 / 1080),
-        "colliders": [
-            ColliderRect(
-                (-1080 * 662 / 1080 / 2, -1080 * 662 / 1080 / 2 - 81),
-                (1080 * 662 / 1080, 81),
-            ),
-            ColliderRect(
-                (-1080 * 662 / 1080 / 2, 1080 * 662 / 1080 / 2), (1080 * 662 / 1080, 81)
-            ),
-            ColliderRect(
-                (-1080 * 662 / 1080 / 2 - 81, -1080 * 662 / 1080 / 2),
-                (81, 1080 * 662 / 1080),
-            ),
-            ColliderRect(
-                (1080 * 662 / 1080 / 2, -1080 * 662 / 1080 / 2), (81, 1080 * 662 / 1080)
-            ),
-            ColliderRect(
-                (1080 * 662 / 1080 / 2 - 81, -1080 * 662 / 1080 / 2), (81, 82 * 3)
-            ),
-            ColliderRect(
-                (1080 * 662 / 1080 / 2 - 81, -1080 * 662 / 1080 / 2 + 82 * 4), (81, 82 * 3)
-            ),
-            ColliderRect(
-                (1080 * 662 / 1080 / 2 - 81 - 1, -1080 * 662 / 1080 / 2 + 81 * 4),
-                (81, 81 * 2),
-                fn=lambda: level_manager.load_level("floor", player_pos=(0, 0)),
-            ),
-        ],
+        "world": Actor("stone_left.png", scale=662 / 1080),
+        "colliders": left_rooms,
         "entities": ActorContainer(
             enemy=Enemy("green_moth", pos=(-200, 0), scale=0.15),
             scroll=Item("green_moth", scale=0.15, pos=(0, 0)),
         ),
     },
     "room6": {
-        "world": Actor("quartz_right.png", scale=662 / 1080),
-        "colliders": [
-            ColliderRect(
-                (-1080 * 662 / 1080 / 2, -1080 * 662 / 1080 / 2 - 81),
-                (1080 * 662 / 1080, 81),
-            ),
-            ColliderRect(
-                (-1080 * 662 / 1080 / 2, 1080 * 662 / 1080 / 2),
-                (1080 * 662 / 1080, 81),
-            ),
-            ColliderRect(
-                (-1080 * 662 / 1080 / 2 - 81, -1080 * 662 / 1080 / 2),
-                (81, 1080 * 662 / 1080),
-            ),
-            ColliderRect(
-                (1080 * 662 / 1080 / 2, -1080 * 662 / 1080 / 2),
-                (81, 1080 * 662 / 1080),
-            ),ColliderRect(
-                (-1080 * 662 / 1080 / 2, -1080 * 662 / 1080 / 2), (81, 82 * 3)
-            ),
-            ColliderRect(
-                (-1080 * 662 / 1080 / 2 , -1080 * 662 / 1080 / 2 + 82 * 4), (81, 82 * 3)
-            ),
-            ColliderRect(
-                (-1080 * 662 / 1080 / 2 + 1, -1080 * 662 / 1080 / 2 + 81 * 4),
-                (81, 81 * 2),
-                fn=lambda: level_manager.load_level("floor", player_pos=(0, 0)),
-            ),
-        ],
+        "world": Actor("stone_right.png", scale=662 / 1080),
+        "colliders": right_rooms,
         "entities": ActorContainer(
             enemy=Enemy("red_hood", pos=(+200, 0), scale=0.15),
             scroll=Item("red_hood", scale=0.15, pos=(0, 0)),
         ),
     },
     "room7": {
-        "world": Actor("netherite_left.png", scale=662 / 1080),
-        "colliders": [
-            ColliderRect(
-                (-1080 * 662 / 1080 / 2, -1080 * 662 / 1080 / 2 - 81),
-                (1080 * 662 / 1080, 81),
-            ),
-            ColliderRect(
-                (-1080 * 662 / 1080 / 2, 1080 * 662 / 1080 / 2), (1080 * 662 / 1080, 81)
-            ),
-            ColliderRect(
-                (-1080 * 662 / 1080 / 2 - 81, -1080 * 662 / 1080 / 2),
-                (81, 1080 * 662 / 1080),
-            ),
-            ColliderRect(
-                (1080 * 662 / 1080 / 2, -1080 * 662 / 1080 / 2), (81, 1080 * 662 / 1080)
-            ),
-            ColliderRect(
-                (1080 * 662 / 1080 / 2 - 81, -1080 * 662 / 1080 / 2), (81, 82 * 3)
-            ),
-            ColliderRect(
-                (1080 * 662 / 1080 / 2 - 81, -1080 * 662 / 1080 / 2 + 82 * 4), (81, 82 * 3)
-            ),
-            ColliderRect(
-                (1080 * 662 / 1080 / 2 - 81 - 1, -1080 * 662 / 1080 / 2 + 81 * 4),
-                (81, 81 * 2),
-                fn=lambda: level_manager.load_level("floor", player_pos=(0, 0)),
-            ),
-        ],
+        "world": Actor("stone_left.png", scale=662 / 1080),
+        "colliders": left_rooms,
         "entities": ActorContainer(
             enemy=Enemy("green_moth", pos=(-200, 0), scale=0.15),
             scroll=Item("green_moth", scale=0.15, pos=(0, 0)),
@@ -371,39 +241,15 @@ levels = {
     },
     "room8": {
         "world": Actor("wood_right.png", scale=662 / 1080),
-        "colliders": [
-            ColliderRect(
-                (-1080 * 662 / 1080 / 2, -1080 * 662 / 1080 / 2 - 81),
-                (1080 * 662 / 1080, 81),
-            ),
-            ColliderRect(
-                (-1080 * 662 / 1080 / 2, 1080 * 662 / 1080 / 2),
-                (1080 * 662 / 1080, 81),
-            ),
-            ColliderRect(
-                (-1080 * 662 / 1080 / 2 - 81, -1080 * 662 / 1080 / 2),
-                (81, 1080 * 662 / 1080),
-            ),
-            ColliderRect(
-                (1080 * 662 / 1080 / 2, -1080 * 662 / 1080 / 2),
-                (81, 1080 * 662 / 1080),
-            ),ColliderRect(
-                (-1080 * 662 / 1080 / 2, -1080 * 662 / 1080 / 2), (81, 82 * 3)
-            ),
-            ColliderRect(
-                (-1080 * 662 / 1080 / 2 , -1080 * 662 / 1080 / 2 + 82 * 4), (81, 82 * 3)
-            ),
-            ColliderRect(
-                (-1080 * 662 / 1080 / 2 + 1, -1080 * 662 / 1080 / 2 + 81 * 4),
-                (81, 81 * 2),
-                fn=lambda: level_manager.load_level("floor", player_pos=(0, 0)),
-            ),
-        ],
+        "colliders": right_rooms,
         "entities": ActorContainer(
             enemy=Enemy("red_hood", pos=(+200, 0), scale=0.15),
             scroll=Item("red_hood", scale=0.15, pos=(0, 0)),
         ),
     },
+    'tutorial': {
+        
+    }
 }
 
 level_manager = LevelManager((662, 662), player, levels)
