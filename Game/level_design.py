@@ -1,38 +1,39 @@
 from helper import ActorContainer, Actor, AbstractActor, Rect
-from managers import game_manager
-from .collisions import Collisions, ColliderRect
-from .entity import Entity, Player
-from typing import List
+from .collisions import Collisions
+from .entity import Player
                 
 class LevelManager(AbstractActor):
-    def __init__(self, dims, player: Player, *args, **kwargs):
+    def __init__(self, dims, player: Player, levels, *args, **kwargs):
         self.entities = ActorContainer()
         self.player = player
         self.width, self.height = dims
+        self.levels = levels
+        self.current_level = list(levels.keys())[0]
         
         self.world: Actor = None
         self.camera = [0, 0]
         self.colliders = Collisions()
         self.total_offset = [0, 0]
     
-    def _load_level(self, level):
+    def _load_level(self, level, player_pos):
+        self.current_level = level
+        level = self.levels[level]
         
         self.world = level['world']
         self.world.pos = (0, 0)
         self.camera = [0, 0]
         self.colliders.rect_list = level['colliders']
-        self.player.pos = level['player_pos']
+        self.player.pos = player_pos
         self.entities = level['entities']
         
         self.offset_room((self.width / 2, self.height / 2))
     
-    def load_level(self, level):
+    def load_level(self, level, player_pos):
         if self.world is not None:
             self.offset_room(self.total_offset)
-        
         self.total_offset = [0, 0]
         
-        self._load_level(level)
+        self._load_level(level, player_pos)
     
     def update(self, dt):
         self.entities.update(dt)
@@ -68,8 +69,8 @@ class LevelManager(AbstractActor):
         self.offset_room(self.camera)
         
         self.world.draw()
-        self.player.draw()
-        self.entities.draw()
+        self.player.draw(screen)
+        self.entities.draw(screen)
         self.debug(screen)
             
         self.offset_room((-self.camera[0], -self.camera[1]))

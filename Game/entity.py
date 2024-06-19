@@ -4,12 +4,11 @@ from .gui import HealthBar
 from helper import Actor, Rect
 from typing import Type
 
-DEFAULT_ENTITY_SPEED = 2
+DEFAULT_ENTITY_SPEED = 1
 
 class Entity(Collider):
-    def __init__(self, *args, healthbar: HealthBar=None, speed=DEFAULT_ENTITY_SPEED, animation={}, **kwargs):
+    def __init__(self, *args, speed=DEFAULT_ENTITY_SPEED, animation={}, **kwargs):
         self.speed = speed
-        self.health = healthbar
         self.animations = animation
         super().__init__(*args, **kwargs)
         
@@ -18,12 +17,8 @@ class Entity(Collider):
         if self.hidden:
             return
         
-        self.health.draw(screen)
         super().draw()
-    
-class Enemy(Entity):
-    pass
-
+        
 class Player(Entity):
     def __init__(self, *args, animation_frames=None, **kwargs):
         self.animation_frames = animation_frames
@@ -62,8 +57,4 @@ class Player(Entity):
             
     def update(self, dt):
         self.move(dt)
-        self.animate()
         super().update(dt)
-        
-    def on_collide(self, collision):
-        print('hi')

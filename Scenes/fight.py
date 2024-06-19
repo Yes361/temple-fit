@@ -1,5 +1,5 @@
 from helper import ActorContainer, Actor, Rect, schedule
-from managers import Scene
+from managers import Scene, game_manager
 from pgzero.builtins import animate
 from Game import camera, Pose, HealthBar, Entity
 from dataclasses import dataclass
@@ -18,7 +18,7 @@ class Objective:
 
 def player_health(hp):
     if hp < 0:
-        pass
+        game_manager.switch_scene("")
 
 
 # Global Actor Definitions
@@ -35,6 +35,10 @@ player_sprite = Entity(
     "character-battle-sprite",
     topleft=(50, 282),
     scale=1.2,
+)
+
+player = ActorContainer(
+    player_sprite=player_sprite,
     healthbar=HealthBar(
         "healthbar",
         Rect((78, 35), (220, 35)),
@@ -44,19 +48,29 @@ player_sprite = Entity(
         scale=0.8,
     ),
 )
-player_sprite.name = "Player TMP"
+player.name = "Player TMP"
 
 enemy_sprite = Entity(
     "character-battle-sprite",
     topleft=(371, 109),
     scale=0.5,
+)
+
+enemy = ActorContainer(
+    enemy_sprite=enemy_sprite,
     healthbar=HealthBar(
         "healthbar", Rect((58.5, 26.25), (220, 35)), 100, topleft=(300, 250), scale=0.6
     ),
 )
-enemy_sprite.name = "Enemy TMP"
+enemy.name = "Enemy TMP"
 
-exercise = [{"exercise": (1, 2), "sets": (3, 7)}]
+prev_room = "hallway"
+
+exercise = [{"exercise": (1, 2), "sets": (5, 7)}, {"exercise": (2, 4), "sets": (7, 10)}]
+
+all_actors = ActorContainer(
+    player=player, enemy=enemy, fire=fireball, cam=camera, back=backdrop
+)
 
 objectives: List[Objective] = []
 
@@ -71,23 +85,24 @@ def fireball_anim():
         fireball.hidden = True
 
     def move_player():
-        hp_damage_taken = enemy_sprite.health.total_hp / len(objectives)
-        enemy_sprite.health.animate_damage(hp_damage_taken)
+        hp_damage_taken = enemy.healthbar.total_hp / len(objectives)
+        enemy.healthbar.animate_damage(hp_damage_taken)
 
         fireball.pos = (90, 240)
-        animate(fireball, on_finished=hide_fireball, pos=player_sprite.pos)
+        animate(fireball, on_finished=hide_fireball, pos=player.pos)
 
     def move_enemy():
         fireball.hidden = False
         fireball.pos = (410, 60)
 
-        player_sprite.health.animate_damage(random.randint(0, 20))
+        player.healthbar.animate_damage(random.randint(0, 20))
 
-        animate(fireball, on_finished=move_player, pos=enemy_sprite.pos)
+        animate(fireball, on_finished=move_player, pos=enemy.pos)
 
     fireball.anim_playing = True
     fireball.scale = 0.3
     schedule(move_enemy, 2)
+
 
 def create_new_objective(rec):
     min_count, max_count = rec["exercise"]
@@ -111,13 +126,11 @@ def check_uncompleted_objectives():
         obj.completed = True
         fireball_anim()
 
-        if enemy_sprite.health._hp < 1:
-            print("huh")
-
         try:
+            Pose.reset_all_recognizers()
             Pose.set_active_recognizer([objectives[idx + 1].action])
         except IndexError:
-            pass
+            schedule(lambda: game_manager.switch_scene('hallway', prev_room), 1)
 
 
 # TODO: make it pretteh
@@ -144,8 +157,12 @@ class battle(Scene):
         super().__init__(self.SCENE_NAME)
 
     # TODO: vary difficulty
-    def on_show(self, room=0):
+    def on_show(self, prev="hallway", room=0):
+        global prev_room
+        prev_room = prev
+
         # create_new_objective(exercise[room])
+        objectives.clear()
         objectives.append(Objective("bicep curls", 1))
 
     def on_hide(self):
@@ -156,17 +173,17 @@ class battle(Scene):
         camera.draw(screen)
         draw_checklist(screen)
 
-        player_sprite.draw(screen)
-        enemy_sprite.draw(screen)
+        player.draw(screen)
+        enemy.draw(screen)
         fireball.draw()
 
         screen.draw.text(
-            player_sprite.name,
+            player.name,
             (player_sprite.left + 90, player_sprite.top - 10),
             fontname="pixel",
         )
         screen.draw.text(
-            enemy_sprite.name,
+            enemy.name,
             (enemy_sprite.left + 10, enemy_sprite.top - 20),
             fontname="pixel",
         )

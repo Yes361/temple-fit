@@ -20,7 +20,11 @@ class ColliderRect(Rect):
         self.is_static = is_static
         self.is_passable = is_passable
         self.fn = fn
-        super().__init__(*args, **kwargs)
+        
+        for attr in kwargs:
+            setattr(self, attr, kwargs[attr])
+            
+        super().__init__(*args)
         
 @dataclass
 class CollisionData:

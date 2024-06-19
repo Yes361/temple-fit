@@ -415,10 +415,13 @@ class ActorContainer(AbstractActor):
         for name in self._actor_list.copy():
             actor = self._actor_list.get(name)
             if isinstance(actor, ActorContainer):
-                actor.clear()
-                continue
-            
+                actor.clear()            
             self.remove(name)
+    
+    def set_prop(self, property, value) -> bool:
+        for actor in self._actor_list.values():
+            if hasattr(actor, property):
+                setattr(actor, property, value)
             
     def __getattr__(self, property):
         if property in self.__dict__:
@@ -427,7 +430,11 @@ class ActorContainer(AbstractActor):
             # setattr(self, property, ) # Cache result?
             return self.get_weak_actor(property)
         else:
-            AttributeError(f'{property} is not in {self.__class__.__name__}')
+            raise AttributeError(f'{property} is not in {self.__class__.__name__}')
+            
+    # def __setattr__(self, property, value):
+    #     self.set_prop(property, value)
+    #     self.__dict__[property] = value
             
     def get_weak_actor(self, item):
         assert item in self._actor_list, f'\"{item}\" is not added.'
