@@ -84,7 +84,7 @@ levels = {
             ColliderRect((-2160 * 0.3 / 2 + 81, -4320 * 0.3 / 2), (81, 4320 * 0.3)),
             ColliderRect((2160 * 0.3 / 2 - 81 * 2, -4320 * 0.3 / 2), (81, 4320 * 0.3)),
             ColliderRect(
-                (-2160 * 0.3 / 2 + 82, -4320 * 0.3 / 2 + 81 * 3 + 10),
+                (-2160 * 0.3 / 2 + 83, -4320 * 0.3 / 2 + 80 * 3 + 10),
                 (81, 81),
                 fn=lambda: level_manager.load_level("room1", player_pos=(200, 0)),
             ),
@@ -104,12 +104,12 @@ levels = {
                 fn=lambda: level_manager.load_level("room4", player_pos=(-200, 0)),
             ),
             ColliderRect(
-                (-2160 * 0.3 / 2 + 82, -4320 * 0.3 / 2 + 81 * 11 + 10),
+                (-2160 * 0.3 / 2 + 82, -4320 * 0.3 / 2 + 81 * 11  - 25),
                 (81, 81),
                 fn=lambda: level_manager.load_level("room5", player_pos=(200, 0)),
             ),
             ColliderRect(
-                (2160 * 0.3 / 2 - 81 * 2 - 1, -4320 * 0.3 / 2 + 81 * 11 + 10),
+                (2160 * 0.3 / 2 - 81 * 2 - 3, -4320 * 0.3 / 2 + 81 * 11 - 25),
                 (81, 81),
                 fn=lambda: level_manager.load_level("room6", player_pos=(-200, 0)),
             ),
@@ -161,7 +161,7 @@ levels = {
         ),
     },
     "room2": {
-        "world": Actor("stone_right.png", scale=662 / 1080),
+        "world": Actor("netherite_right.png", scale=662 / 1080),
         "colliders": [
             ColliderRect(
                 (-1080 * 662 / 1080 / 2, -1080 * 662 / 1080 / 2 - 81),
@@ -197,7 +197,7 @@ levels = {
         ),
     },
     "room3": {
-        "world": Actor("stone_left.png", scale=662 / 1080),
+        "world": Actor("wood_left.png", scale=662 / 1080),
         "colliders": [
             ColliderRect(
                 (-1080 * 662 / 1080 / 2, -1080 * 662 / 1080 / 2 - 81),
@@ -267,7 +267,7 @@ levels = {
         ),
     },
     "room5": {
-        "world": Actor("stone_left.png", scale=662 / 1080),
+        "world": Actor("quartz_left.png", scale=662 / 1080),
         "colliders": [
             ColliderRect(
                 (-1080 * 662 / 1080 / 2, -1080 * 662 / 1080 / 2 - 81),
@@ -301,7 +301,7 @@ levels = {
         ),
     },
     "room6": {
-        "world": Actor("stone_right.png", scale=662 / 1080),
+        "world": Actor("quartz_right.png", scale=662 / 1080),
         "colliders": [
             ColliderRect(
                 (-1080 * 662 / 1080 / 2, -1080 * 662 / 1080 / 2 - 81),
@@ -336,7 +336,7 @@ levels = {
         ),
     },
     "room7": {
-        "world": Actor("stone_left.png", scale=662 / 1080),
+        "world": Actor("netherite_left.png", scale=662 / 1080),
         "colliders": [
             ColliderRect(
                 (-1080 * 662 / 1080 / 2, -1080 * 662 / 1080 / 2 - 81),
@@ -370,7 +370,7 @@ levels = {
         ),
     },
     "room8": {
-        "world": Actor("stone_right.png", scale=662 / 1080),
+        "world": Actor("wood_right.png", scale=662 / 1080),
         "colliders": [
             ColliderRect(
                 (-1080 * 662 / 1080 / 2, -1080 * 662 / 1080 / 2 - 81),

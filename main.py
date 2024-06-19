@@ -35,3 +35,5 @@ def draw():
     game_manager.draw(screen)
 
 pgzrun.go()
+
+#test test can you see this raiyan islammm
