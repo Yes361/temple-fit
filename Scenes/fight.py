@@ -8,7 +8,6 @@ import pygame, random
 
 # Definitions
 
-
 @dataclass
 class Objective:
     action: str
@@ -161,21 +160,24 @@ class battle(Scene):
         global prev_room
         prev_room = prev
 
-        # create_new_objective(exercise[room])
         objectives.clear()
-        objectives.append(Objective("bicep curls", 1))
+        create_new_objective(exercise[room])
+        # objectives.append(Objective("bicep curls", 1))
 
     def on_hide(self):
         pass
 
     def on_draw(self, screen):
+        # all_actors.draw(screen)
         backdrop.draw()
         camera.draw(screen)
         draw_checklist(screen)
+        
 
         player.draw(screen)
         enemy.draw(screen)
-        fireball.draw()
+                
+        draw_checklist(screen)
 
         screen.draw.text(
             player.name,
@@ -189,6 +191,7 @@ class battle(Scene):
         )
 
     def on_update(self, dt):
+        all_actors.update(dt)
         check_uncompleted_objectives()
 
     def on_key_down(self, key, unicode):

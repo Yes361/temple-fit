@@ -1,5 +1,5 @@
-from helper import AbstractActor, Actor, Rect
-from pgzero.builtins import animate
+from helper import AbstractActor, Actor, Rect, CACHED_DIALOGUE, CACHED_VOICELINES
+from pgzero.builtins import animate, sounds
 
 class Text(AbstractActor):
     def __init__(self, *args, bounding_box: Rect=None, **kwargs):
@@ -36,10 +36,18 @@ class Text(AbstractActor):
             screen.draw.textbox(text, self.bounding_box, **self.styles)
             
 class Dialogue(Text):
-    def __init__(self, actor_ref: Actor, characters: dict, dialogue: list, *args, **kwargs):
+    def __init__(self, actor_ref: Actor, characters: dict, dialogue: list, voice_lines: list = None, *args, **kwargs):
         self.dialogue = dialogue
+        self.voice_lines = voice_lines
+        self.sound = None
         self.actor_ref = actor_ref.get_weak_ref()
         self.characters = characters
+        if self.voice_lines is not None:
+            voice_line = self.voice_lines.pop(0)
+            self.sound = getattr(sounds, voice_line)
+            self.sound.play()
+            kwargs['time'] = self.sound.get_length()
+            
         super().__init__(self.parse_dialogue_line(self.dialogue.pop(0)), *args, **kwargs)
     
     def parse_dialogue_line(self, line):
@@ -55,12 +63,18 @@ class Dialogue(Text):
     def next_line(self):
         if len(self.dialogue) > 0:
             line = self.parse_dialogue_line(self.dialogue.pop(0))
-
-            self.animate_typewriter(self.pos, line, time_per_char=self.time_per_char, **self.styles)
-            
+            if self.voice_lines is not None:
+                voice_line = self.voice_lines.pop(0)
+                self.sound = getattr(sounds, voice_line)
+                self.sound.play()
+                self.animate_typewriter(self.pos, line, time=self.sound.get_length(), **self.styles)
+            else:
+                self.animate_typewriter(self.pos, line, time_per_char=self.time_per_char, **self.styles)
+    
     def next(self):
         if self._anim.running:
             self.skip()
+            self.sound.stop()
         else:
             self.next_line()
 

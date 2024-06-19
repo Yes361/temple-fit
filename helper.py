@@ -36,6 +36,16 @@ def extract_gif_frames(read_file, out_dir, prefix):
                 im.save(rf'{out_dir}/{prefix}_frame_{idx:0{digit_length}d}.png')
         except EOFError:
             pass
+        
+def extract_voicelines(folder):
+    scene = {}
+    for file in os.listdir(folder):
+        if scene_name := re.match(r'^(.+)_\d+\.mp3$', file):
+            scene_name = scene_name.group(1)
+            if scene_name not in scene:
+                scene[scene_name] = []
+            scene[scene_name].append(file)
+    return scene
 
 def match_file_prefix(prefix, file):
     return re.match(rf'{prefix}(?:_frame)', file) != None
@@ -68,9 +78,6 @@ def load_gifs(path):
         gif_images[file_name] = extract_frames_from_gif(file_name)
     return gif_images
 
-def play_sound(sound: str):
-    getattr(sounds, sound).play()
-
 # TODO: Sync Assets and Images Folder function
 def sync_assets_and_images(asset_folder_path):
     pass
@@ -80,12 +87,13 @@ CACHED_GIFS = load_gifs(r'assets/gifs')
 def read_dialogue_lines(asset_folder_path):
     dialogue = {}
     for file in os.listdir(asset_folder_path):
-        file_name = re.match(r'^\d+_(.+)\.txt$', file).group(1)
+        file_name = re.match(r'^(.+)_\d+\.txt$', file).group(1)
         dialogue_lines = open(os.path.join(asset_folder_path, file), 'r').read().split('\n')
         dialogue[file_name] = list(filter(lambda line: (line != '\n') and (line != ''), dialogue_lines))
     return dialogue
 
 CACHED_DIALOGUE = read_dialogue_lines(r'assets/Dialogue')
+CACHED_VOICELINES = extract_voicelines(r'sounds')
 
 class AbstractActor:
     @abstractmethod
@@ -472,5 +480,6 @@ def schedule(on_finish, duration): # monke patch
 if __name__ == '__main__':
     # extract_gif_frames(r'assets/gifs/outro_card.gif', 'images', 'outro_card') 
     # print(read_dialogue_lines(r'assets/Dialogue'))
-    lower_case_files(r'images')
+    lower_case_files(r'sounds')
+    # print(CACHED_VOICELINES)
     # print(CACHED_DIALOGUE)

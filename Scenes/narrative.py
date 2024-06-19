@@ -1,5 +1,5 @@
 from managers import Scene, game_manager
-from helper import Actor, ActorContainer, Rect, CACHED_DIALOGUE
+from helper import Actor, ActorContainer, Rect, CACHED_DIALOGUE, CACHED_VOICELINES
 from Game import Button, Dialogue
 from pgzero.builtins import keyboard, keys
 
@@ -23,7 +23,7 @@ class Narrative(Scene):
         text_box = Actor('narrative_text_box', pos=(370, 600), scale=0.3)
         text_box.resize((450, 95))
         
-        text_anim = Dialogue(sprite, {'MC': 'character-battle-sprite', 'Mayor': 'narrative_icon', 'Merchant': 'narrative_icon'}, CACHED_DIALOGUE['start'], time_per_char=0.02, bounding_box=Rect((220, 565), (425, 75)), color='black')
+        text_anim = Dialogue(sprite, {'MC': 'character-battle-sprite', 'Mayor': 'narrative_icon', 'Merchant': 'narrative_icon'}, CACHED_DIALOGUE['start'], voice_lines=CACHED_VOICELINES['mayorscene'], time_per_char=0.02, bounding_box=Rect((220, 565), (425, 75)), color='black')
         ui_elements = ActorContainer()
         
         next_button = Button('play_button', pos=(550, 500), on_click=lambda x, y: game_manager.switch_scene('hallway'))
