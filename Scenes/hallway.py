@@ -247,6 +247,9 @@ levels = {
             scroll=Item("red_hood", scale=0.15, pos=(0, 0)),
         ),
     },
+    'tutorial': {
+        
+    }
 }
 
 level_manager = LevelManager((662, 662), player, levels)
