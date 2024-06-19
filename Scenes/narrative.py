@@ -18,7 +18,7 @@ class Narrative(Scene):
         backdrop = Actor('narrative_backdrop', topleft=(0, 0), dims=(662, 662))
         
         sprite = Actor('narrative_icon', pos=(100, 580))
-        sprite.scale = 1
+        sprite.scale = 1.5
         
         text_box = Actor('narrative_text_box', pos=(370, 600), scale=0.3)
         text_box.resize((450, 95))

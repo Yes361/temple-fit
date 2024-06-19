@@ -45,6 +45,7 @@ player = ActorContainer(
         on_hp_change=player_health,
         topleft=(10, 510),
         scale=0.8,
+        fill = (153,1,1)
     ),
 )
 player.name = "Player TMP"
@@ -58,7 +59,7 @@ enemy_sprite = Entity(
 enemy = ActorContainer(
     enemy_sprite=enemy_sprite,
     healthbar=HealthBar(
-        "healthbar", Rect((58.5, 26.25), (220, 35)), 100, topleft=(300, 250), scale=0.6
+        "healthbar", Rect((58.5, 26.25), (220, 35)), 100, topleft=(300, 250), scale=0.6, fill = (153,1,1)
     ),
 )
 enemy.name = "Enemy TMP"
