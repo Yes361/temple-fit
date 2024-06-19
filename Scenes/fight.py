@@ -44,7 +44,7 @@ player = ActorContainer(
         100,
         on_hp_change=player_health,
         topleft=(10, 510),
-        scale=0.8,
+        scale=0.8
         fill = (153,1,1)
     ),
 )
@@ -64,7 +64,8 @@ enemy = ActorContainer(
 )
 enemy.name = "Enemy TMP"
 
-prev_room = "hallway"
+next_room = "hallway"
+next_player_pos = (0, 0)
 
 exercise = [{"exercise": (1, 2), "sets": (5, 7)}, {"exercise": (2, 4), "sets": (7, 10)}]
 
@@ -130,7 +131,7 @@ def check_uncompleted_objectives():
             Pose.reset_all_recognizers()
             Pose.set_active_recognizer([objectives[idx + 1].action])
         except IndexError:
-            schedule(lambda: game_manager.switch_scene('hallway', prev_room), 1)
+            schedule(lambda: game_manager.switch_scene('hallway', next_room, next_player_pos), 1)
 
 
 # TODO: make it pretteh
@@ -157,9 +158,10 @@ class battle(Scene):
         super().__init__(self.SCENE_NAME)
 
     # TODO: vary difficulty
-    def on_show(self, prev="hallway", room=0):
-        global prev_room
-        prev_room = prev
+    def on_show(self, next="hallway", pos=(0, 0), room=0):
+        global next_room, next_player_pos
+        next_room = next
+        next_player_pos = pos
 
         objectives.clear()
         create_new_objective(exercise[room])
