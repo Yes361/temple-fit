@@ -27,9 +27,6 @@ backdrop = Actor("battle-backdrop", topleft=(0, 0), dims=(662, 662))
 camera.resize((250, 250 * 3 / 4))
 camera.topleft = (355, 386)
 
-fireball = Actor("fireball", hidden=True)
-fireball.anim_playing = False
-
 player_sprite = Entity(
     "character-battle-sprite",
     topleft=(50, 282),
@@ -70,38 +67,22 @@ next_player_pos = (0, 0)
 exercise = [{"exercise": (1, 2), "sets": (5, 7)}, {"exercise": (2, 4), "sets": (7, 10)}]
 
 all_actors = ActorContainer(
-    player=player, enemy=enemy, fire=fireball, cam=camera, back=backdrop
+    player=player, enemy=enemy, cam=camera, back=backdrop
 )
 
 objectives: List[Objective] = []
 
 # Helper Functions
 
-
-def fireball_anim():
-    global fireball
-
-    def hide_fireball():
-        fireball.anim_playing = False
-        fireball.hidden = True
-
+def anim():
     def move_player():
         hp_damage_taken = enemy.healthbar.total_hp / len(objectives)
         enemy.healthbar.animate_damage(hp_damage_taken)
-
-        fireball.pos = (90, 240)
-        animate(fireball, on_finished=hide_fireball, pos=player.pos)
-
+        
     def move_enemy():
-        fireball.hidden = False
-        fireball.pos = (410, 60)
-
         player.healthbar.animate_damage(random.randint(0, 20))
+        schedule(move_player, 0.1)
 
-        animate(fireball, on_finished=move_player, pos=enemy.pos)
-
-    fireball.anim_playing = True
-    fireball.scale = 0.3
     schedule(move_enemy, 2)
 
 
@@ -121,18 +102,20 @@ def create_new_objective(rec):
 
 def check_uncompleted_objectives():
     for idx, obj in enumerate(objectives):
-        if obj.completed or Pose.report_stats(obj.action) < obj.count:
+        if obj.completed:
             continue
+        
+        if Pose.report_stats(obj.action) >= obj.count:
+            obj.completed = True
+            anim()
 
-        obj.completed = True
-        fireball_anim()
+            try:
+                Pose.reset_all_recognizers()
+                Pose.set_active_recognizer([objectives[idx + 1].action])
+            except IndexError:
+                schedule(lambda: game_manager.switch_scene('hallway', next_room, next_player_pos), 1)
 
-        try:
-            Pose.reset_all_recognizers()
-            Pose.set_active_recognizer([objectives[idx + 1].action])
-        except IndexError:
-            schedule(lambda: game_manager.switch_scene('hallway', next_room, next_player_pos), 1)
-
+        break
 
 # TODO: make it pretteh
 def draw_checklist(screen):
@@ -150,6 +133,10 @@ def draw_checklist(screen):
             ocolor="white",
         )
 
+def reset():
+    objectives.clear()
+    player.healthbar.hp = 100
+    enemy.healthbar.hp = 100
 
 class battle(Scene):
     SCENE_NAME = "Battle"
@@ -158,14 +145,17 @@ class battle(Scene):
         super().__init__(self.SCENE_NAME)
 
     # TODO: vary difficulty
-    def on_show(self, next="hallway", pos=(0, 0), room=0):
+    def on_show(self, next="hallway", pos=(0, 0), room=0, enemy_image='character-battle-sprite'):
         global next_room, next_player_pos
         next_room = next
         next_player_pos = pos
+        enemy_sprite.image = enemy_image
 
-        objectives.clear()
-        create_new_objective(exercise[room])
-        # objectives.append(Objective("bicep curls", 1))
+        reset()
+        # create_new_objective(exercise[room])
+        objectives.append(Objective("bicep curls", 10))
+        objectives.append(Objective("bicep curls", 10))
+        objectives.append(Objective("bicep curls", 10))
 
     def on_hide(self):
         pass
@@ -175,7 +165,6 @@ class battle(Scene):
         backdrop.draw()
         camera.draw(screen)
         draw_checklist(screen)
-        
 
         player.draw(screen)
         enemy.draw(screen)

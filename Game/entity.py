@@ -37,27 +37,27 @@ class Player(Entity):
     # def on_collide(self, collision):
     #     pass
         
-    def move(self, dt):
-        anim = 'idle'
+    def move(self):
+        # anim = 'idle'
         if keyboard[keys.S] or keyboard[keys.DOWN]:
             self.y += self.speed
-            anim = 'down'
+            self._current_anim = 'down'
             
         if keyboard[keys.W] or keyboard[keys.UP]:
             self.y -= self.speed
-            anim = 'up'
+            self._current_anim = 'up'
             
         if keyboard[keys.D] or keyboard[keys.RIGHT]:
             self.x += self.speed
-            anim = 'right'
+            self._current_anim = 'right'
             
         if keyboard[keys.A] or keyboard[keys.LEFT]:
             self.x -= self.speed
-            anim = 'left'
+            self._current_anim = 'left'
         
-        if self.images != self.animation_frames[anim]:
-            self.images = self.animation_frames[anim]
+        if self.images != self.animation_frames[self._current_anim]:
+            self.images = self.animation_frames[self._current_anim]
             
     def update(self, dt):
-        self.move(dt)
+        self._current_anim = 'idle'
         super().update(dt)
