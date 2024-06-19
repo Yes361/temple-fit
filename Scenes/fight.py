@@ -44,7 +44,7 @@ player = ActorContainer(
         100,
         on_hp_change=player_health,
         topleft=(10, 510),
-        scale=0.8
+        scale=0.8,
         fill = (153,1,1)
     ),
 )
@@ -76,7 +76,6 @@ all_actors = ActorContainer(
 objectives: List[Objective] = []
 
 # Helper Functions
-
 
 def fireball_anim():
     global fireball

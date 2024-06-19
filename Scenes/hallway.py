@@ -56,9 +56,7 @@ class Enemy(Entity):
         if self.colliderect(player):
             fade()
             schedule(
-                lambda: game_manager.switch_scene(
-                    "Battle", next=self.next, room=0
-                ),
+                lambda: game_manager.switch_scene("Battle", next=self.next, room=0),
                 1,
             )
 
@@ -120,9 +118,13 @@ right_rooms = [
     ),
 ]
 
+
 def next_floor():
+    global counter
     if counter >= 8:
-        level_manager.load_level('fields')
+        level_manager.load_level("floor2")
+        counter = 0
+
 
 levels = {
     "tutorial_start": {
@@ -194,7 +196,7 @@ levels = {
             ),
         ],
         "entities": ActorContainer(
-            enemy=Enemy("green_moth", pos=(-200, 0), scale=0.15, next='fields')
+            enemy=Enemy("green_moth", pos=(-200, 0), scale=0.15, next="fields")
         ),
     },
     "fields": {
@@ -228,7 +230,11 @@ levels = {
         "colliders": [
             ColliderRect((-2160 * 0.3 / 2 + 81, -4320 * 0.3 / 2), (81, 4320 * 0.3)),
             ColliderRect((2160 * 0.3 / 2 - 81 * 2, -4320 * 0.3 / 2), (81, 4320 * 0.3)),
-            ColliderRect((-2160 * 0.3 / 2 + 81, -4320 * 0.3 / 2 + 80), (4320 * 0.3, 10), fn=next_floor),
+            ColliderRect(
+                (-2160 * 0.3 / 2 + 81, -4320 * 0.3 / 2 + 80),
+                (4320 * 0.3, 10),
+                fn=next_floor,
+            ),
             ColliderRect(
                 (-2160 * 0.3 / 2 + 83, -4320 * 0.3 / 2 + 80 * 3 + 10),
                 (81, 81),
@@ -291,7 +297,7 @@ levels = {
         ]
         + left_rooms,
         "entities": ActorContainer(
-            enemy=Enemy("green_moth", pos=(-200, 0), scale=0.15, next='hallway'),
+            enemy=Enemy("green_moth", pos=(-200, 0), scale=0.15, next="floor"),
             scroll=Item("scroll", scale=0.15, pos=(0, 0)),
         ),
     },
@@ -306,7 +312,7 @@ levels = {
         ]
         + right_rooms,
         "entities": ActorContainer(
-            enemy=Enemy("red_hood", pos=(+200, 0), scale=0.15, next='hallway'),
+            enemy=Enemy("red_hood", pos=(+200, 0), scale=0.15, next="floor"),
             scroll=Item("scroll", scale=0.15, pos=(0, 0)),
         ),
     },
@@ -321,7 +327,7 @@ levels = {
         ]
         + left_rooms,
         "entities": ActorContainer(
-            enemy=Enemy("green_moth", pos=(-200, 0), scale=0.15, next='hallway'),
+            enemy=Enemy("green_moth", pos=(-200, 0), scale=0.15, next="floor"),
             scroll=Item("scroll", scale=0.15, pos=(0, 0)),
         ),
     },
@@ -336,12 +342,12 @@ levels = {
         ]
         + right_rooms,
         "entities": ActorContainer(
-            enemy=Enemy("red_hood", pos=(+200, 0), scale=0.15, next='hallway'),
+            enemy=Enemy("red_hood", pos=(+200, 0), scale=0.15, next="floor"),
             scroll=Item("scroll", scale=0.15, pos=(0, 0)),
         ),
     },
     "room5": {
-        "world": Actor("quartz_left.png", scale=662 / 1080),
+        "world": Actor("purple_left.png", scale=662 / 1080),
         "colliders": [
             ColliderRect(
                 (1080 * 662 / 1080 / 2 - 81 - 1, -1080 * 662 / 1080 / 2 + 81 * 4),
@@ -351,12 +357,12 @@ levels = {
         ]
         + left_rooms,
         "entities": ActorContainer(
-            enemy=Enemy("green_moth", pos=(-200, 0), scale=0.15, next='hallway'),
+            enemy=Enemy("green_moth", pos=(-200, 0), scale=0.15, next="floor"),
             scroll=Item("scroll", scale=0.15, pos=(0, 0)),
         ),
     },
     "room6": {
-        "world": Actor("quartz_right.png", scale=662 / 1080),
+        "world": Actor("purple_right.png", scale=662 / 1080),
         "colliders": [
             ColliderRect(
                 (-1080 * 662 / 1080 / 2 + 1, -1080 * 662 / 1080 / 2 + 81 * 4),
@@ -366,7 +372,7 @@ levels = {
         ]
         + right_rooms,
         "entities": ActorContainer(
-            enemy=Enemy("red_hood", pos=(+200, 0), scale=0.15, next='hallway'),
+            enemy=Enemy("red_hood", pos=(+200, 0), scale=0.15, next="floor"),
             scroll=Item("scroll", scale=0.15, pos=(0, 0)),
         ),
     },
@@ -381,7 +387,7 @@ levels = {
         ]
         + left_rooms,
         "entities": ActorContainer(
-            enemy=Enemy("green_moth", pos=(-200, 0), scale=0.15, next='hallway'),
+            enemy=Enemy("green_moth", pos=(-200, 0), scale=0.15, next="floor"),
             scroll=Item("scroll", scale=0.15, pos=(0, 0)),
         ),
     },
@@ -396,7 +402,146 @@ levels = {
         ]
         + right_rooms,
         "entities": ActorContainer(
-            enemy=Enemy("red_hood", pos=(+200, 0), scale=0.15, next='hallway'),
+            enemy=Enemy("red_hood", pos=(+200, 0), scale=0.15, next="floor"),
+            scroll=Item("scroll", scale=0.15, pos=(0, 0)),
+        ),
+    },
+    "floor2": {
+        "world": Actor("floor2", scale=0.3),
+        "colliders": [
+            ColliderRect((-2160 * 0.3 / 2 + 81, -3500 * 0.3 / 2), (81, 3500 * 0.3)),
+            ColliderRect((2160 * 0.3 / 2 - 81 * 2, -3500 * 0.3 / 2), (81, 3500 * 0.3)),
+            ColliderRect(
+                (-2160 * 0.3 / 2 + 81, -3500 * 0.3 / 2 + 80),
+                (3500 * 0.3, 10),
+                fn=next_floor,
+            ),
+            ColliderRect(
+                (-2160 * 0.3 / 2 + 83, -3500 * 0.3 / 2 + 80 * 3 + 10),
+                (81, 81),
+                fn=lambda: level_manager.load_level("room1-2", player_pos=(0, 0)),
+                # fn=lambda: print('room1')
+            ),
+            ColliderRect(
+                (2160 * 0.3 / 2 - 81 * 2 - 1, -3500 * 0.3 / 2 + 81 * 3 + 10),
+                (81, 81),
+                fn=lambda: level_manager.load_level("room2-2", player_pos=(0, 0)),
+                # fn=lambda: print('room2')
+            ),
+            ColliderRect(
+                (-2160 * 0.3 / 2 + 82, -3500 * 0.3 / 2 + 81 * 7 + 10),
+                (81, 81),
+                fn=lambda: level_manager.load_level("room3-2", player_pos=(0, 0)),
+                # fn=lambda: print('room3')
+            ),
+            ColliderRect(
+                (2160 * 0.3 / 2 - 81 * 2 - 1, -3500 * 0.3 / 2 + 81 * 7 + 10),
+                (81, 81),
+                fn=lambda: level_manager.load_level("room4-2", player_pos=(0, 0)),
+                # fn=lambda: print('room4')
+            ),
+            ColliderRect(
+                (-2160 * 0.3 / 2 + 82, -3500 * 0.3 / 2 + 81 * 11 - 25),
+                (81, 81),
+                fn=lambda: level_manager.load_level("room5-2", player_pos=(0, 0)),
+                # fn=lambda: print('room5')
+            ),
+            ColliderRect(
+                (2160 * 0.3 / 2 - 81 * 2 - 3, -3500 * 0.3 / 2 + 81 * 11 - 25),
+                (81, 81),
+                fn=lambda: level_manager.load_level("room6-2", player_pos=(0, 0)),
+                # fn=lambda: print('room6')
+            )
+        ],
+        "entities": ActorContainer(),
+    },
+    "room1-2": {
+        "world": Actor("smooth_left.png", scale=662 / 1080),
+        "colliders": [
+            ColliderRect(
+                (1080 * 662 / 1080 / 2 - 81 - 1, -1080 * 662 / 1080 / 2 + 81 * 4),
+                (81, 81),
+                fn=lambda: level_manager.load_level("floor2", player_pos=(-84, -370)),
+            ),
+        ]
+        + left_rooms,
+        "entities": ActorContainer(
+            enemy=Enemy("green_moth", pos=(-200, 0), scale=0.15, next="floor2"),
+            scroll=Item("scroll", scale=0.15, pos=(0, 0)),
+        ),
+    },
+    "room2-2": {
+        "world": Actor("brick_right.png", scale=662 / 1080),
+        "colliders": [
+            ColliderRect(
+                (-1080 * 662 / 1080 / 2 + 1, -1080 * 662 / 1080 / 2 + 81 * 4),
+                (81, 81),
+                fn=lambda: level_manager.load_level("floor2", player_pos=(96, -370)),
+            ),
+        ]
+        + right_rooms,
+        "entities": ActorContainer(
+            enemy=Enemy("red_hood", pos=(+200, 0), scale=0.15, next="floor2"),
+            scroll=Item("scroll", scale=0.15, pos=(0, 0)),
+        ),
+    },
+    "room3-2": {
+        "world": Actor("block_left.png", scale=662 / 1080),
+        "colliders": [
+            ColliderRect(
+                (1080 * 662 / 1080 / 2 - 81 - 1, -1080 * 662 / 1080 / 2 + 81 * 4),
+                (81, 81),
+                fn=lambda: level_manager.load_level("floor2", player_pos=(-84, 48)),
+            ),
+        ]
+        + left_rooms,
+        "entities": ActorContainer(
+            enemy=Enemy("green_moth", pos=(-200, 0), scale=0.15, next="floor2"),
+            scroll=Item("scroll", scale=0.15, pos=(0, 0)),
+        ),
+    },
+    "room4-2": {
+        "world": Actor("smooth_right.png", scale=662 / 1080),
+        "colliders": [
+            ColliderRect(
+                (-1080 * 662 / 1080 / 2 + 1, -1080 * 662 / 1080 / 2 + 81 * 4),
+                (81, 81),
+                fn=lambda: level_manager.load_level("floor2", player_pos=(96, 48)),
+            ),
+        ]
+        + right_rooms,
+        "entities": ActorContainer(
+            enemy=Enemy("red_hood", pos=(+200, 0), scale=0.15, next="floor2"),
+            scroll=Item("scroll", scale=0.15, pos=(0, 0)),
+        ),
+    },
+    "room5-2": {
+        "world": Actor("brick_left.png", scale=662 / 1080),
+        "colliders": [
+            ColliderRect(
+                (1080 * 662 / 1080 / 2 - 81 - 1, -1080 * 662 / 1080 / 2 + 81 * 4),
+                (81, 81),
+                fn=lambda: level_manager.load_level("floor2", player_pos=(-84, 219)),
+            ),
+        ]
+        + left_rooms,
+        "entities": ActorContainer(
+            enemy=Enemy("green_moth", pos=(-200, 0), scale=0.15, next="floor2"),
+            scroll=Item("scroll", scale=0.15, pos=(0, 0)),
+        ),
+    },
+    "room6-2": {
+        "world": Actor("block_right.png", scale=662 / 1080),
+        "colliders": [
+            ColliderRect(
+                (-1080 * 662 / 1080 / 2 + 1, -1080 * 662 / 1080 / 2 + 81 * 4),
+                (81, 81),
+                fn=lambda: level_manager.load_level("floor2", player_pos=(96, 219)),
+            ),
+        ]
+        + right_rooms,
+        "entities": ActorContainer(
+            enemy=Enemy("red_hood", pos=(+200, 0), scale=0.15, next="floor22"),
             scroll=Item("scroll", scale=0.15, pos=(0, 0)),
         ),
     },
@@ -416,24 +561,25 @@ class hallway(Scene):
 
     def on_show(self, room="fields", player_pos=(0, 0)):
         global level_manager, text
-            
+
         reset_opacity()
 
         if room == "fields":
-            player_pos = (0, 1000)
+            level_manager.load_level("fields", player_pos=(0, 1000))
         elif room == "tutorial":
             level_manager.load_level("tutorial_start", player_pos)
-        if level_manager.prev_level.startswith("room"):
+        elif level_manager.prev_level.startswith("room"):
             levels[room]["entities"].enemy.hidden = True
             level_manager.load_level(room, player_pos)
-            
+        else:
+            level_manager.load_level(room)
 
     def on_update(self, dt):
         if not freeze_frame:
             level_manager.update(dt)
-            
+
         if counter >= 8:
-            levels['floor']['world'].image = 'floor1-open'
+            levels["floor"]["world"].image = "floor1-open"
 
     def on_draw(self, screen):
         global counter

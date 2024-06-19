@@ -37,14 +37,14 @@ class StartScreen(Scene):
             hallway_button=Button(
                 "play_button.png",
                 pos=(331, 520),
-                on_click=lambda x, y: game_manager.switch_scene('hallway'),
+                on_click=lambda x, y: game_manager.switch_scene('hallway', 'fields'),
                 scale=0.1,
                 hover_frame='character.png'
             ),
             narrative_button=Button(
                 "play_button.png",
                 pos=(331, 630),
-                on_click=lambda x, y: game_manager.switch_scene('Narrative'),
+                on_click=lambda x, y: game_manager.switch_scene('hallway', 'floor2'),
                 scale=0.1,
             ),
             hidden=True,
