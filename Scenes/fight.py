@@ -64,7 +64,6 @@ enemy.name = "Enemy TMP"
 next_room = "hallway"
 next_player_pos = (0, 0)
 
-exercise = [{"exercise": (1, 2), "sets": (5, 7)}, {"exercise": (2, 4), "sets": (7, 10)}]
 
 all_actors = ActorContainer(
     player=player, enemy=enemy, cam=camera, back=backdrop

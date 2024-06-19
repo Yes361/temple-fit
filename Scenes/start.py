@@ -75,3 +75,15 @@ class StartScreen(Scene):
 
     def on_key_down(self, key, unicode):
         intro.skip_gif()
+
+
+
+def difficultyChanger(difficulty):
+    if difficulty == 'easy':
+        exercise = [{"exercise": (1, 2), "sets": (5, 7)}, {"exercise": (2, 4), "sets": (7, 10)}]
+    
+    elif difficulty == 'medium':
+        exercise = [{"exercise": (2, 4), "sets": (5, 7)}, {"exercise": (4, 6), "sets": (7, 10)}]
+    
+    elif difficulty == 'hard':
+        exercise = [{"exercise": (5, 7), "sets": (8, 10)}, {"exercise": (7, 10), "sets": (10, 15)}]
