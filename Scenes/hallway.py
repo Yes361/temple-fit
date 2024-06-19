@@ -287,7 +287,7 @@ levels = {
             ColliderRect(
                 (-2160 * 0.3 / 2 + 83, -4320 * 0.3 / 2 + 80 * 3 + 10),
                 (81, 81),
-                fn=lambda: level_manager.load_level("room1", player_pos=(0, 0)),
+                fn=lambda: level_manager.load_level("room1", player_pos=(1080 * 0.3/2 - 20, 20)),
                 # fn=lambda: print('room1')
             ),
             ColliderRect(
