@@ -34,6 +34,9 @@ class Player(Entity):
             }
         super().__init__(*args, **kwargs)
         
+    # def on_collide(self, collision):
+    #     pass
+        
     def move(self, dt):
         anim = 'idle'
         if keyboard[keys.S] or keyboard[keys.DOWN]:
