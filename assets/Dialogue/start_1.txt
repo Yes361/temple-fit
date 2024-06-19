@@ -22,6 +22,10 @@ MC: I guess, but what does all this have to do with me?
 
 Mayor: I need you to go to the temple. There is something in there, something powerful, and I need it. 
 
+MC: What is it?
+
+Mayor: Gold and treasures. Lots of it.
+
 MC: Why would I help you? What do I get in return?
 
 Mayor: You get to live! Come back alive, and you're free to go. Refuse, and...let's say you're living in luxury right now. 
@@ -30,14 +34,8 @@ MC: And if I don't come back?
 
 Mayor: You'll join the ranks of the forgotten. But I have faith in you, you have...strength.
 
-...
+MC: ...
 
 MC: Fine, I'll do it. But when I come back, we need to have a serious talk. 
 
 Mayor: Excellent. I wish you luck on your journey then. Go now. 
-
-Merchant: Greetings traveller! What's your name?
-
-MC: [inputted name]
-
-Merchant: Ah well, how can I help? Would you like to take a look at what I have?
