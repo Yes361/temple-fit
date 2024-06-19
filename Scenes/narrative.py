@@ -3,6 +3,24 @@ from helper import Actor, ActorContainer, Rect, CACHED_DIALOGUE, CACHED_VOICELIN
 from Game import Button, Dialogue
 from pgzero.builtins import keyboard, keys
 
+backdrop = Actor("narrative_backdrop", topleft=(0, 0), dims=(662, 662))
+
+sprite = Actor("narrative_icon", pos=(100, 580))
+sprite.scale = 1.5
+
+text_box = Actor("narrative_text_box", pos=(370, 600), scale=0.3)
+text_box.resize((450, 95))
+
+ui_elements = ActorContainer()
+
+next_button = Button(
+    "play_button",
+    pos=(550, 500),
+    on_click=lambda x, y: game_manager.switch_scene("hallway", "fields"),
+)
+next_button.hidden = True
+
+
 class Narrative(Scene):
     SCENE_NAME = "Narrative"
 
@@ -13,21 +31,21 @@ class Narrative(Scene):
         pass
 
     def on_show(self):
-        global backdrop, sprite, ui_elements, text_box, text_anim, next_button
+        global text_anim
 
-        backdrop = Actor('narrative_backdrop', topleft=(0, 0), dims=(662, 662))
-        
-        sprite = Actor('narrative_icon', pos=(100, 580))
-        sprite.scale = 1.5
-        
-        text_box = Actor('narrative_text_box', pos=(370, 600), scale=0.3)
-        text_box.resize((450, 95))
-        
-        text_anim = Dialogue(sprite, {'MC': 'character-battle-sprite', 'Mayor': 'narrative_icon', 'Merchant': 'narrative_icon'}, CACHED_DIALOGUE['start'], voice_lines=CACHED_VOICELINES['mayorscene'], time_per_char=0.02, bounding_box=Rect((220, 565), (425, 75)), color='black')
-        ui_elements = ActorContainer()
-        
-        next_button = Button('play_button', pos=(550, 500), on_click=lambda x, y: game_manager.switch_scene('hallway'))
-        next_button.hidden = True
+        text_anim = Dialogue(
+            sprite,
+            {
+                "MC": "character-battle-sprite",
+                "Mayor": "narrative_icon",
+                "Merchant": "narrative_icon",
+            },
+            CACHED_DIALOGUE["start"],
+            voice_lines=CACHED_VOICELINES["mayorscene"],
+            time_per_char=0.02,
+            bounding_box=Rect((220, 565), (425, 75)),
+            color="black",
+        )
 
     def on_draw(self, screen):
         backdrop.draw()
