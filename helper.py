@@ -478,8 +478,4 @@ def schedule(on_finish, duration): # monke patch
     return animate(dummy_object, duration=duration, on_finished=on_finish, pos=(20, 20))
         
 if __name__ == '__main__':
-    # extract_gif_frames(r'assets/gifs/outro_card.gif', 'images', 'outro_card') 
-    # print(read_dialogue_lines(r'assets/Dialogue'))
-    lower_case_files(r'sounds')
-    # print(CACHED_VOICELINES)
-    # print(CACHED_DIALOGUE)
+    extract_gif_frames(r'assets/gifs/ending.gif', 'images', 'end') 

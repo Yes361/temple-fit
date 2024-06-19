@@ -66,10 +66,6 @@ next_player_pos = (0, 0)
 
 exercise = [{"exercise": (1, 2), "sets": (5, 7)}, {"exercise": (2, 4), "sets": (7, 10)}]
 
-all_actors = ActorContainer(
-    player=player, enemy=enemy, cam=camera, back=backdrop
-)
-
 objectives: List[Objective] = []
 
 # Helper Functions
@@ -99,6 +95,11 @@ def create_new_objective(rec):
             Objective(exercise_of_choice, random.randint(min_set, max_set))
         )
 
+def next_scene():
+    if next_room == 'outro':
+        game_manager.switch_scene('outro')
+    else:
+        game_manager.switch_scene('hallway', next_room, next_player_pos)
 
 def check_uncompleted_objectives():
     for idx, obj in enumerate(objectives):
@@ -113,7 +114,7 @@ def check_uncompleted_objectives():
                 Pose.reset_all_recognizers()
                 Pose.set_active_recognizer([objectives[idx + 1].action])
             except IndexError:
-                schedule(lambda: game_manager.switch_scene('hallway', next_room, next_player_pos), 1)
+                schedule(next_scene, 1)
 
         break
 
@@ -152,16 +153,12 @@ class battle(Scene):
         enemy_sprite.image = enemy_image
 
         reset()
-        # create_new_objective(exercise[room])
-        objectives.append(Objective("bicep curls", 10))
-        objectives.append(Objective("bicep curls", 10))
-        objectives.append(Objective("bicep curls", 10))
+        create_new_objective(exercise[room])
 
     def on_hide(self):
         pass
 
     def on_draw(self, screen):
-        # all_actors.draw(screen)
         backdrop.draw()
         camera.draw(screen)
         draw_checklist(screen)
@@ -183,7 +180,6 @@ class battle(Scene):
         )
 
     def on_update(self, dt):
-        all_actors.update(dt)
         check_uncompleted_objectives()
 
     def on_key_down(self, key, unicode):

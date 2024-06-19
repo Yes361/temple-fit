@@ -1,6 +1,13 @@
 from managers import Scene, game_manager
 from Game import LevelManager, ColliderRect, Entity, Player, Dialogue
-from helper import Actor, ActorContainer, schedule, Rect, CACHED_DIALOGUE, CACHED_VOICELINES
+from helper import (
+    Actor,
+    ActorContainer,
+    schedule,
+    Rect,
+    CACHED_DIALOGUE,
+    CACHED_VOICELINES,
+)
 from pgzero.builtins import animate, keyboard
 
 freeze_frame = False
@@ -25,8 +32,9 @@ counter = 0
 
 text_anim = None
 sprite = None
-scroll_counter_img = Actor('scroll', pos=(ui.width / 2, 662 - ui.height / 4))
+scroll_counter_img = Actor("scroll", pos=(ui.width / 2, 662 - ui.height / 4))
 scroll_counter_img.scale = 0.15
+
 
 def fade():
     global freeze_frame
@@ -123,28 +131,34 @@ right_rooms = [
 ]
 
 
-
-def next_floor():
+def next_floor(current_floor):
     global counter
     if counter >= 8:
-        level_manager.load_level("floor2")
+        if current_floor == "floor":
+            level_manager.load_level("floor2")
+        elif current_floor == "floor2":
+            game_manager.switch_scene("Battle")
         counter = 0
 
 
 def create_room(name, world, floor, next_player_pos, left_side):
     if left_side:
-        colliders = [ColliderRect(
+        colliders = [
+            ColliderRect(
                 (1080 * 662 / 1080 / 2 - 81 - 1, -1080 * 662 / 1080 / 2 + 81 * 4),
                 (81, 81),
                 fn=lambda: level_manager.load_level(floor, player_pos=next_player_pos),
-            )] + left_rooms
+            )
+        ] + left_rooms
         enemy_spawn = (-200, 0)
     else:
-        colliders = [ColliderRect(
+        colliders = [
+            ColliderRect(
                 (-1080 * 662 / 1080 / 2 + 1, -1080 * 662 / 1080 / 2 + 81 * 4),
                 (81, 81),
                 fn=lambda: level_manager.load_level(floor, player_pos=(96, -370)),
-            )] + right_rooms
+            )
+        ] + right_rooms
         enemy_spawn = (200, 0)
     return {
         "world": Actor(world, scale=662 / 1080),
@@ -154,7 +168,8 @@ def create_room(name, world, floor, next_player_pos, left_side):
             scroll=Item("scroll", scale=0.15, pos=(0, 0)),
         ),
     }
-    
+
+
 def load_tutorial():
     global text_anim, sprite
     sprite = Actor("narrative_icon", pos=(100, 580))
@@ -172,8 +187,9 @@ def load_tutorial():
         bounding_box=Rect((220, 565), (425, 75)),
         color="black",
     )
-    
+
     level_manager.load_level("tutorial_start", (0, 0))
+
 
 levels = {
     "tutorial_start": {
@@ -335,23 +351,28 @@ levels = {
         ],
         "entities": ActorContainer(),
     },
-    "room1": create_room("room1", 'stone_left', 'floor', (-84, -370), True),
-    "room2": create_room("room2", 'netherite_right', 'floor', (96, -370), False),
-    "room3": create_room("room3", 'wood_left', 'floor', (-84, 48), True),
-    "room4": create_room("room4", 'stone_right', 'floor', (96, 48), False),
-    "room5": create_room("room5", 'purple_left', 'floor', (-84, 219), True),
-    "room6": create_room("room6", 'purple_right', 'floor', (96, 219), False),
-    "room7": create_room("room7", 'netherite_left', 'floor', (-84, 501), True),
-    "room8": create_room("room8", 'wood_right', 'floor', (96, 501), False),
+    "room1": create_room("room1", "stone_left", "floor", (-84, -370), True),
+    "room2": create_room("room2", "netherite_right", "floor", (96, -370), False),
+    "room3": create_room("room3", "wood_left", "floor", (-84, 48), True),
+    "room4": create_room("room4", "stone_right", "floor", (96, 48), False),
+    "room5": create_room("room5", "purple_left", "floor", (-84, 219), True),
+    "room6": create_room("room6", "purple_right", "floor", (96, 219), False),
+    "room7": create_room("room7", "netherite_left", "floor", (-84, 501), True),
+    "room8": create_room("room8", "wood_right", "floor", (96, 501), False),
     "floor2": {
         "world": Actor("floor2", scale=0.3),
         "colliders": [
             ColliderRect((-2160 * 0.3 / 2 + 81, -3500 * 0.3 / 2), (81, 3500 * 0.3)),
             ColliderRect((2160 * 0.3 / 2 - 81 * 2, -3500 * 0.3 / 2), (81, 3500 * 0.3)),
             ColliderRect(
+                (-2160 * 0.3 / 2 + 81, 4320 * 0.3 / 2 - 80),
+                (4320 * 0.3, 10),
+                fn=lambda: next_floor("floor2"),
+            ),
+            ColliderRect(
                 (-2160 * 0.3 / 2 + 81, -3500 * 0.3 / 2 + 80),
                 (3500 * 0.3, 10),
-                fn=next_floor,
+                fn=lambda: next_floor("floor"),
             ),
             ColliderRect(
                 (-2160 * 0.3 / 2 + 83, -3500 * 0.3 / 2 + 80 * 3 + 10),
@@ -388,16 +409,16 @@ levels = {
                 (81, 81),
                 fn=lambda: level_manager.load_level("room6-2", player_pos=(0, 0)),
                 # fn=lambda: print('room6')
-            )
+            ),
         ],
         "entities": ActorContainer(),
     },
-    "room1-2": create_room("room1-2", 'smooth_left', 'floor', (-84, -370), True),
-    "room2-2": create_room("room2-2", 'brick_right', 'floor', (96, -370), False),
-    "room3-2": create_room("room3-2", 'block_left', 'floor', (-84, 48), True),
-    "room4-2": create_room("room4-2", 'smooth_right', 'floor', (96, 48), False),
-    "room5-2": create_room("room5-2", 'brick_left', 'floor', (-84, 219), True),
-    "room6-2": create_room("room6-2", 'block_right', 'floor', (96, 219), False),   
+    "room1-2": create_room("room1-2", "smooth_left", "floor2", (-84, -370), True),
+    "room2-2": create_room("room2-2", "brick_right", "floor2", (96, -370), False),
+    "room3-2": create_room("room3-2", "block_left", "floor2", (-84, 48), True),
+    "room4-2": create_room("room4-2", "smooth_right", "floor2", (96, 48), False),
+    "room5-2": create_room("room5-2", "brick_left", "floor2", (-84, 219), True),
+    "room6-2": create_room("room6-2", "block_right", "floor2", (96, 219), False),
 }
 
 level_manager = LevelManager((662, 662), player, levels)
@@ -415,10 +436,10 @@ class hallway(Scene):
         global level_manager, text_anim, sprite
 
         reset_opacity()
-        
+
         if room == "fields":
             level_manager.load_level("fields", player_pos=(0, 1000))
-        
+
         elif level_manager.current_level.startswith("room"):
             levels[room]["entities"].enemy.hidden = True
             level_manager.load_level(room, player_pos)
@@ -431,14 +452,14 @@ class hallway(Scene):
 
         if counter >= 8:
             levels["floor"]["world"].image = "floor1-open"
-            
-        if level_manager.current_level.startswith('tutorial') and text_anim and sprite:
+
+        if level_manager.current_level.startswith("tutorial") and text_anim and sprite:
             text_anim.update(dt)
             sprite.update(dt)
-            
+
         if text_anim is None or text_anim.is_complete():
             player.move()
-            
+
     def on_draw(self, screen):
         global counter
 
@@ -447,8 +468,8 @@ class hallway(Scene):
         scroll_counter_img.draw()
 
         screen.draw.text(f"{counter}", (40, 615))
-        
-        if level_manager.current_level.startswith('tutorial') and text_anim and sprite:
+
+        if level_manager.current_level.startswith("tutorial") and text_anim and sprite:
             text_anim.draw(screen)
             sprite.draw(screen)
 
@@ -459,5 +480,3 @@ class hallway(Scene):
             else:
                 text_anim.hidden = True
                 sprite.hidden = True
-
-        
