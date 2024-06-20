@@ -68,7 +68,7 @@ class Enemy(Entity):
         if self.colliderect(player):
             fade()
             schedule(
-                lambda: game_manager.switch_scene("Battle", next=self.next, room=0, enemy_image=self.image),
+                lambda: game_manager.switch_scene("Battle", next=self.next, room=0, enemy_image=self.image, scale=self.scale),
                 1,
             )
 
@@ -232,7 +232,7 @@ levels = {
                 (662 / 2, -662 / 2),
                 (81, 662),
                 fn=lambda: level_manager.load_level(
-                    "tutorial_hallway", player_pos=(0, 0)
+                    "tutorial_hallway", player_pos=(-280, 0)
                 ),
             ),
         ],
@@ -256,7 +256,7 @@ levels = {
             ColliderRect(
                 (662 / 2, -662 / 2),
                 (81, 662),
-                fn=lambda: level_manager.load_level("tutorial_boss", player_pos=(0, 0)),
+                fn=lambda: level_manager.load_level("tutorial_boss", player_pos=(-280, 0)),
             ),
         ],
         "entities": ActorContainer(),
@@ -282,7 +282,7 @@ levels = {
             ),
         ],
         "entities": ActorContainer(
-            enemy=Enemy("green_moth", pos=(-200, 0), scale=0.15, next="floor")
+            enemy=Enemy("green_moth", pos=(200, 0), scale=0.15, next="floor")
         ),
     },
     "fields": {
@@ -319,54 +319,54 @@ levels = {
             ColliderRect(
                 (-2160 * 0.3 / 2 + 81, -4320 * 0.3 / 2 + 80),
                 (4320 * 0.3, 10),
-                fn=lambda: level_manager.load_level("floor2", player_pos=(0, 0)),
+                fn=lambda: level_manager.load_level("floor2", player_pos=(-100, 0)),
             ),
             ColliderRect(
                 (-2160 * 0.3 / 2 + 83, -4320 * 0.3 / 2 + 80 * 3 + 10),
                 (81, 81),
-                fn=lambda: level_manager.load_level("room1", player_pos=(0, 0)),
+                fn=lambda: level_manager.load_level("room1", player_pos=(100, 0)),
                 # fn=lambda: print('room1')
             ),
             ColliderRect(
                 (2160 * 0.3 / 2 - 81 * 2 - 1, -4320 * 0.3 / 2 + 81 * 3 + 10),
                 (81, 81),
-                fn=lambda: level_manager.load_level("room2", player_pos=(0, 0)),
+                fn=lambda: level_manager.load_level("room2", player_pos=(-100, 0)),
                 # fn=lambda: print('room2')
             ),
             ColliderRect(
                 (-2160 * 0.3 / 2 + 82, -4320 * 0.3 / 2 + 81 * 7 + 10),
                 (81, 81),
-                fn=lambda: level_manager.load_level("room3", player_pos=(0, 0)),
+                fn=lambda: level_manager.load_level("room3", player_pos=(100, 0)),
                 # fn=lambda: print('room3')
             ),
             ColliderRect(
                 (2160 * 0.3 / 2 - 81 * 2 - 1, -4320 * 0.3 / 2 + 81 * 7 + 10),
                 (81, 81),
-                fn=lambda: level_manager.load_level("room4", player_pos=(0, 0)),
+                fn=lambda: level_manager.load_level("room4", player_pos=(-100, 0)),
                 # fn=lambda: print('room4')
             ),
             ColliderRect(
                 (-2160 * 0.3 / 2 + 82, -4320 * 0.3 / 2 + 81 * 11 - 25),
                 (81, 81),
-                fn=lambda: level_manager.load_level("room5", player_pos=(0, 0)),
+                fn=lambda: level_manager.load_level("room5", player_pos=(100, 0)),
                 # fn=lambda: print('room5')
             ),
             ColliderRect(
                 (2160 * 0.3 / 2 - 81 * 2 - 3, -4320 * 0.3 / 2 + 81 * 11 - 25),
                 (81, 81),
-                fn=lambda: level_manager.load_level("room6", player_pos=(0, 0)),
+                fn=lambda: level_manager.load_level("room6", player_pos=(-100, 0)),
                 # fn=lambda: print('room6')
             ),
             ColliderRect(
                 (-2160 * 0.3 / 2 + 82, -4320 * 0.3 / 2 + 81 * 14 + 10),
                 (81, 81),
-                fn=lambda: level_manager.load_level("room7", player_pos=(0, 0)),
+                fn=lambda: level_manager.load_level("room7", player_pos=(100, 0)),
                 # fn=lambda: print('room7')
             ),
             ColliderRect(
                 (2160 * 0.3 / 2 - 81 * 2 - 1, -4320 * 0.3 / 2 + 81 * 14 + 10),
                 (81, 81),
-                fn=lambda: level_manager.load_level("room8", player_pos=(0, 0)),
+                fn=lambda: level_manager.load_level("room8", player_pos=(-100, 0)),
                 # fn=lambda: print('room8')
             ),
         ],
@@ -465,13 +465,14 @@ class hallway(Scene):
         reset_opacity()
 
         if room == "fields":
-            level_manager.load_level("fields", player_pos=(0, 1000))
+            player_pos= (0, 1000)
+        elif room == 'floor':
+            player_pos = (0, 588)
 
-        elif level_manager.current_level.startswith("room"):
+        if level_manager.current_level.startswith("room"):
             levels[room]["entities"].enemy.hidden = True
-            level_manager.load_level(room, player_pos)
-        else:
-            level_manager.load_level(room)
+        
+        level_manager.load_level(room, player_pos)
 
     def on_update(self, dt):
         if not freeze_frame:
@@ -486,6 +487,8 @@ class hallway(Scene):
 
         if text_anim is None or text_anim.is_complete():
             player.move()
+            
+        print(player.pos)
 
     def on_draw(self, screen):
         global counter

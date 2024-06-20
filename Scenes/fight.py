@@ -146,11 +146,12 @@ class battle(Scene):
         super().__init__(self.SCENE_NAME)
 
     # TODO: vary difficulty
-    def on_show(self, next="hallway", pos=(0, 0), room=0, enemy_image='character-battle-sprite'):
+    def on_show(self, next="hallway", pos=(0, 0), room=0, enemy_image='character-battle-sprite', scale=1):
         global next_room, next_player_pos
         next_room = next
         next_player_pos = pos
         enemy_sprite.image = enemy_image
+        enemy_sprite.scale = scale
 
         reset()
         create_new_objective(exercise[room])

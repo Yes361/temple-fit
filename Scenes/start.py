@@ -44,7 +44,7 @@ class StartScreen(Scene):
             narrative_button=Button(
                 "play_button.png",
                 pos=(331, 630),
-                on_click=lambda x, y: game_manager.switch_scene('hallway', 'floor'),
+                on_click=lambda x, y: game_manager.switch_scene('Narrative'),
                 scale=0.1,
             ),
             hidden=True,
