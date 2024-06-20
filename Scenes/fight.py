@@ -176,7 +176,7 @@ class battle(Scene):
         create_objectives(config.exercise[room])
     
     def on_hide(self):
-        pass
+        Pose.reset_all_recognizers()
 
     def on_draw(self, screen):
         backdrop.draw()

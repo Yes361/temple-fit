@@ -329,17 +329,14 @@ levels = {
             ColliderRect(
                 (-662 / 2, -960 / 2 * 662 / 208 + 400),
                 (662, 10),
-                fn=load_tutorial,
             ),
             ColliderRect(
                 (662 / 2, -960 / 2 * 662 / 208),
                 (10, 960 * 662 / 208),
-                fn=load_tutorial,
             ),
             ColliderRect(
                 (-662 / 2, 960 / 2 * 662 / 208),
                 (662, 10),
-                fn=load_tutorial,
             ),
             ColliderRect(
                 (-662 / 2 + 10, -960 / 2),

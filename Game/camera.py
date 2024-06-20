@@ -19,7 +19,7 @@ class PoseAnalyzer:
     ACTION_RECOGNIZERS = {
         'jumping jacks': JumpingJacks,
         'bicep curls': BicepCurls,
-        # 'squats': Squats
+        'squats': Squats    
     }
     IMPLEMENTED_ACTIONS = list(ACTION_RECOGNIZERS.keys())
     
