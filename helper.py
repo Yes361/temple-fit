@@ -209,6 +209,7 @@ class Actor(Actor, AbstractActor):
         self.iterations = 0
         self._is_playing_gif = False
         self._image_name = ''
+        self._anim_instance = None
         self.gif_name = None
         self.time_elapsed = 0
         self.opacity = opacity
@@ -280,22 +281,22 @@ class Actor(Actor, AbstractActor):
             elif self.gif_name is None:
                 self.animate()
                 
-    def animate_starting_targets(self, duration=1, tween='linear', on_finished=1, **kwargs):
+    def animate_targets(self, duration=1, tween='linear', on_finished=None, **kwargs):
         """
-        Animates the actor's properties to new values over time.
+        Animates the actor's properties from a preset value to their current values
         
         @params:
             duration (float): The duration of the animation in seconds.
             tween (str): The type of tweening to use. Default is 'linear'.
             on_finished (callable): The function to call when the animation is finished.
-            **kwargs: The properties to animate and their target values.
+            **kwargs: The properties to animate and their target values. Formatted as (start, finish)
         """
         saved_attributes = {}
         for attr in kwargs:
             saved_attributes[attr] = getattr(self, attr)
             setattr(self, attr, kwargs[attr])
         
-        self.anim_instance = animate(self, tween, duration, **saved_attributes)
+        self._anim_instance = animate(self, tween, duration, on_finished=on_finished, **saved_attributes)
                 
     def pause_gif(self, play=None):
         if play is not None:

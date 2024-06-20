@@ -47,6 +47,7 @@ class HealthBar(Actor, GUIElement):
         self.percent_filled = 1
         self.total_hp = total_hp
         self._hp = total_hp
+        self._anim = None
         self.extents: Rect = extents
         self.fill = fill
         super().__init__(image, *args, **kwargs)
@@ -59,6 +60,8 @@ class HealthBar(Actor, GUIElement):
     def hp(self, value):
         self._hp = value
         self.percent_filled = self._hp / self.total_hp
+        if self._anim is not None:
+            self._anim.stop(complete=False)
         
     def animate_damage(self, loss_hp):
         """
@@ -70,7 +73,7 @@ class HealthBar(Actor, GUIElement):
         fn = self.on_hp_change
         if callable(fn):
             fn = lambda: self.on_hp_change(self.hp - loss_hp)
-        animate(self, duration=5, on_finished=fn, hp=self.hp - loss_hp)
+        self._anim = animate(self, duration=5, on_finished=fn, hp=self.hp - loss_hp)
         
     def draw(self, screen):
         """

@@ -45,6 +45,7 @@ class Text(AbstractActor):
         
         current_index = int(self._char_index)
         text = self._text[0:current_index]
+        
         if self.bounding_box is None:
             screen.draw.text(text, self.pos, **self.styles)
         else:
@@ -62,7 +63,7 @@ class Dialogue(Text):
         
         self.actor_ref = None
         if actor_ref is not None:
-            self.actor_ref = actor_ref.get_weak_ref()
+            self.actor_ref = actor_ref
         
         self.characters = characters
         if self.voice_lines is not None:
@@ -127,3 +128,10 @@ class Dialogue(Text):
         if self._anim.running:
             return False
         return len(self.dialogue) == 0
+    
+    def draw(self, screen):
+        if self.hidden:
+            return
+        
+        self.actor_ref.draw(screen)
+        super().draw(screen)

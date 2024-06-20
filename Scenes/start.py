@@ -4,14 +4,16 @@ from pgzero.builtins import animate
 from Game import Button
 from . import utils
 
+player_button_pressed = False
 
-def fade_ui_elements(group):
+def fade_ui_elements(group: ActorContainer):
+    for elm in group:
+        if not elm.hidden:
+            elm.animate_targets(tween="bounce_end", pos=(elm.x, -50))
+
     group.hidden = False
     group.opacity = 0
     animate(group, opacity=255)
-    for elm in group:
-        if not elm.hidden:
-            elm.animate_starting_targets(tween="bounce_end", pos=(elm.x, -50))
 
 
 def set_difficulty(mode):
@@ -29,7 +31,13 @@ class StartScreen(Scene):
         pass
 
     def on_show(self, play_intro=True):
-        global intro, ui_elements
+        global intro, ui_elements, play_button
+        
+        def press_player_button():
+            global player_button_pressed
+            if not player_button_pressed:
+                player_button_pressed = True
+                fade_ui_elements(difficulty)
 
         game_manager.reset_scenes()
 
@@ -59,13 +67,16 @@ class StartScreen(Scene):
             ),
             hidden=True,
         )
+        
+        play_button = Button(
+            "play_button.png",
+            pos=(331, 400),
+            on_click=lambda key, unicode: press_player_button(),
+            scale=0.1,
+        )
+        
         ui_elements = ActorContainer(
-            narrative_button=Button(
-                "play_button.png",
-                pos=(331, 400),
-                on_click=lambda key, unicode: fade_ui_elements(difficulty),
-                scale=0.1,
-            ),
+            narrative_button=play_button,
             difficulty_group=difficulty,
             hidden=True,
         )
@@ -97,3 +108,7 @@ class StartScreen(Scene):
 
     def on_key_down(self, key, unicode):
         intro.skip_gif()
+
+    def reset(self):
+        global player_button_pressed
+        player_button_pressed = False

@@ -20,8 +20,6 @@ next_button = Button(
 )
 next_button.hidden = True
 
-
-
 class Narrative(Scene):
     SCENE_NAME = "Narrative"
 
@@ -45,7 +43,6 @@ class Narrative(Scene):
             {
                 "MC": "character-battle-sprite",
                 "Mayor": "narrative_icon",
-                "Merchant": "narrative_icon",
             },
             CACHED_DIALOGUE["start"],
             voice_lines=CACHED_VOICELINES["mayorscene"],
@@ -77,13 +74,11 @@ class Narrative(Scene):
                 text_anim.next()
             else:
                 text_anim.hidden = True
-                sprite.hidden = True
                 text_box.hidden = True
                 next_button.hidden = False
 
     def reset(self):
         if self._reset:
             text_anim.hidden = False
-            sprite.hidden = False
             text_box.hidden = False
             next_button.hidden = True

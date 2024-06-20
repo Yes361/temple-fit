@@ -28,12 +28,14 @@ player = Player(
     speed=3,
 )
 
+text_box = Actor("narrative_text_box", pos=(370, 600), scale=0.3)
+text_box.resize((450, 95))
+
 ui = Actor("battle_scene_tab", scale=0.15)
 ui.topleft = (0, 662 - ui.height)
 scroll_counter = 0
 
 text_anim = None
-sprite = None
 
 key_counter_img = Actor("key", pos=(50, 610))
 key_counter_img.scale = 0.15
@@ -69,6 +71,17 @@ def reset_opacity():
 class Enemy(Entity):
     def update(self, dt):
         global player
+
+        def switch():
+            game_manager.switch_scene(
+                "Battle",
+                next=self.next,
+                room=0,
+                enemy_image=self.image,
+                scale=self.scale,
+            )
+            levels[level_manager.current_level]["entities"].enemy.hidden = True
+
         if self.hidden:
             return
 
@@ -77,16 +90,7 @@ class Enemy(Entity):
 
         if self.colliderect(player):
             fade()
-            schedule(
-                lambda: game_manager.switch_scene(
-                    "Battle",
-                    next=self.next,
-                    room=0,
-                    enemy_image=self.image,
-                    scale=self.scale,
-                ),
-                1,
-            )
+            schedule(switch, 0.5)
 
         super().update(dt)
 
@@ -152,25 +156,24 @@ right_rooms = [
 
 
 def load_floor3():
-    global text_anim, sprite
+    global text_anim
 
     level_manager.load_level("floor3", player_pos=(0, 0))
     sprite = Actor("narrative_icon", pos=(100, 580))
-    sprite.scale = 1.5
 
     text_anim = Dialogue(
         sprite,
         {
             "MC": "character-battle-sprite",
-            "OM": "narrative_icon",
+            "OM": "old_man_icon",
         },
         CACHED_DIALOGUE["outro"],
         voice_lines=CACHED_VOICELINES["oms"],
         time_per_char=0.02,
         bounding_box=Rect((220, 565), (425, 75)),
-        color="white",
+        color="black",
         on_finish=lambda: game_manager.switch_scene(
-            "Battle", next="outro", enemy_image="dragon"
+            "Battle", next="outro", enemy_image="old_man_enemy", scale=0.4, room=2
         ),
     )
 
@@ -179,10 +182,14 @@ key_counter = 0
 
 
 def next_floor(current_floor):
-    global scroll_counter, total_scrolls
-    if current_floor == "floor" and key_counter == 1:
+    global scroll_counter, key_counter, total_scrolls
+    if key_counter < 1:
+        return
+
+    if current_floor == "floor":
         level_manager.load_level("floor2")
         total_scrolls += SECOND_SCROLLS
+        key_counter = 0
     if (
         current_floor == "floor2"
         and key_counter == 1
@@ -221,7 +228,7 @@ def create_room(name, world, floor, next_player_pos, left_side):
 
 
 def load_tutorial():
-    global text_anim, sprite
+    global text_anim
     sprite = Actor("narrative_icon", pos=(130, 560))
     sprite.scale = 1
     text_anim = Dialogue(
@@ -468,13 +475,13 @@ def position_keys():
     random_room_floor1 = f"room{random.randint(1, 8)}"
     random_pos_floor1 = (random.randint(-200, 200), random.randint(-200, 200))
     levels[random_room_floor1]["entities"].add(
-        "key", Item("key", pos=random_pos_floor1)
+        "key", Item("key", pos=random_pos_floor1, scale=0.5)
     )
 
     random_room_floor2 = f"room{random.randint(1, 6)}-2"
     random_pos_floor2 = (random.randint(-200, 200), random.randint(-200, 200))
     levels[random_room_floor2]["entities"].add(
-        "key", Item("key", pos=random_pos_floor2)
+        "key", Item("key", pos=random_pos_floor2, scale=0.5)
     )
 
 
@@ -491,7 +498,7 @@ class hallway(Scene):
 
     def on_show(self, room="fields", player_pos=(0, 0)):
 
-        global level_manager, text_anim, sprite
+        global level_manager, text_anim
 
         if not Music.is_playing("in_game"):
             Music.stop()
@@ -504,21 +511,17 @@ class hallway(Scene):
         elif room == "floor":
             player_pos = (0, 588)
 
-        if level_manager.current_level.startswith("room"):
-            levels[room]["entities"].enemy.hidden = True
-
         level_manager.load_level(room, player_pos)
 
     def on_update(self, dt):
         if not freeze_frame:
             level_manager.update(dt)
 
-        if scroll_counter >= 1:  # CHANGE
+        if scroll_counter >= FIRST_SCROLLS:  # CHANGE
             levels["floor"]["world"].image = "floor1-open"
 
-        if level_manager.current_level.startswith("tutorial") and text_anim and sprite:
+        if level_manager.current_level.startswith("tutorial") and text_anim:
             text_anim.update(dt)
-            sprite.update(dt)
 
         if text_anim is None or text_anim.is_complete():
             player.move()
@@ -539,18 +542,14 @@ class hallway(Scene):
             fontsize=30,
         )
 
-        if text_anim and sprite:
+        if text_anim is not None and not text_anim.is_complete():
+            text_box.draw()
             text_anim.draw(screen)
-            if not text_anim.is_complete():
-                sprite.draw(screen)
 
     def on_key_down(self, key, unicode):
         if text_anim and keyboard.SPACE:
             if not text_anim.is_complete():
                 text_anim.next()
-            else:
-                text_anim.hidden = True
-                sprite.hidden = True
 
     def reset(self):
         global scroll_counter, key_counter

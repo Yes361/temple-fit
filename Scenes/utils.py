@@ -3,13 +3,16 @@ exercise_sets = {
     "easy": [
         {"exercise": (1, 2), "sets": (5, 7)},
         {"exercise": (2, 4), "sets": (7, 10)},
+        {"exercise": (3, 6), "sets": (10, 13)},
     ],
     "medium": [
         {"exercise": (1, 2), "sets": (5, 7)},
         {"exercise": (2, 4), "sets": (7, 10)},
+        {"exercise": (2, 4), "sets": (7, 10)},
     ],
     "hard": [
         {"exercise": (1, 2), "sets": (5, 7)},
+        {"exercise": (2, 4), "sets": (7, 10)},
         {"exercise": (2, 4), "sets": (7, 10)},
     ],
 }
