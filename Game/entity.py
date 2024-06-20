@@ -35,7 +35,6 @@ class Player(Entity):
         super().__init__(*args, **kwargs)
         
     def move(self):
-        # anim = 'idle'
         if keyboard[keys.S] or keyboard[keys.DOWN]:
             self.y += self.speed
             self._current_anim = 'down'

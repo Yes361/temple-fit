@@ -28,27 +28,26 @@ player = Player(
     speed=3,
 )
 
+# UI setup
 text_box = Actor("narrative_text_box", pos=(370, 600), scale=0.3)
 text_box.resize((450, 95))
-
 ui = Actor("battle_scene_tab", scale=0.15)
 ui.topleft = (0, 662 - ui.height)
 scroll_counter = 0
-
 text_anim = None
-
 key_counter_img = Actor("key", pos=(50, 610))
 key_counter_img.scale = 0.15
-
 scroll_counter_img = Actor("scroll", pos=(110, 610))
 scroll_counter_img.scale = 0.10
 
-FIRST_SCROLLS = 8
-SECOND_SCROLLS = 6
-total_scrolls = FIRST_SCROLLS
-
+# Constants for scrolls and floors
+FIRST_SET_OF_SCROLLS = 8
+SECOND_SET_OF_SCROLLS = 6
+required_scrolls = FIRST_SET_OF_SCROLLS
 current_floor = 0
+key_counter = 0
 
+# Fade animation between rooms and battle scenes
 def fade():
     global freeze_frame
 
@@ -71,6 +70,9 @@ def reset_opacity():
 
 class Enemy(Entity):
     def update(self, dt):
+        """
+        Enemy AI simply moves towards the player, and on contact, switches to the battle scene
+        """
         global player
 
         def switch():
@@ -98,6 +100,9 @@ class Enemy(Entity):
 
 class Item(Entity):
     def update(self, dt):
+        """
+        Each item simply increments the appropriate counter on contact
+        """
         global player, scroll_counter, key_counter
         if self.hidden:
             return
@@ -110,6 +115,7 @@ class Item(Entity):
                 levels[level_manager.current_level]["entities"].key.hidden = True
                 key_counter += 1
 
+# Basic Colliders for rooms left and right of the main hallway on each floor
 
 left_rooms = [
     ColliderRect(
@@ -179,29 +185,23 @@ def load_final_room():
     )
 
 
-key_counter = 0
-
-
 def next_floor(floor):
-    global scroll_counter, key_counter, total_scrolls, current_floor
+    global scroll_counter, key_counter, required_scrolls, current_floor
     if key_counter < 1:
         return
 
-    if floor == "floor" and scroll_counter >= total_scrolls and key_counter >= 1:
+    if floor == "floor" and scroll_counter >= required_scrolls:
         level_manager.load_level("floor2", player_pos=(0, -378))
-        total_scrolls += SECOND_SCROLLS
+        required_scrolls += SECOND_SET_OF_SCROLLS
         key_counter = 0
         current_floor += 1
-    if (
-        floor == "floor2"
-        and key_counter >= 1
-        and scroll_counter >= total_scrolls
-    ):
+    if floor == "floor2" and scroll_counter >= required_scrolls:
         level_manager.load_level("floor3", player_pos=(0, 453))
         current_floor += 1
 
 
-def create_room(name, world, floor, next_player_pos, left_side, enemy_type, scale=0.15):
+# Creates a room branching from the main hallway on each floor
+def create_room(name: str, world: str, floor: str, next_player_pos: tuple, left_side: bool, enemy_type: str, scale=0.15):
     if left_side:
         colliders = [
             ColliderRect(
@@ -230,7 +230,7 @@ def create_room(name, world, floor, next_player_pos, left_side, enemy_type, scal
         ),
     }
 
-
+# Load the Dialogue and Tutorial
 def load_tutorial():
     global text_anim
     sprite = Actor("narrative_icon", pos=(130, 560))
@@ -402,9 +402,7 @@ levels = {
         ],
         "entities": ActorContainer(),
     },
-    "room1": create_room(
-        "room1", "stone_left", "floor", (-84, -370), True, "green_moth", scale=0.1
-    ),
+    "room1": create_room("room1", "stone_left", "floor", (-84, -370), True, "green_moth", scale=0.1),
     "room2": create_room("room2", "netherite_right", "floor", (96, -370), False, "scorpion", scale=0.15),
     "room3": create_room("room3", "wood_left", "floor", (-84, 48), True, "dragon", scale=0.2),
     "room4": create_room("room4", "stone_right", "floor", (96, 48), False, "dragon", scale=0.2),
@@ -473,7 +471,7 @@ levels = {
                 fn=load_final_room,
             ),
         ],
-        'entities': ActorContainer()
+        "entities": ActorContainer(),
     },
     "final_room": {
         "world": Actor("final_room"),
@@ -487,19 +485,15 @@ levels = {
     },
 }
 
-
+# Position the keys randomly on each floor
 def position_keys():
     random_room_floor1 = f"room{random.randint(1, 8)}"
     random_pos_floor1 = (random.randint(-200, 200), random.randint(-200, 200))
-    levels[random_room_floor1]["entities"].add(
-        "key", Item("key", pos=random_pos_floor1, scale=0.5)
-    )
+    levels[random_room_floor1]["entities"].add("key", Item("key", pos=random_pos_floor1, scale=0.5))
 
     random_room_floor2 = f"room{random.randint(1, 6)}-2"
     random_pos_floor2 = (random.randint(-200, 200), random.randint(-200, 200))
-    levels[random_room_floor2]["entities"].add(
-        "key", Item("key", pos=random_pos_floor2, scale=0.5)
-    )
+    levels[random_room_floor2]["entities"].add("key", Item("key", pos=random_pos_floor2, scale=0.5))
 
 
 level_manager = LevelManager((662, 662), player, levels)
@@ -534,7 +528,8 @@ class hallway(Scene):
         if not freeze_frame:
             level_manager.update(dt)
 
-        if scroll_counter >= FIRST_SCROLLS:  # CHANGE
+        # Change the closed floor1 image to an open floor1 image if conditions are met
+        if scroll_counter >= FIRST_SET_OF_SCROLLS and key_counter >= 1:
             levels["floor"]["world"].image = "floor1-open"
 
         if level_manager.current_level.startswith("tutorial") and text_anim:
@@ -542,8 +537,6 @@ class hallway(Scene):
 
         if text_anim is None or text_anim.is_complete():
             player.move()
-            
-        print(player.pos)
 
     def on_draw(self, screen):
         level_manager.draw(screen)
@@ -553,7 +546,7 @@ class hallway(Scene):
         key_counter_img.draw()
         screen.draw.text(f"{key_counter}/1", (30, 630), fontname="pixel", fontsize=30)
         screen.draw.text(
-            f"{scroll_counter}/{total_scrolls}",
+            f"{scroll_counter}/{required_scrolls}",
             (80, 630),
             fontname="pixel",
             fontsize=30,
@@ -569,12 +562,15 @@ class hallway(Scene):
                 text_anim.next()
 
     def reset(self):
-        global scroll_counter, key_counter, total_scrolls
+        global scroll_counter, key_counter, required_scrolls
         scroll_counter = 0
         key_counter = 0
-        
-        total_scrolls = FIRST_SCROLLS
 
+        required_scrolls = FIRST_SET_OF_SCROLLS
+        
+        levels["floor"]["world"].image = "floor1-open"
+
+        # Reset the Entities in each level to a base state
         for level in levels.values():
             entities = level["entities"]
             if entities.has("enemy"):
@@ -583,6 +579,6 @@ class hallway(Scene):
             if entities.has("scroll"):
                 entities.scroll.hidden = False
 
-            if entities.has("item"):
-                entities.remove("item")
+            if entities.has("key"):
+                entities.remove("key")
         position_keys()

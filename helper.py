@@ -247,12 +247,13 @@ class Actor(Actor, AbstractActor):
         """
         return type(self.images) == list and len(self.images) > 0
     
-    # Thanks to https://gist.github.com/Susensio/979259559e2bebcd0273f1a95d7c1e79
     @Actor.image.setter
     def image(self, image):
         if self._image_name != image:
+            # Thanks to https://gist.github.com/Susensio/979259559e2bebcd0273f1a95d7c1e79 for this trick
             super(Actor, type(self)).image.fset(self, image)
-            self.scale = self.scale # HACK
+            self.scale = self.scale # HACK: Whenever a new image is set, scale isn't applied
+            # Setting scale to itself seems to resolve the issue
             
     def update(self, dt):
         self.time_elapsed += dt
@@ -392,11 +393,12 @@ class ActorContainer(AbstractActor):
     """
     Actor Container is a list of Actors - Similar to Group() in CMU Academy
     """
-    def __init__(self, pos=(0, 0), /, *, hidden=False, on_show=None, on_hide=None, **kwargs):
+    def __init__(self, pos=(0, 0), /, *, hidden=False, **kwargs):
+        """
+        Initialize the object and add actors using keyword arguments.
+        """
         self._actor_list: Dict[any, Type[Actor | GUIElement | ActorContainer]] = {}
         self.hidden = hidden
-        self.on_enter = on_show
-        self.on_exit = on_hide
         self._opacity = 255
         self._x = 0
         self._y = 0
@@ -601,7 +603,7 @@ class Music:
         Music._current = None
     
     def is_playing(name):
-        # music.is_playing is useless
+        # music.is_playing is useless (its what prompted overwriting the music builtin)
         return music.is_playing('') and Music._current == name
     
     

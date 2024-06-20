@@ -8,11 +8,14 @@ backdrop = Actor("narrative_backdrop", topleft=(0, 0), dims=(662, 662))
 sprite = Actor("narrative_icon", pos=(100, 580))
 sprite.scale = 1.5
 
+# Set up the text box for displaying dialogue
 text_box = Actor("narrative_text_box", pos=(370, 600), scale=0.3)
 text_box.resize((450, 95))
 
+# Container for holding UI elements
 ui_elements = ActorContainer()
 
+# Set up the next button for advancing the scene
 next_button = Button(
     "arrow",
     pos=(550, 500),
@@ -33,7 +36,6 @@ class Narrative(Scene):
     def on_show(self):
         global text_anim
         
-        print(not Music.is_playing('menu'))
         if not Music.is_playing('in_game'):
             Music.stop()
             Music.play('in_game')
@@ -69,9 +71,11 @@ class Narrative(Scene):
 
     def on_key_down(self, key, unicode):
         if keyboard.SPACE:
+            # Advance the text if the space bar is pressed
             if not text_anim.is_complete():
                 text_anim.next()
             else:
+                # Hide the text animation and text box, show the next button
                 text_anim.hidden = True
                 text_box.hidden = True
                 next_button.hidden = False

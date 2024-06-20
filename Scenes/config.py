@@ -1,4 +1,9 @@
+"""
+Config.py contains shared variables and functions between scenes
+"""
+
 mode = "easy"
+
 exercise_sets = {
     "easy": {
         "sets": [
@@ -27,10 +32,14 @@ exercise_sets = {
 }
 
 def set_difficulty(difficulty):
+    """
+    Set difficulty
+    """
     global exercise, mode, time_limit
     mode = difficulty
     exercise = exercise_sets[difficulty]["sets"]
     time_limit = exercise_sets[difficulty]['time_limit']
-    print(f"DEBUG: :scream: utils.mode was just set to {mode}, truly unbelievable")
 
 set_difficulty('easy')
+
+__all__ = [set_difficulty, exercise_sets, mode, exercise, time_limit]

@@ -5,8 +5,8 @@ from Game import Button
 from . import config
 import sys
 
+# Global flag to track whether player button is pressed
 player_button_pressed = False
-
 
 def fade_ui_elements(group: ActorContainer):
     for elm in group:
@@ -22,7 +22,7 @@ def outro_sequence():
     ui_elements.hidden = True
     intro.play_gif("outro_card", iterations=1, on_finish=lambda: sys.exit(0))
 
-
+# Set game difficulty and switch scene to Narrative.
 def set_difficulty(mode):
     config.set_difficulty(mode)
     game_manager.switch_scene("Narrative")
@@ -40,6 +40,7 @@ class StartScreen(Scene):
     def on_show(self, play_intro=True):
         global intro, ui_elements, play_button
 
+        # Handle the button press
         def press_player_button():
             global player_button_pressed
             if not player_button_pressed:
@@ -53,6 +54,7 @@ class StartScreen(Scene):
 
         intro = Actor("character-battle-sprite", pos=(331, 331))
 
+        # Container for difficulty buttons
         difficulty = ActorContainer(
             easy=Button(
                 "easy.png",
@@ -90,6 +92,7 @@ class StartScreen(Scene):
         )
 
         if play_intro:
+            # Play intro animation sequence
             intro.play_gif(
                 "intro_card",
                 iterations=1,
@@ -100,7 +103,7 @@ class StartScreen(Scene):
                 ),
             )
         else:
-            intro.image = "intro_frame_84"
+            intro.image = "intro_frame_84" # Else show the lastt frame
             ui_elements.hidden = False
 
     def on_draw(self, screen):
