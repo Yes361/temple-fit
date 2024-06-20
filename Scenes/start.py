@@ -2,7 +2,7 @@ from managers import Scene, game_manager
 from helper import Actor, ActorContainer, Music
 from pgzero.builtins import animate
 from Game import Button
-from . import utils
+from . import config
 
 player_button_pressed = False
 
@@ -17,7 +17,7 @@ def fade_ui_elements(group: ActorContainer):
 
 
 def set_difficulty(mode):
-    utils.set_difficulty(mode)
+    config.set_difficulty(mode)
     game_manager.switch_scene("Narrative")
 
 

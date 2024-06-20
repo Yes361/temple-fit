@@ -4,7 +4,7 @@ from Game import camera, Pose, HealthBar, Entity
 from dataclasses import dataclass
 from typing import List
 import random
-from . import utils
+from . import config
 
 # Definitions
 
@@ -70,6 +70,7 @@ enemy.name = "The Big Bad"
 next_room = "hallway"
 next_player_pos = (0, 0)
 
+timer = 0
 
 objectives: List[Objective] = []
 
@@ -137,9 +138,15 @@ def next_scene():
         game_manager.switch_scene("hallway", next_room, next_player_pos)
 
 def reset():
+    global timer
     objectives.clear()
+    player.healthbar.stop_animating_damage()
+    enemy.healthbar.stop_animating_damage()
+    
     player.healthbar.hp = 100
     enemy.healthbar.hp = 100
+    
+    timer = config.time_limit
 
 class battle(Scene):
     SCENE_NAME = "Battle"
@@ -166,7 +173,9 @@ class battle(Scene):
         enemy_sprite.scale = scale
 
         reset()
-        create_new_objective(utils.exercise[room])
+        create_new_objective(config.exercise[room])
+        
+        print(config.exercise[room])
 
     def on_hide(self):
         pass
@@ -191,10 +200,19 @@ class battle(Scene):
             (enemy_sprite.left + 10, enemy_sprite.top - 20),
             fontname="pixel",
         )
+        
+        screen.draw.text(f'time remaining: {timer:.3f}', (400, 50), fontname="pixel")
 
     def on_update(self, dt):
+        global timer
         check_uncompleted_objectives()
-
+        
+        timer -= dt
+        
+        if timer < 0:
+            game_manager.reset_scenes()
+            game_manager.switch_scene('hallway', 'floor')
+        
         if player.healthbar.hp < 1:
             game_manager.switch_scene("Start Screen", False)
 

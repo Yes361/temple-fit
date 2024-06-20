@@ -618,8 +618,8 @@ class GUIElement(AbstractActor):
     def on_hold(self) -> bool:
         pass
         
+dummy_object = Actor('battle_scene_tab')
 def schedule(on_finish, duration): # monke patch
-    dummy_object = Actor('battle_scene_tab')
     return animate(dummy_object, duration=duration, on_finished=on_finish, pos=(20, 20))
         
 if __name__ == '__main__':

@@ -55,7 +55,6 @@ class Narrative(Scene):
 
     def on_draw(self, screen):
         backdrop.draw()
-        sprite.draw()
         text_box.draw()
         text_anim.draw(screen)
         ui_elements.draw()
