@@ -1,4 +1,4 @@
-from helper import AbstractActor, Actor, Rect, CACHED_DIALOGUE, CACHED_VOICELINES
+from helper import AbstractActor, Actor, Rect
 from pgzero.builtins import animate, sounds
 
 class Text(AbstractActor):

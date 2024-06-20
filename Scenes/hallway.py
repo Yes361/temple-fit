@@ -250,6 +250,8 @@ def load_tutorial():
 
     level_manager.load_level("tutorial_start", (0, 0))
 
+# Defining the Levels
+# Levels are defined by a World Actor, List of Colliders, and an Entity ActorContainer
 
 levels = {
     "tutorial_start": {
@@ -517,6 +519,7 @@ class hallway(Scene):
 
         reset_opacity()
 
+        # Force player spawns for these positions
         if room == "fields":
             player_pos = (0, 1000)
         elif room == "floor":
@@ -535,13 +538,15 @@ class hallway(Scene):
         if level_manager.current_level.startswith("tutorial") and text_anim:
             text_anim.update(dt)
 
+        # Player movement is restricted during Tutorial Dialogue
         if text_anim is None or text_anim.is_complete():
             player.move()
 
     def on_draw(self, screen):
         level_manager.draw(screen)
+        
+        # UI elements
         ui.draw()
-
         scroll_counter_img.draw()
         key_counter_img.draw()
         screen.draw.text(f"{key_counter}/1", (30, 630), fontname="pixel", fontsize=30)
@@ -552,12 +557,14 @@ class hallway(Scene):
             fontsize=30,
         )
 
+        # Draw the Dialogue Text Box
         if text_anim is not None and not text_anim.is_complete():
             text_box.draw()
             text_anim.draw(screen)
 
     def on_key_down(self, key, unicode):
         if text_anim and keyboard.SPACE:
+            # Advance the Dialogue
             if not text_anim.is_complete():
                 text_anim.next()
 
@@ -581,4 +588,6 @@ class hallway(Scene):
 
             if entities.has("key"):
                 entities.remove("key")
+        
+        # Reposition keys for next session
         position_keys()

@@ -1,5 +1,4 @@
-from abc import ABC, abstractmethod
-from helper import ActorContainer
+from abc import abstractmethod
 from typing import *
 import pygame
 

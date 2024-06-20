@@ -1,8 +1,5 @@
 from pgzero.builtins import keyboard, keys
 from .collisions import Collider
-from .gui import HealthBar
-from helper import Actor, Rect
-from typing import Type
 
 DEFAULT_ENTITY_SPEED = 1
 

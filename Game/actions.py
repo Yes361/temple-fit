@@ -1,8 +1,8 @@
-from pygame.math import Vector2
-from abc import abstractmethod, ABC
+from abc import abstractmethod, ABC # abc enables abstractions for classes
 from math import acos, degrees
-import mediapipe as mp
+import mediapipe as mp # Library for extrapolating landmarks of a human from an image
 
+# 
 mp_pose_landmarks = mp.solutions.pose.PoseLandmark
 
 def distance(x, y):

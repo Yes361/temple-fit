@@ -1,5 +1,5 @@
-from .actions import JumpingJacks, Squats, BicepCurls, Recognizer, find_angle_between_landmarks
-from typing import Dict, List, Type
+from .actions import JumpingJacks, Squats, BicepCurls, Recognizer
+from typing import Dict, Type
 from helper import Actor
 import mediapipe as mp
 import numpy as np
