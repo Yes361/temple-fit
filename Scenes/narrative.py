@@ -1,7 +1,7 @@
 from managers import Scene, game_manager
-from helper import Actor, ActorContainer, Rect, CACHED_DIALOGUE, CACHED_VOICELINES
+from helper import Actor, ActorContainer, Rect, Music, CACHED_DIALOGUE, CACHED_VOICELINES
 from Game import Button, Dialogue
-from pgzero.builtins import keyboard, keys
+from pgzero.builtins import keyboard
 
 backdrop = Actor("narrative_backdrop", topleft=(0, 0), dims=(662, 662))
 
@@ -21,17 +21,24 @@ next_button = Button(
 next_button.hidden = True
 
 
+
 class Narrative(Scene):
     SCENE_NAME = "Narrative"
 
     def __init__(self, *args, **kwargs):
         super().__init__(self.SCENE_NAME)
+        self._reset = False
 
     def on_hide(self):
         pass
 
     def on_show(self):
         global text_anim
+        
+        print(not Music.is_playing('menu'))
+        if not Music.is_playing('in_game'):
+            Music.stop()
+            Music.play('in_game')
 
         text_anim = Dialogue(
             sprite,
@@ -46,6 +53,8 @@ class Narrative(Scene):
             bounding_box=Rect((220, 565), (425, 75)),
             color="black",
         )
+        
+        self._reset = True
 
     def on_draw(self, screen):
         backdrop.draw()
@@ -71,3 +80,10 @@ class Narrative(Scene):
                 sprite.hidden = True
                 text_box.hidden = True
                 next_button.hidden = False
+
+    def reset(self):
+        if self._reset:
+            text_anim.hidden = False
+            sprite.hidden = False
+            text_box.hidden = False
+            next_button.hidden = True

@@ -207,7 +207,7 @@ class GameManager:
             self._event_stack.pop()
         self.show_scene(scene, *args, switch_event_scene=True, **kwargs)
         
-    def reset(self):
+    def reset_scenes(self):
         for scene in self.scenes.values():
             scene.reset()
     

@@ -15,7 +15,7 @@ class PoseAnalyzer:
     """
     Analyzes poses detected in video frames using MediaPipe and recognizes specific exercises.
     """
-    MAX_LANDMARKS = 33
+    LANDMARK_COUNT_THRES = 10
     ACTION_RECOGNIZERS = {
         'jumping jacks': JumpingJacks,
         'bicep curls': BicepCurls,
@@ -162,13 +162,13 @@ class Camera(Actor):
             return pygame.Surface((self.width, self.height))
         
         detection_result = self.pose.process_frame(frame)
-        self.pose.recognize_pose(frame, self.time_elapsed)
         
         if self.pose.is_results_available():
             PoseAnalyzer.draw_hand_landmarks(frame, detection_result)
-            # cv2.putText(frame, f'{find_angle_between_landmarks(detection_result.pose_landmarks, mp_pose.PoseLandmark.LEFT_SHOULDER,  mp_pose.PoseLandmark.LEFT_ELBOW,  mp_pose.PoseLandmark.LEFT_WRIST)}', (10, 30), cv2.FONT_HERSHEY_SCRIPT_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
-            self.prompt_user(frame, detection_result)
-        
+            if self.prompt_user(frame, detection_result):
+                self.pose.recognize_pose(frame, self.time_elapsed)
+            
+            
         self._surf = Camera.convert_frame_surface(frame, (self.width, self.height))
         super().draw()
 
@@ -179,25 +179,28 @@ class Camera(Actor):
         return average_brightness
 
     
-    def prompt_user(self, frame, results):
+    def prompt_user(self, frame, results) -> bool:
         """
         Display a prompt to the user based on the visibility of landmarks.
         
         @params:
             frame: The video frame.
             results: The result from a MediaPipe pose detection.
+            
+        @returns:
+            Boolean representing if the Camera can see most of the User's body
         """
         pose_markers = results.pose_landmarks
         if not pose_markers:
-            return
+            cv2.putText(frame, 'Reposition Thyself', (400, 300), cv2.FONT_HERSHEY_SIMPLEX, 10, (255, 0, 0), 2, cv2.LINE_AA)
+            return False
         
-        visible_landmarks = 0
-        # TODO: replace this with pose's visibility
-        for lm in pose_markers.landmark:
-            visible_landmarks += (lm.visibility > 0.5)
+        visible_landmarks = sum((lm.visibility > 0.5) for lm in pose_markers.landmark)
         
-        if visible_landmarks < PoseAnalyzer.MAX_LANDMARKS:
-            return 'do stuff pls :pray: thx'
+        if visible_landmarks < PoseAnalyzer.LANDMARK_COUNT_THRES:
+            cv2.putText(frame, 'Reposition Thyself', (0, 300), cv2.FONT_HERSHEY_SIMPLEX, 3, (255, 0, 0), 2, cv2.LINE_AA)
+            return False
+        return True
         
     @staticmethod
     def process_camera_frame(frame):

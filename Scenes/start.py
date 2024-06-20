@@ -1,7 +1,7 @@
 from managers import Scene, game_manager
-from helper import Actor, ActorContainer
+from helper import Actor, ActorContainer, Music
 from pgzero.builtins import animate
-from Game import Button, camera
+from Game import Button
 
 
 def fade_ui_elements():
@@ -23,17 +23,21 @@ class StartScreen(Scene):
 
     def on_show(self, play_intro=True):
         global intro, ui_elements
-
+        
+        game_manager.reset_scenes()
+        
+        Music.stop
+        Music.play('menu')
+        
         intro = Actor("character-battle-sprite", pos=(331, 331))
-
         ui_elements = ActorContainer(
             narrative_button=Button(
                 "play_button.png",
                 pos=(331, 400),
-                on_click=lambda x, y: game_manager.switch_scene('Narrative'),
+                on_click=lambda key, unicode: game_manager.switch_scene('Narrative'),
                 scale=0.1,
             ),
-            hidden=True,
+            hidden=True
         )
 
         if play_intro:
@@ -44,6 +48,9 @@ class StartScreen(Scene):
                     "intro", iterations=1, on_finish=fade_ui_elements
                 ),
             )
+        else:
+            intro.image = 'intro_frame_84'
+            ui_elements.hidden = False
         
     def on_draw(self, screen):
         intro.draw()

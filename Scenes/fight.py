@@ -1,12 +1,12 @@
-from helper import ActorContainer, Actor, Rect, schedule
+from helper import ActorContainer, Actor, Rect, schedule, Music
 from managers import Scene, game_manager
-from pgzero.builtins import animate
 from Game import camera, Pose, HealthBar, Entity
 from dataclasses import dataclass
 from typing import List
-import pygame, random
+import random
 
 # Definitions
+
 
 @dataclass
 class Objective:
@@ -42,10 +42,10 @@ player = ActorContainer(
         on_hp_change=player_health,
         topleft=(10, 510),
         scale=0.8,
-        fill = (153,1,1)
+        fill=(153, 1, 1),
     ),
 )
-player.name = "Player TMP"
+player.name = "The MC"
 
 enemy_sprite = Entity(
     "character-battle-sprite",
@@ -56,10 +56,15 @@ enemy_sprite = Entity(
 enemy = ActorContainer(
     enemy_sprite=enemy_sprite,
     healthbar=HealthBar(
-        "healthbar", Rect((58.5, 26.25), (220, 35)), 100, topleft=(300, 250), scale=0.6, fill = (153,1,1)
+        "healthbar",
+        Rect((58.5, 26.25), (220, 35)),
+        100,
+        topleft=(300, 250),
+        scale=0.6,
+        fill=(153, 1, 1),
     ),
 )
-enemy.name = "Enemy TMP"
+enemy.name = "The Big Bad"
 
 next_room = "hallway"
 next_player_pos = (0, 0)
@@ -68,13 +73,12 @@ exercise = [{"exercise": (1, 2), "sets": (5, 7)}, {"exercise": (2, 4), "sets": (
 
 objectives: List[Objective] = []
 
-# Helper Functions
 
 def anim():
     def move_player():
         hp_damage_taken = enemy.healthbar.total_hp / len(objectives)
         enemy.healthbar.animate_damage(hp_damage_taken)
-        
+
     def move_enemy():
         player.healthbar.animate_damage(random.randint(0, 20))
         schedule(move_player, 0.1)
@@ -95,17 +99,11 @@ def create_new_objective(rec):
             Objective(exercise_of_choice, random.randint(min_set, max_set))
         )
 
-def next_scene():
-    if next_room == 'outro':
-        game_manager.switch_scene('outro')
-    else:
-        game_manager.switch_scene('hallway', next_room, next_player_pos)
-
 def check_uncompleted_objectives():
     for idx, obj in enumerate(objectives):
         if obj.completed:
             continue
-        
+
         if Pose.report_stats(obj.action) >= obj.count:
             obj.completed = True
             anim()
@@ -115,10 +113,8 @@ def check_uncompleted_objectives():
                 Pose.set_active_recognizer([objectives[idx + 1].action])
             except IndexError:
                 schedule(next_scene, 1)
-
         break
 
-# TODO: make it pretteh
 def draw_checklist(screen):
     screen.draw.text(
         "Checklist", (40, 30), fontname="pixel", fontsize=30, owidth=0.5, ocolor="white"
@@ -134,6 +130,12 @@ def draw_checklist(screen):
             ocolor="white",
         )
 
+def next_scene():
+    if next_room == "outro":
+        game_manager.switch_scene("outro")
+    else:
+        game_manager.switch_scene("hallway", next_room, next_player_pos)
+
 def reset():
     objectives.clear()
     player.healthbar.hp = 100
@@ -145,9 +147,19 @@ class battle(Scene):
     def __init__(self, **kwargs):
         super().__init__(self.SCENE_NAME)
 
-    # TODO: vary difficulty
-    def on_show(self, next="hallway", pos=(0, 0), room=0, enemy_image='character-battle-sprite', scale=1):
+    def on_show(
+        self,
+        next="hallway",
+        pos=(0, 0),
+        room=0,
+        enemy_image="character-battle-sprite",
+        scale=1,
+    ):
         global next_room, next_player_pos
+        
+        Music.stop()
+        Music.play('battle')        
+        
         next_room = next
         next_player_pos = pos
         enemy_sprite.image = enemy_image
@@ -166,7 +178,7 @@ class battle(Scene):
 
         player.draw(screen)
         enemy.draw(screen)
-                
+
         draw_checklist(screen)
 
         screen.draw.text(
@@ -183,5 +195,8 @@ class battle(Scene):
     def on_update(self, dt):
         check_uncompleted_objectives()
 
-    def on_key_down(self, key, unicode):
-        pass
+        if player.healthbar.hp < 1:
+            game_manager.switch_scene("Start Screen", False)
+
+    def reset(self):
+        reset()

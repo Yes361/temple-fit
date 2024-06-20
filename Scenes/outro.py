@@ -1,6 +1,6 @@
 from managers import Scene, game_manager
-from helper import Actor, ActorContainer
-from pgzero.builtins import sounds
+from helper import Actor
+from pgzero.builtins import music
 
 outro = Actor("character-battle-sprite", pos=(331, 331))
 
@@ -10,11 +10,14 @@ class Outro(Scene):
     def __init__(self, *args, **kwargs):
         super().__init__(self.SCENE_NAME)
 
-    def on_hide(self):
-        pass
-
     def on_show(self):
+        
+        music.stop()
+        music.play('in_game')
+        
+            
         outro.play_gif('ending', iterations=1, on_finish=lambda: game_manager.switch_scene('Start Screen', False))
+        
 
     def on_draw(self, screen):
         outro.draw()

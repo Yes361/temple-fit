@@ -1,4 +1,4 @@
-from pgzero.builtins import Actor, sounds, animate, Rect
+from pgzero.builtins import Actor, animate, Rect, music
 from pgzhelper import Actor
 from typing import *
 from abc import abstractmethod
@@ -411,8 +411,6 @@ class ActorContainer(AbstractActor):
         
         for name, actor in kwargs.items():
             self.add(name, actor)
-
-    
     
     @property
     def x(self):
@@ -500,6 +498,9 @@ class ActorContainer(AbstractActor):
         actor = self._actor_list.pop(name)
         del actor
         
+    def has(self, name: any) -> bool:
+        return name in self._actor_list
+        
     def colliderect(self, other_actor: Type[AbstractActor]):
         """
         Checks if any actor in the container collides with another actor.
@@ -562,12 +563,44 @@ class ActorContainer(AbstractActor):
         
     def __len__(self):
         return len(self._actor_list)
-
+    
+class Music:
+    """
+    The Better Music Class.
+    (But doesn't support queuing and fadeout)
+    """
+    _current = None  
+    # queue = music.queue
+    pause = music.pause
+    unpause = music.unpause
+    # fadeout = music.fadeout
+    set_volume = music.set_volume
+    get_volume = music.get_volume
+    set_pos = music.set_pos
+    get_pos = music.get_pos
+    
+    def play(name):
+        music.play(name)
+        Music._current = name
+        
+    def play_once(name):
+        music.play_once(name)
+        Music._current = name
+        
+    def stop():
+        music.stop()
+        Music._current = None
+    
+    def is_playing(name):
+        # music.is_playing is useless
+        return music.is_playing('') and Music._current == name
+    
+    
 class GUIElement(AbstractActor):
     @abstractmethod
     def on_click(self, pos, button) -> bool:
         pass
-    
+
     @abstractmethod
     def on_hover(self) -> bool:
         pass
