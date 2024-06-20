@@ -47,6 +47,7 @@ FIRST_SCROLLS = 8
 SECOND_SCROLLS = 6
 total_scrolls = FIRST_SCROLLS
 
+current_floor = 0
 
 def fade():
     global freeze_frame
@@ -76,7 +77,7 @@ class Enemy(Entity):
             game_manager.switch_scene(
                 "Battle",
                 next=self.next,
-                room=0,
+                room=current_floor,
                 enemy_image=self.image,
                 scale=20 / self.width,
             )
@@ -181,21 +182,23 @@ def load_final_room():
 key_counter = 0
 
 
-def next_floor(current_floor):
-    global scroll_counter, key_counter, total_scrolls
+def next_floor(floor):
+    global scroll_counter, key_counter, total_scrolls, current_floor
     if key_counter < 1:
         return
 
-    if current_floor == "floor" and scroll_counter >= total_scrolls and key_counter >= 1:
+    if floor == "floor" and scroll_counter >= total_scrolls and key_counter >= 1:
         level_manager.load_level("floor2", player_pos=(0, -378))
         total_scrolls += SECOND_SCROLLS
         key_counter = 0
+        current_floor += 1
     if (
-        current_floor == "floor2"
+        floor == "floor2"
         and key_counter >= 1
         and scroll_counter >= total_scrolls
     ):
         level_manager.load_level("floor3", player_pos=(0, 453))
+        current_floor += 1
 
 
 def create_room(name, world, floor, next_player_pos, left_side, enemy_type, scale=0.15):
