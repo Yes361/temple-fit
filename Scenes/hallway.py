@@ -78,7 +78,7 @@ class Enemy(Entity):
                 next=self.next,
                 room=0,
                 enemy_image=self.image,
-                scale=self.scale,
+                scale=20 / self.width,
             )
             levels[level_manager.current_level]["entities"].enemy.hidden = True
 
@@ -155,10 +155,10 @@ right_rooms = [
 ]
 
 
-def load_floor3():
+def load_final_room():
     global text_anim
 
-    level_manager.load_level("floor3", player_pos=(0, 0))
+    level_manager.load_level("final_room", player_pos=(0, 0))
     sprite = Actor("narrative_icon", pos=(100, 580))
 
     text_anim = Dialogue(
@@ -187,7 +187,7 @@ def next_floor(current_floor):
         return
 
     if current_floor == "floor":
-        level_manager.load_level("floor2")
+        level_manager.load_level("floor2", player_pos=(0, -378))
         total_scrolls += SECOND_SCROLLS
         key_counter = 0
     if (
@@ -195,7 +195,7 @@ def next_floor(current_floor):
         and key_counter == 1
         and scroll_counter >= total_scrolls
     ):
-        load_floor3()
+        level_manager.load_level("floor3", player_pos=(0, 453))
 
 
 def create_room(name, world, floor, next_player_pos, left_side, enemy_type, scale=0.15):
@@ -217,7 +217,7 @@ def create_room(name, world, floor, next_player_pos, left_side, enemy_type, scal
             )
         ] + right_rooms
         enemy_spawn = (100, 0)
-    
+
     return {
         "world": Actor(world, scale=662 / 1080),
         "colliders": colliders,
@@ -402,14 +402,16 @@ levels = {
         ],
         "entities": ActorContainer(),
     },
-    "room1": create_room("room1", "stone_left", "floor", (-84, -370), True, 'green_moth'),
-    "room2": create_room("room2", "netherite_right", "floor", (96, -370), False, 'red_hood'),
-    "room3": create_room("room3", "wood_left", "floor", (-84, 48), True, 'dragon'),
-    "room4": create_room("room4", "stone_right", "floor", (96, 48), False, 'green_moth'),
-    "room5": create_room("room5", "purple_left", "floor", (-84, 219), True, 'green_moth'),
-    "room6": create_room("room6", "purple_right", "floor", (96, 219), False, 'green_moth'),
-    "room7": create_room("room7", "netherite_left", "floor", (-84, 501), True, 'green_moth'),
-    "room8": create_room("room8", "wood_right", "floor", (96, 501), False, 'green_moth'),
+    "room1": create_room(
+        "room1", "stone_left", "floor", (-84, -370), True, "green_moth", scale=0.1
+    ),
+    "room2": create_room("room2", "netherite_right", "floor", (96, -370), False, "scorpion", scale=0.15),
+    "room3": create_room("room3", "wood_left", "floor", (-84, 48), True, "dragon", scale=0.2),
+    "room4": create_room("room4", "stone_right", "floor", (96, 48), False, "dragon", scale=0.2),
+    "room5": create_room("room5", "purple_left", "floor", (-84, 219), True, "red_hood", scale=0.3),
+    "room6": create_room("room6", "purple_right", "floor", (96, 219), False, "green_moth", scale=0.1),
+    "room7": create_room("room7", "netherite_left", "floor", (-84, 501), True, "red_hood", scale=0.3),
+    "room8": create_room("room8", "wood_right", "floor", (96, 501), False, "scorpion", scale=0.15),
     "floor2": {
         "world": Actor("floor2", scale=0.3),
         "colliders": [
@@ -453,19 +455,33 @@ levels = {
         ],
         "entities": ActorContainer(),
     },
-    "room1-2": create_room("room1-2", "smooth_left", "floor2", (-84, -370), True, 'green_moth'),
-    "room2-2": create_room("room2-2", "brick_right", "floor2", (96, -370), False, 'green_moth'),
-    "room3-2": create_room("room3-2", "block_left", "floor2", (-84, 48), True, 'green_moth'),
-    "room4-2": create_room("room4-2", "smooth_right", "floor2", (96, 48), False, 'green_moth'),
-    "room5-2": create_room("room5-2", "brick_left", "floor2", (-84, 219), True, 'green_moth'),
-    "room6-2": create_room("room6-2", "block_right", "floor2", (96, 219), False, 'green_moth'),
+    "room1-2": create_room("room1-2", "smooth_left", "floor2", (-84, -370), True, "dragon", scale=0.2),
+    "room2-2": create_room("room2-2", "brick_right", "floor2", (96, -370), False, "red_hood", scale=0.3),
+    "room3-2": create_room("room3-2", "block_left", "floor2", (-84, 48), True, "scorpion", scale=0.15),
+    "room4-2": create_room("room4-2", "smooth_right", "floor2", (96, 48), False, "green_moth", scale=0.1),
+    "room5-2": create_room("room5-2", "brick_left", "floor2", (-84, 219), True, "dragon", scale=0.2),
+    "room6-2": create_room("room6-2", "block_right", "floor2", (96, 219), False, "red_hood", scale=0.3),
     "floor3": {
+        "world": Actor("floor3", scale=0.3),
+        "colliders": [
+            ColliderRect((-2160 * 0.3 / 2 + 81, -3500 * 0.3 / 2), (81, 3500 * 0.3)),
+            ColliderRect((2160 * 0.3 / 2 - 81 * 2, -3500 * 0.3 / 2), (81, 3500 * 0.3)),
+            ColliderRect((-2160 * 0.3 / 2 + 81, 3500 * 0.3 / 2), (3500 * 0.3, 10)),
+            ColliderRect(
+                (-2160 * 0.3 / 2 + 81, -3500 * 0.3 / 2 + 80),
+                (3500 * 0.3, 10),
+                fn=load_final_room,
+            ),
+        ],
+        'entities': ActorContainer()
+    },
+    "final_room": {
         "world": Actor("final_room"),
         "colliders": [
-            ColliderRect((-2300 / 2 * 0.3, -1300 / 2 * 0.3 - 10), (2300 * 0.3, 10)),
-            ColliderRect((2300 / 2 * 0.3, -1300 / 2 * 0.3), (10, 1300 * 0.3)),
-            ColliderRect((-2300 / 2 * 0.3, 1300 / 2 * 0.3 - 10), (2300 * 0.3, 10)),
-            ColliderRect((-2300 / 2 * 0.3 - 10, -1300 / 2 * 0.3), (10, 1300 * 0.3)),
+            ColliderRect((-662 / 2, -662 / 2 - 10), (662, 10)),
+            ColliderRect((662 / 2, -662 / 2), (10, 662)),
+            ColliderRect((-662 / 2, 662 / 2 - 10), (662, 10)),
+            ColliderRect((-662 / 2 - 10, -662 / 2), (10, 662)),
         ],
         "entities": ActorContainer(),
     },
@@ -526,6 +542,8 @@ class hallway(Scene):
 
         if text_anim is None or text_anim.is_complete():
             player.move()
+            
+        print(player.pos)
 
     def on_draw(self, screen):
         level_manager.draw(screen)

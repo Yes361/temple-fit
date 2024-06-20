@@ -3,8 +3,10 @@ from helper import Actor, ActorContainer, Music
 from pgzero.builtins import animate
 from Game import Button
 from . import config
+import sys
 
 player_button_pressed = False
+
 
 def fade_ui_elements(group: ActorContainer):
     for elm in group:
@@ -14,6 +16,11 @@ def fade_ui_elements(group: ActorContainer):
     group.hidden = False
     group.opacity = 0
     animate(group, opacity=255)
+
+
+def outro_sequence():
+    ui_elements.hidden = True
+    intro.play_gif("outro_card", iterations=1, on_finish=lambda: sys.exit(0))
 
 
 def set_difficulty(mode):
@@ -32,7 +39,7 @@ class StartScreen(Scene):
 
     def on_show(self, play_intro=True):
         global intro, ui_elements, play_button
-        
+
         def press_player_button():
             global player_button_pressed
             if not player_button_pressed:
@@ -49,34 +56,35 @@ class StartScreen(Scene):
         difficulty = ActorContainer(
             easy=Button(
                 "easy.png",
-                pos=(331, 480),
+                pos=(331, 490),
                 on_click=lambda key, unicode: set_difficulty("easy"),
                 scale=0.1,
             ),
             middle=Button(
                 "medium.png",
-                pos=(331, 520),
+                pos=(331, 530),
                 on_click=lambda key, unicode: set_difficulty("medium"),
                 scale=0.1,
             ),
             hard=Button(
                 "hard.png",
-                pos=(331, 560),
+                pos=(331, 570),
                 on_click=lambda key, unicode: set_difficulty("hard"),
                 scale=0.1,
             ),
             hidden=True,
         )
-        
-        play_button = Button(
-            "play_button.png",
-            pos=(331, 400),
-            on_click=lambda key, unicode: press_player_button(),
-            scale=0.1,
-        )
-        
+
         ui_elements = ActorContainer(
-            narrative_button=play_button,
+            narrative_button=Button(
+                "play_button.png",
+                pos=(331, 400),
+                on_click=lambda key, unicode: press_player_button(),
+                scale=0.1,
+            ),
+            exit_button=Button(
+                "exit", pos=(331, 450), on_click=lambda key, unicode: outro_sequence(), scale=0.1
+            ),
             difficulty_group=difficulty,
             hidden=True,
         )
@@ -105,9 +113,6 @@ class StartScreen(Scene):
 
     def on_mouse_down(self, pos, button):
         ui_elements.on_click(pos, button)
-
-    def on_key_down(self, key, unicode):
-        intro.skip_gif()
 
     def reset(self):
         global player_button_pressed

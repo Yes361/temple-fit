@@ -6,7 +6,7 @@ exercise_sets = {
             {"exercise": (2, 4), "sets": (7, 10)},
             {"exercise": (3, 6), "sets": (10, 13)},
         ],
-        'time_limit': 60
+        'time_limit': 45
     },
     "medium": {
         "sets": [
@@ -14,7 +14,7 @@ exercise_sets = {
             {"exercise": (2, 4), "sets": (7, 10)},
             {"exercise": (2, 4), "sets": (7, 10)},
         ],
-        'time_limit': 45
+        'time_limit': 30
     },
     "hard": {
         "sets": [
@@ -22,11 +22,9 @@ exercise_sets = {
             {"exercise": (2, 4), "sets": (7, 10)},
             {"exercise": (2, 4), "sets": (7, 10)},
         ],
-        'time_limit': 30
+        'time_limit': 20
     },
 }
-
-
 
 def set_difficulty(difficulty):
     global exercise, mode, time_limit

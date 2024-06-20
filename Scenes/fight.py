@@ -87,7 +87,7 @@ def anim():
     schedule(move_enemy, 2)
 
 
-def create_new_objective(rec):
+def create_objectives(rec):
     min_count, max_count = rec["exercise"]
     count = random.randint(min_count, max_count)
     for i in range(count):
@@ -173,10 +173,8 @@ class battle(Scene):
         enemy_sprite.scale = scale
 
         reset()
-        create_new_objective(config.exercise[room])
-        
-        print(config.exercise[room])
-
+        create_objectives(config.exercise[room])
+    
     def on_hide(self):
         pass
 
