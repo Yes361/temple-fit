@@ -478,4 +478,5 @@ def schedule(on_finish, duration): # monke patch
     return animate(dummy_object, duration=duration, on_finished=on_finish, pos=(20, 20))
         
 if __name__ == '__main__':
-    extract_gif_frames(r'assets/gifs/ending.gif', 'images', 'end') 
+    # extract_gif_frames(r'assets/gifs/ending.gif', 'images', 'ending') 
+    print(CACHED_GIFS)

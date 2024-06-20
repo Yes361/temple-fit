@@ -21,7 +21,7 @@ class StartScreen(Scene):
     def on_hide(self):
         pass
 
-    def on_show(self):
+    def on_show(self, play_intro=True):
         global intro, ui_elements
 
         intro = Actor("character-battle-sprite", pos=(331, 331))
@@ -37,7 +37,7 @@ class StartScreen(Scene):
             hallway_button=Button(
                 "play_button.png",
                 pos=(331, 520),
-                on_click=lambda x, y: game_manager.switch_scene('hallway', 'fields'),
+                on_click=lambda x, y: game_manager.switch_scene('hallway', 'floor3'),
                 scale=0.1,
                 hover_frame='character.png'
             ),
@@ -50,13 +50,14 @@ class StartScreen(Scene):
             hidden=True,
         )
 
-        intro.play_gif(
-            "intro_card",
-            iterations=1,
-            on_finish=lambda: intro.play_gif(
-                "intro", iterations=1, on_finish=fade_ui_elements
-            ),
-        )
+        if play_intro:
+            intro.play_gif(
+                "intro_card",
+                iterations=1,
+                on_finish=lambda: intro.play_gif(
+                    "intro", iterations=1, on_finish=fade_ui_elements
+                ),
+            )
         
     def on_draw(self, screen):
         intro.draw()

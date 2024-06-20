@@ -1,8 +1,10 @@
 from managers import Scene, game_manager
 from helper import Actor, ActorContainer
+from pgzero.builtins import sounds
 
+outro = Actor("character-battle-sprite", pos=(331, 331))
 
-class StartScreen(Scene):
+class Outro(Scene):
     SCENE_NAME = "outro"
 
     def __init__(self, *args, **kwargs):
@@ -12,14 +14,10 @@ class StartScreen(Scene):
         pass
 
     def on_show(self):
-        global intro, ui_elements
-
-        intro = Actor("character-battle-sprite", pos=(331, 331))
-        intro.play_gif
+        outro.play_gif('ending', iterations=1, on_finish=lambda: game_manager.switch_scene('Start Screen', False))
 
     def on_draw(self, screen):
-        intro.draw()
-        ui_elements.draw()
+        outro.draw()
 
     def on_update(self, dt):
-        intro.update(dt)
+        outro.update(dt)

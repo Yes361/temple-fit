@@ -43,7 +43,7 @@ class Scene:
         pass
     
     @abstractmethod
-    def on_key_up(self, key, unicode):
+    def on_key_up(self, key):
         pass
     
     @abstractmethod
@@ -177,5 +177,11 @@ class GameManager:
     
     def on_mouse_up(self, pos, button):
         self.scenes[self.current_event()].on_mouse_up(pos, button)
+        
+    def on_key_up(self, key):
+        self.scenes[self.current_event()].on_key_up(key)
+        
+    def on_music_end(self):
+        self.scenes[self.current_event()].on_music_end()
           
 game_manager = GameManager()

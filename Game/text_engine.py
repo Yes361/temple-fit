@@ -36,11 +36,16 @@ class Text(AbstractActor):
             screen.draw.textbox(text, self.bounding_box, **self.styles)
             
 class Dialogue(Text):
-    def __init__(self, actor_ref: Actor, characters: dict, dialogue: list, voice_lines: list = None, *args, **kwargs):
-        self.dialogue = dialogue
-        self.voice_lines = voice_lines
+    def __init__(self, actor_ref: Actor, characters: dict, dialogue: list, voice_lines: list = None, on_finish=None, *args, **kwargs):
+        self.dialogue = dialogue.copy()
+        self.voice_lines = voice_lines.copy()
         self.sound = None
-        self.actor_ref = actor_ref.get_weak_ref()
+        self.on_finish = on_finish
+        
+        self.actor_ref = None
+        if actor_ref is not None:
+            self.actor_ref = actor_ref.get_weak_ref()
+        
         self.characters = characters
         if self.voice_lines is not None:
             voice_line = self.voice_lines.pop(0)
@@ -56,7 +61,8 @@ class Dialogue(Text):
             character = line[0:colon].strip()
             
             assert character in self.characters, 'After searching far and wide, across multiple galaxies and dimensions, in the tiniest of crevices, I can not find this character in the list of characters you\' provided'
-            self.actor_ref.image = self.characters[character]
+            if self.actor_ref is not None:
+                self.actor_ref.image = self.characters[character]
             line = line[colon + 1:].strip()
         return line
     
@@ -70,7 +76,10 @@ class Dialogue(Text):
                 self.animate_typewriter(self.pos, line, time=self.sound.get_length(), **self.styles)
             else:
                 self.animate_typewriter(self.pos, line, time_per_char=self.time_per_char, **self.styles)
-    
+                
+        if len(self.dialogue) == 0 and callable(self.on_finish):
+            self.on_finish()
+            
     def next(self):
         if self._anim.running:
             self.skip()

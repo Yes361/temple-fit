@@ -68,7 +68,7 @@ class Enemy(Entity):
         if self.colliderect(player):
             fade()
             schedule(
-                lambda: game_manager.switch_scene("Battle", next=self.next, room=0),
+                lambda: game_manager.switch_scene("Battle", next=self.next, room=0, enemy_image=self.image),
                 1,
             )
 
@@ -156,7 +156,7 @@ def create_room(name, world, floor, next_player_pos, left_side):
             ColliderRect(
                 (-1080 * 662 / 1080 / 2 + 1, -1080 * 662 / 1080 / 2 + 81 * 4),
                 (81, 81),
-                fn=lambda: level_manager.load_level(floor, player_pos=(96, -370)),
+                fn=lambda: level_manager.load_level(floor, player_pos=next_player_pos),
             )
         ] + right_rooms
         enemy_spawn = (200, 0)
@@ -189,6 +189,27 @@ def load_tutorial():
     )
 
     level_manager.load_level("tutorial_start", (0, 0))
+
+def load_floor3():
+    global text_anim, sprite
+    
+    level_manager.load_level("floor3", player_pos=(0, 0))
+    sprite = Actor("narrative_icon", pos=(100, 580))
+    sprite.scale = 1.5
+    
+    text_anim = Dialogue(
+        sprite,
+        {
+            "MC": "character-battle-sprite",
+            "OM": "narrative_icon",
+        },
+        CACHED_DIALOGUE["outro"],
+        voice_lines=CACHED_VOICELINES["oms"],
+        time_per_char=0.02,
+        bounding_box=Rect((220, 565), (425, 75)),
+        color="white",
+        on_finish=lambda: game_manager.switch_scene('Battle', next='outro', enemy_image='dragon')
+    )
 
 
 levels = {
@@ -298,7 +319,7 @@ levels = {
             ColliderRect(
                 (-2160 * 0.3 / 2 + 81, -4320 * 0.3 / 2 + 80),
                 (4320 * 0.3, 10),
-                fn=next_floor,
+                fn=lambda: level_manager.load_level("floor2", player_pos=(0, 0)),
             ),
             ColliderRect(
                 (-2160 * 0.3 / 2 + 83, -4320 * 0.3 / 2 + 80 * 3 + 10),
@@ -365,14 +386,9 @@ levels = {
             ColliderRect((-2160 * 0.3 / 2 + 81, -3500 * 0.3 / 2), (81, 3500 * 0.3)),
             ColliderRect((2160 * 0.3 / 2 - 81 * 2, -3500 * 0.3 / 2), (81, 3500 * 0.3)),
             ColliderRect(
-                (-2160 * 0.3 / 2 + 81, 4320 * 0.3 / 2 - 80),
-                (4320 * 0.3, 10),
-                fn=lambda: next_floor("floor2"),
-            ),
-            ColliderRect(
-                (-2160 * 0.3 / 2 + 81, -3500 * 0.3 / 2 + 80),
+                (-2160 * 0.3 / 2 + 81, 3500 * 0.3 / 2 - 80),
                 (3500 * 0.3, 10),
-                fn=lambda: next_floor("floor"),
+                fn=load_floor3,
             ),
             ColliderRect(
                 (-2160 * 0.3 / 2 + 83, -3500 * 0.3 / 2 + 80 * 3 + 10),
@@ -419,6 +435,17 @@ levels = {
     "room4-2": create_room("room4-2", "smooth_right", "floor2", (96, 48), False),
     "room5-2": create_room("room5-2", "brick_left", "floor2", (-84, 219), True),
     "room6-2": create_room("room6-2", "block_right", "floor2", (96, 219), False),
+    'floor3': {
+        'world': Actor('final_room', scale=0.3),
+        'colliders': [
+            ColliderRect((-2300 / 2 * 0.3, -1300 / 2 * 0.3 - 10), (2300 * 0.3, 10)),
+            ColliderRect((2300 / 2 * 0.3, -1300 / 2 * 0.3), (10, 1300 * 0.3)),
+            ColliderRect((-2300 / 2 * 0.3, 1300 / 2 * 0.3 - 10), (2300 * 0.3, 10)),
+            ColliderRect((-2300 / 2 * 0.3 - 10, -1300 / 2 * 0.3), (10, 1300 * 0.3)),
+        ],
+        'entities': ActorContainer()
+    }
+        
 }
 
 level_manager = LevelManager((662, 662), player, levels)
@@ -450,7 +477,7 @@ class hallway(Scene):
         if not freeze_frame:
             level_manager.update(dt)
 
-        if counter >= 8:
+        if counter >= 1: # CHANGE
             levels["floor"]["world"].image = "floor1-open"
 
         if level_manager.current_level.startswith("tutorial") and text_anim and sprite:
@@ -466,12 +493,14 @@ class hallway(Scene):
         level_manager.draw(screen)
         ui.draw()
         scroll_counter_img.draw()
-
+        
+        
         screen.draw.text(f"{counter}", (40, 615))
 
-        if level_manager.current_level.startswith("tutorial") and text_anim and sprite:
+        if text_anim and sprite:
             text_anim.draw(screen)
-            sprite.draw(screen)
+            if not text_anim.is_complete():
+                sprite.draw(screen)
 
     def on_key_down(self, key, unicode):
         if text_anim and keyboard.SPACE:
