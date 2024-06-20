@@ -186,7 +186,7 @@ def next_floor(current_floor):
     if key_counter < 1:
         return
 
-    if current_floor == "floor" and scroll_counter > total_scrolls and key_counter >= 1:
+    if current_floor == "floor" and scroll_counter >= total_scrolls and key_counter >= 1:
         level_manager.load_level("floor2", player_pos=(0, -378))
         total_scrolls += SECOND_SCROLLS
         key_counter = 0
@@ -566,9 +566,11 @@ class hallway(Scene):
                 text_anim.next()
 
     def reset(self):
-        global scroll_counter, key_counter
+        global scroll_counter, key_counter, total_scrolls
         scroll_counter = 0
         key_counter = 0
+        
+        total_scrolls = FIRST_SCROLLS
 
         for level in levels.values():
             entities = level["entities"]
