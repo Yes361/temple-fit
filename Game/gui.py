@@ -5,8 +5,8 @@ import pygame
 
 class Button(Actor, GUIElement):
     """
-    asds
-    """ 
+    A GUI button that can respond to click and hover events.
+    """
     def __init__(self, image, *args, on_click: callable = None, on_hover: callable = None, held_frame=None, hover_frame=None, **kwargs):
         self.event_click = on_click
         self.event_hover = on_hover
@@ -38,6 +38,9 @@ class Button(Actor, GUIElement):
         super().update(dt)
         
 class HealthBar(Actor, GUIElement):
+    """
+    A GUI health bar that can display and animate changes in health.
+    """
     def __init__(self, image, extents, total_hp, *args, counter_default=0, on_hp_change=None, fill=(255, 0, 0), **kwargs):
         self._counter_value = counter_default
         self.on_hp_change = on_hp_change
@@ -58,12 +61,24 @@ class HealthBar(Actor, GUIElement):
         self.percent_filled = self._hp / self.total_hp
         
     def animate_damage(self, loss_hp):
+        """
+        Animate the health bar to show damage taken.
+        
+        @params:
+            loss_hp (int): The amount of health points lost.
+        """
         fn = self.on_hp_change
         if callable(fn):
             fn = lambda: self.on_hp_change(self.hp - loss_hp)
         animate(self, duration=5, on_finished=fn, hp=self.hp - loss_hp)
         
     def draw(self, screen):
+        """
+        Draw the health bar on the screen.
+        
+        @params:
+            screen (pygame.Surface): The surface to draw the health bar on.
+        """
         super().draw()
         pos = (self.extents.x + self.left, self.extents.y + self.top)
         dims = (self.extents.width * self.percent_filled * self.scale, self.extents.height * self.scale)

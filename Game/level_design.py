@@ -26,6 +26,13 @@ class LevelManager(AbstractActor):
         self._current_level = value
     
     def _load_level(self, level, player_pos):
+        """
+        Loads a specified level with optional player starting position.
+
+        @params:
+            level (str): Name of the level to load.
+            player_pos (tuple): Initial position (x, y) of the player entity.
+        """
         self.current_level = level
         level = self.levels[level]
         
@@ -37,6 +44,13 @@ class LevelManager(AbstractActor):
         self.entities = level['entities']
         
     def load_level(self, level, player_pos=(0, 0)):
+        """
+        Public method to load a specified level with optional player starting position.
+
+        @params:
+            level (str): Name of the level to load.
+            player_pos (tuple, optional): Initial position (x, y) of the player entity. Defaults to (0, 0).
+        """
         if self.world is not None:
             self.offset_room(self.total_offset)
         self.total_offset = [0, 0]
@@ -51,14 +65,23 @@ class LevelManager(AbstractActor):
         self.set_camera(self.player.pos)
         
     def offset_room(self, pos):
+        """
+        Offsets all game entities by a specified position.
+
+        @params:
+            pos (tuple): Offset values (dx, dy) to apply to game entities.
+        """
         dx, dy = pos
         self.total_offset = [self.total_offset[0] - dx, self.total_offset[1] - dy]
         self.entities.x -= dx
         self.entities.y -= dy
+        
         self.player.x -= dx
         self.player.y -= dy
+        
         self.world.x -= dx
         self.world.y -= dy
+        
         for collider in self.colliders.rect_list:
             collider.x -= dx
             collider.y -= dy
@@ -70,6 +93,12 @@ class LevelManager(AbstractActor):
         self.camera = [x, y]
         
     def debug(self, screen):
+        """
+        Draws collision rectangles for debugging purposes.
+
+        @params:
+            screen: Surface or screen object to draw on.
+        """
         for collider in self.colliders.rect_list:
             screen.draw.rect(Rect((collider.x, collider.y), (collider.width, collider.height)), (255, 255, 255))
     

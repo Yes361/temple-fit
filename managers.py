@@ -4,15 +4,15 @@ from typing import *
 import pygame
 
 class Scene:
+    """
+    Base Scene class.
+
+    This class represents a generic scene in the game. Each specific scene in the game should
+    inherit from this class and implement the required abstract methods to define the scene's behavior.
+    """
     def __init__(self, scene, *args, **kwargs):
         game_manager.subscribe(scene, self)
         self.globals = kwargs
-        # self.all_actors = ActorContainer(
-        #     UI_element = ActorContainer(),
-        #     Actors = ActorContainer()   
-        # )
-        # self.Actors = self.all_actors.Actor
-        # self.UI_element = self.all_actors.UI_element
     
     @abstractmethod
     def load_actors():
@@ -52,11 +52,6 @@ class Scene:
     
     @abstractmethod
     def on_mouse_down(self, pos, button):
-        # if self.UI_element.hidden:
-        #     return
-        
-        # for actor in self.UI_element:
-        #     actor.on_click(pos, button)
         pass
     
     @abstractmethod
@@ -65,11 +60,6 @@ class Scene:
     
     @abstractmethod
     def on_mouse_hold(self, pos, buttons):
-        # if self.UI_element.hidden:
-        #     return
-        
-        # for actor in self.UI_element:
-        #     actor.on_hold(pos, buttons)
         pass
     
     @abstractmethod
@@ -78,20 +68,23 @@ class Scene:
     
     @abstractmethod
     def on_mouse_hover(self, pos):
-        # if self.UI_element.hidden:
-        #     return
-        
-        # for actor in self.UI_element:
-        #     actor.on_hover(pos)
         pass
     
     @abstractmethod
     def on_music_end(self):
         pass
     
+    @abstractmethod
+    def reset(self):
+        pass
+    
 class GameManager:
     """
-    Handles Scene Transition/Visibility and Draw/Update Callbacks
+    Handles Scene Transition/Visibility and Draw/Update Callbacks.
+
+    The GameManager is responsible for managing the lifecycle of scenes, including transitions, visibility,
+    and handling updates and drawing. It maintains a registry of scenes and manages which scenes are active
+    and visible at any given time.
     """
     def __init__(self, predefined_scenes={}):
         self.scenes: Dict[any, Type[Scene]] = predefined_scenes
@@ -99,17 +92,53 @@ class GameManager:
         self._event_stack = []
         
     def subscribe(self, scene_name, scene: Type[Scene]):
+        """
+        Register a new scene with the given name.
+
+        @params
+        scene_name : str
+            The name to register the scene under.
+        scene : Type[Scene]
+            The scene instance to register.
+        """
         assert scene_name not in self.scenes, f'\"{scene_name}\" is already subscribed.'
         self.scenes[scene_name] = scene
 
     def unsubscribe(self, scene):
+        """
+        Unregister an existing scene.
+
+        @params
+        scene : str
+            The name of the scene to unregister.
+        """
         assert scene in self.scenes, f'\"{scene}\" doesn\'t exist.'
         self.scenes.pop(scene)
         
     def list_all_scenes(self):
+        """
+        Return a list of all registered scene names.
+
+        @returns
+        List[str]
+            A list of registered scene names.
+        """
         return self.scenes.keys()
 
     def show_scene(self, scene, *args, switch_event_scene: bool = True, **kwargs):
+        """
+        Make a registered scene active and visible.
+
+        @params
+        scene : str
+            The name of the scene to show.
+        switch_event_scene : bool
+            Whether to switch the event handling to this scene (default is True).
+        *args : tuple
+            Additional positional arguments to pass to the scene's on_show method.
+        **kwargs : dict
+            Additional keyword arguments to pass to the scene's on_show method.
+        """
         assert scene in self.scenes, f'\"{scene}\" doesn\'t exist.'
         assert scene not in self._active_scenes, f'\"{scene}\" is already visible.'
         
@@ -120,6 +149,17 @@ class GameManager:
         self.scenes[scene].on_show(*args, **kwargs)
         
     def hide_scene(self, scene, *args, **kwargs):
+        """
+        Make an active scene invisible.
+
+        @params
+        scene : str
+            The name of the scene to hide.
+        *args : tuple
+            Additional positional arguments to pass to the scene's on_hide method.
+        **kwargs : dict
+            Additional keyword arguments to pass to the scene's on_hide method.
+        """
         assert scene in self.scenes, f'\"{scene}\" doesn\'t exist.'
         assert scene in self._active_scenes, f'\"{scene}\" is already invisible.'
         
@@ -130,14 +170,35 @@ class GameManager:
             self._event_stack.pop()
         
     def clear_active_scenes(self):
+        """
+        Hide all currently active scenes.
+        """
         for scene in self._active_scenes:
             self.hide_scene(scene)
         self._active_scenes.clear()
         
     def get_active_scenes(self):
+        """
+        Return a list of currently active scene names.
+
+        @returns:
+        List[str]
+            A list of active scene names.
+        """
         return self._active_scenes
 
     def switch_scene(self, scene, *args, **kwargs):
+        """
+        Switch to a new scene, making it the only active scene.
+
+        @params
+        scene : str
+            The name of the scene to switch to.
+        *args : tuple
+            Additional positional arguments to pass to the scene's on_show method.
+        **kwargs : dict
+            Additional keyword arguments to pass to the scene's on_show method.
+        """
         assert scene not in self._active_scenes, f'\"{scene}\" is already active.'
         assert scene in self.scenes, f'\"{scene}\" doesn\'t exist.'
         self.clear_active_scenes()
@@ -145,14 +206,32 @@ class GameManager:
         if len(self._event_stack) > 0:
             self._event_stack.pop()
         self.show_scene(scene, *args, switch_event_scene=True, **kwargs)
+        
+    def reset(self):
+        for scene in self.scenes.values():
+            scene.reset()
     
-    def draw(self, screen):        
+    def draw(self, screen):      
+        """
+        Draw all active scenes onto the given screen.
+
+        @params
+        screen : pgzero.screen.Screen
+            The screen or surface to draw the scenes on.
+        """  
         for scene in self._active_scenes:
             
             current_scene = self.scenes[scene]
             current_scene.on_draw(screen)
             
     def update(self, dt):
+        """
+        Update all active scenes.
+
+        @params
+        dt : float
+            The time delta since the last update.
+        """
         for scene in self._active_scenes:
             
             current_scene = self.scenes[scene]
@@ -164,6 +243,13 @@ class GameManager:
         self.scenes[current_event].on_key_hold(dt)
                 
     def current_event(self):
+        """
+        Return the name of the scene that should currently handle input events.
+
+        @returns:
+        str
+            The name of the current event scene.
+        """
         return self._event_stack[-1]
                 
     def on_key_down(self, key, unicode):

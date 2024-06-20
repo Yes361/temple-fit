@@ -12,10 +12,12 @@ mp_pose = mp.solutions.pose
 DEFAULT_RESOLUTION = (800, 600)
 
 class PoseAnalyzer:
+    """
+    Analyzes poses detected in video frames using MediaPipe and recognizes specific exercises.
+    """
     MAX_LANDMARKS = 33
     ACTION_RECOGNIZERS = {
         'jumping jacks': JumpingJacks,
-        # 'lunges': Squats,
         'bicep curls': BicepCurls,
         'squats': Squats
     }
@@ -35,8 +37,13 @@ class PoseAnalyzer:
     @staticmethod
     def draw_hand_landmarks(frame, detection_result):
         """
-        Draw the hand landmarks
+        Draw the hand landmarks on the frame.
+        
+        @params:
+            frame: The video frame.
+            detection_result: The result from a MediaPipe pose detection.
         """
+        
         if detection_result.pose_landmarks:     
             mp_drawing.draw_landmarks(frame, detection_result.pose_landmarks, mp_pose.POSE_CONNECTIONS)
     
@@ -52,6 +59,14 @@ class PoseAnalyzer:
         return result
     
     def recognize_pose(self, frame, time_elapsed):
+        """
+        Recognize poses in the frame and update the recognizer states.
+        
+        @params:
+            frame: The video frame.
+            time_elapsed: Time elapsed since the last update.
+        """
+
         if not self.detection_result:
             return
         
@@ -63,6 +78,15 @@ class PoseAnalyzer:
         self.active_recognizers = active_list[0] if type(active_list[0]) == list else active_list
                 
     def report_stats(self, action: str=None):
+        """
+        Report statistics of the recognized actions.
+        
+        @params:
+            action (str): Specific action to report stats for.
+        
+        @@returns:
+            dict or int: Statistics data.
+        """
         if action is None:
             return {action: recognizer.report_stats() for action, recognizer in self.recognizers.items()}
         else:
@@ -78,6 +102,9 @@ class PoseAnalyzer:
             recognizer.reset()
 
 class Camera(Actor):    
+    """
+    Handles camera operations and integrates with PoseAnalyzer for pose detection and recognition.
+    """
     def __init__(self, *args, **kwargs):
         self._cap = None
         self.pose = PoseAnalyzer(min_detection_confidence = 0.85, min_tracking_confidence  = 0.85)
@@ -91,9 +118,11 @@ class Camera(Actor):
     
     def initialize_camera(self, video_mode, dims):
         """
-        Initialize Camera
-        @param video_mode 0 = Webcam, 1 = External Webcam
-        @param dimensions dimensions of the video frame
+        Initialize the camera.
+        
+        @params:
+            video_mode: 0 for Webcam, 1 for External Webcam.
+            dims: Dimensions of the video frame.
         """
         width, height = dims
         self.time_elapsed = 0
@@ -120,7 +149,10 @@ class Camera(Actor):
         frame = Camera.process_camera_frame(frame)
         return ret, frame
     
-    def draw(self, screen, *args, border=(0, 0, 0), **kwargs):
+    def draw(self, screen, *args, **kwargs):
+        """
+        Draw the current frame and detected poses on the screen.
+        """
         if self.hidden:
             return
         
@@ -148,6 +180,13 @@ class Camera(Actor):
 
     
     def prompt_user(self, frame, results):
+        """
+        Display a prompt to the user based on the visibility of landmarks.
+        
+        @params:
+            frame: The video frame.
+            results: The result from a MediaPipe pose detection.
+        """
         pose_markers = results.pose_landmarks
         if not pose_markers:
             return
@@ -163,7 +202,13 @@ class Camera(Actor):
     @staticmethod
     def process_camera_frame(frame):
         """
-        Preprocessing image frame
+        Preprocess the camera frame.
+        
+        @params:
+            frame: The video frame.
+        
+        @returns:
+            The processed frame.
         """
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         return frame
@@ -171,7 +216,14 @@ class Camera(Actor):
     @staticmethod
     def convert_frame_surface(frame, dims):
         """
-        Convert Frame to a Pygame Surface
+        Convert a frame to a pygame surface.
+        
+        @params:
+            frame: The video frame.
+            dims: The dimensions to scale the surface to.
+        
+        @returns:
+            pygame.Surface: The converted surface.
         """
         frame = cv2.flip(frame, 1)
         surface = pygame.surfarray.make_surface(np.rot90(frame))
