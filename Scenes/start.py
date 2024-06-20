@@ -27,23 +27,9 @@ class StartScreen(Scene):
         intro = Actor("character-battle-sprite", pos=(331, 331))
 
         ui_elements = ActorContainer(
-            battle_button=Button(
-                "play_button.png",
-                pos=(331, 410),
-                on_click=lambda x, y: game_manager.switch_scene('hallway', 'tutorial'),
-                scale=0.1,
-                hover_frame='character'
-            ),
-            hallway_button=Button(
-                "play_button.png",
-                pos=(331, 520),
-                on_click=lambda x, y: game_manager.switch_scene('hallway', 'floor3'),
-                scale=0.1,
-                hover_frame='character.png'
-            ),
             narrative_button=Button(
                 "play_button.png",
-                pos=(331, 630),
+                pos=(331, 400),
                 on_click=lambda x, y: game_manager.switch_scene('Narrative'),
                 scale=0.1,
             ),

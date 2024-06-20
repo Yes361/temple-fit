@@ -8,22 +8,25 @@ import pygame
 import os
 import re
 
-def list_actor_attributes(actor: Actor, field_name: List[str]) -> dict[str, Any]:
-    """
-    @param actor
-    @param field_name The desired fields
-    @return: A dictionary containing the values of the desired fields
-    """
-    field = {}
-    for name in field_name:
-        field[name] = getattr(actor, name)
-    return field
-
 def lower_case_files(directory):
+    """
+    Converts all filenames in a directory to lowercase.
+    
+    @params:
+        directory (str): The path to the directory.
+    """
     for file in os.listdir(directory):
         os.rename(rf'{directory}\{file}', rf'{directory}\{file.lower()}')
         
 def extract_gif_frames(read_file, out_dir, prefix):
+    """
+    Extracts frames from a GIF file and saves them as PNG files.
+    
+    @params:
+        read_file (str): The path to the GIF file.
+        out_dir (str): The directory to save the frames.
+        prefix (str): The prefix for the output filenames.
+    """
     idx = 0
     with Image.open(read_file) as im:
         im.seek(1)
@@ -38,6 +41,15 @@ def extract_gif_frames(read_file, out_dir, prefix):
             pass
         
 def extract_voicelines(folder):
+    """
+    Extracts voice lines from a folder and categorizes them by scene.
+    
+    @params:
+        folder (str): The path to the folder containing the voice lines.
+        
+    @returns:
+        dict: A dictionary where keys are scene names and values are lists of voice line filenames.
+    """
     scene = {}
     for file in os.listdir(folder):
         if scene_name := re.match(r'^(.+)_\d+\.mp3$', file):
@@ -48,9 +60,28 @@ def extract_voicelines(folder):
     return scene
 
 def match_file_prefix(prefix, file):
+    """
+    Matches a file prefix to a given string.
+    
+    @params:
+        prefix (str): The prefix to match.
+        file (str): The filename to check.
+        
+    @returns:
+        bool: True if the prefix matches, otherwise False.
+    """
     return re.match(rf'{prefix}(?:_frame)', file) != None
 
 def extract_frames_from_gif(prefix):
+    """
+    Extracts frames from a GIF file given a prefix.
+    
+    @params:
+        prefix (str): The prefix of the GIF file.
+        
+    @returns:
+        List[str]: A list of frame filenames.
+    """
     gif_frames = []
     for file in os.listdir('images'):
         if match_file_prefix(prefix, file):
@@ -58,6 +89,12 @@ def extract_frames_from_gif(prefix):
     return gif_frames
 
 def move_assets_into_images(asset_folder):
+    """
+    Moves assets from a folder into the 'images' directory.
+    
+    @params:
+        asset_folder (str): The path to the asset folder.
+    """
     for file in asset_folder:
         asset_path = f'{asset_folder}/{file}'
         if os.path.isdir(asset_path):
@@ -66,11 +103,26 @@ def move_assets_into_images(asset_folder):
             os.rename(asset_path, f'images/{file}')
             
 def delete_gif(prefix):
+    """
+    Deletes GIF frames with a specific prefix from the 'images' directory.
+    
+    @params:
+        prefix (str): The prefix of the GIF frames to delete.
+    """
     for file in os.listdir('images'):
         if match_file_prefix(prefix, file):
             os.remove(f'images/{file}')
 
 def load_gifs(path):
+    """
+    Loads GIF files from a directory and extracts their frames.
+    
+    @params:
+        path (str): The path to the directory containing GIF files.
+        
+    @returns:
+        dict: A dictionary where keys are GIF names and values are lists of frame filenames.
+    """
     gifs = os.listdir(path)
     gif_images = {}
     for file in gifs:
@@ -78,13 +130,17 @@ def load_gifs(path):
         gif_images[file_name] = extract_frames_from_gif(file_name)
     return gif_images
 
-# TODO: Sync Assets and Images Folder function
-def sync_assets_and_images(asset_folder_path):
-    pass
-
-CACHED_GIFS = load_gifs(r'assets/gifs')
 
 def read_dialogue_lines(asset_folder_path):
+    """
+    Reads dialogue lines from text files in a folder.
+    
+    @params:
+        asset_folder_path (str): The path to the folder containing dialogue files.
+        
+    @returns:
+        dict: A dictionary where keys are dialogue file names and values are lists of dialogue lines.
+    """
     dialogue = {}
     for file in os.listdir(asset_folder_path):
         file_name = re.match(r'^(.+)_\d+\.txt$', file).group(1)
@@ -92,6 +148,7 @@ def read_dialogue_lines(asset_folder_path):
         dialogue[file_name] = list(filter(lambda line: (line != '\n') and (line != ''), dialogue_lines))
     return dialogue
 
+CACHED_GIFS = load_gifs(r'assets/gifs')
 CACHED_DIALOGUE = read_dialogue_lines(r'assets/Dialogue')
 CACHED_VOICELINES = extract_voicelines(r'sounds')
 
@@ -182,6 +239,12 @@ class Actor(Actor, AbstractActor):
         return self._dims
         
     def resize(self, dims):
+        """
+        Resizes the actor to the specified dimensions.
+        
+        @params:
+            dims (tuple): The new dimensions for the actor.
+        """
         self._dims = dims
         self.width, self.height = dims
         self._surf = pygame.transform.scale(self._surf, dims)
@@ -194,6 +257,12 @@ class Actor(Actor, AbstractActor):
             super().draw()
     
     def is_animation_available(self):
+        """
+        Checks if animation is available for the actor.
+        
+        @returns:
+            bool: True if animation is available, otherwise False.
+        """
         return type(self.images) == list and len(self.images) > 0
     
     # https://gist.github.com/Susensio/979259559e2bebcd0273f1a95d7c1e79
@@ -212,6 +281,15 @@ class Actor(Actor, AbstractActor):
                 self.animate()
                 
     def animate_starting_targets(self, duration=1, tween='linear', on_finished=1, **kwargs):
+        """
+        Animates the actor's properties to new values over time.
+        
+        @params:
+            duration (float): The duration of the animation in seconds.
+            tween (str): The type of tweening to use. Default is 'linear'.
+            on_finished (callable): The function to call when the animation is finished.
+            **kwargs: The properties to animate and their target values.
+        """
         saved_attributes = {}
         for attr in kwargs:
             saved_attributes[attr] = getattr(self, attr)
@@ -233,12 +311,18 @@ class Actor(Actor, AbstractActor):
             self.iterations -= 1
     
     def stop_gif(self):
+        """
+        Stops the GIF animation and clears the frames.
+        """
         self.iterations = 0
         self.images.clear()
         self._is_playing_gif = False
         self.gif_name = None
         
     def skip_gif(self):
+        """
+        Skips to the last frame of the GIF animation.
+        """
         if not self.is_animation_available():
             return
         
@@ -248,11 +332,28 @@ class Actor(Actor, AbstractActor):
             self._gif_on_finish()
     
     def play_animation(self, images, fps, iterations):
+        """
+        Plays a custom animation with specified frames per second and iterations.
+        
+        @params:
+            images (list): A list of image frames.
+            fps (int): Frames per second.
+            iterations (int): Number of iterations. -1 for infinite loop.
+        """
         self.images = images
         self.fps = fps
         self.iterations = iterations
     
     def play_gif(self, gif, iterations = -1, fps=24, on_finish: callable = None,):
+        """
+        Plays a GIF animation.
+        
+        @params:
+            gif (str): The name of the GIF to play.
+            iterations (int): Number of iterations. Default is -1 (infinite).
+            fps (int): Frames per second. Default is 24.
+            on_finish (callable, optional): Function to call when the animation finishes.
+        """
         self.gif_name = gif
         self._is_playing_gif = True
         self._gif_on_finish = on_finish
@@ -262,6 +363,13 @@ class Actor(Actor, AbstractActor):
         return weakref.proxy(self)
     
     def copy_basic_attr(self, other: Type[Actor], attrs=['scale']):
+        """
+        Copies basic attributes from another actor.
+        
+        @params:
+            other (Actor): The other actor to copy attributes from.
+            attrs (list): The list of attributes to copy. Default is ['scale'].
+        """
         for attr in attrs:
             value = getattr(self, attr)
             setattr(self, attr, value)
@@ -374,8 +482,14 @@ class ActorContainer(AbstractActor):
   
     def add(self, name: any, actor: Type[AbstractActor]):
         """
-        Adds an Actor to the Actor Container
-        @returns: Weak reference of the actor that is to be used
+        Adds an Actor to the ActorContainer.
+        
+        @params:
+            name (any): The identifier for the actor.
+            actor (AbstractActor): The actor to add.
+        
+        @returns:
+            weakref.proxy: A weak reference to the added actor.
         """
         assert name not in self._actor_list, f'\"{name}\" is already added.'
         self._actor_list[name] = actor
@@ -386,11 +500,16 @@ class ActorContainer(AbstractActor):
         actor = self._actor_list.pop(name)
         del actor
         
-    # TODO: z-index shenanigans
-    # def set_actor_zindex(self, name):
-    #     pass
-        
     def colliderect(self, other_actor: Type[AbstractActor]):
+        """
+        Checks if any actor in the container collides with another actor.
+        
+        @params:
+            other_actor (AbstractActor): The other actor to check collision with.
+        
+        @returns:
+            bool: True if any actor collides with the other actor, False otherwise.
+        """
         for actor in self._actor_list.values():
             if actor.colliderect(other_actor):
                 return True
@@ -412,24 +531,12 @@ class ActorContainer(AbstractActor):
         self.x += dx
         self.y += dy
             
-    # TODO: Implement on_show and on_hide for Actors and ActorContainer
-    # def show(self, *args, **kwargs):
-    #     if callable()
-    
-    # def hide(self):
-    #     pass
-            
     def clear(self):
         for name in self._actor_list.copy():
             actor = self._actor_list.get(name)
             if isinstance(actor, ActorContainer):
                 actor.clear()            
             self.remove(name)
-    
-    def set_prop(self, property, value) -> bool:
-        for actor in self._actor_list.values():
-            if hasattr(actor, property):
-                setattr(actor, property, value)
             
     def __getattr__(self, property):
         if property in self.__dict__:
@@ -439,10 +546,6 @@ class ActorContainer(AbstractActor):
             return self.get_weak_actor(property)
         else:
             raise AttributeError(f'{property} is not in {self.__class__.__name__}')
-            
-    # def __setattr__(self, property, value):
-    #     self.set_prop(property, value)
-    #     self.__dict__[property] = value
             
     def get_weak_actor(self, item):
         assert item in self._actor_list, f'\"{item}\" is not added.'

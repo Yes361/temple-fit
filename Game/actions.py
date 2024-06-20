@@ -14,6 +14,18 @@ def distance_between_landmarks(detection_result, pointA: int, pointB: int):
     return distance(landmarkA.x - landmarkB.x, landmarkA.y - landmarkB.y)
 
 def find_angle_between_landmarks(detection_result, pointA: int, pointB: int, pointC: int):
+    """
+    Calculate the angle formed by three landmarks.
+    
+    Args:
+        detection_result: The result from a Mediapipe pose detection.
+        pointA (int): Index of the first landmark.
+        pointB (int): Index of the second landmark.
+        pointC (int): Index of the third landmark.
+    
+    Returns:
+        float: Angle between the three landmarks in degrees.
+    """
     edgeAB = distance_between_landmarks(detection_result, pointA, pointB)
     edgeAC = distance_between_landmarks(detection_result, pointA, pointC)
     edgeCB = distance_between_landmarks(detection_result, pointC, pointB)
@@ -24,16 +36,22 @@ def find_angle_between_landmarks(detection_result, pointA: int, pointB: int, poi
         angle += 360
     return angle
 
-def dot_product(detection_result, pointA: int, pointB: int, pointC: int):
-    landmarks = detection_result.landmark
-    landmarkA, landmarkB, landmarkC = landmarks[pointA], landmarks[pointB], landmarks[pointC]
-    edgeAB = Vector2(landmarkA.x - landmarkB.x, landmarkA.y - landmarkB.y).normalize()
-    edgeCB = Vector2(landmarkC.x - landmarkB.x, landmarkC.y - landmarkB.y).normalize()
-    return Vector2.dot(edgeAB, edgeCB)
-
 class Recognizer(ABC):    
+    """
+    Abstract base class for exercise recognizers.
+    """
     @abstractmethod
     def run(self, detection_results, time_elapsed: float) -> bool:
+        """
+        Process detection results and update the recognizer state.
+        
+        Args:
+            detection_results: The result from a Mediapipe pose detection.
+            time_elapsed (float): Time elapsed since the last update.
+        
+        Returns:
+            bool: Whether the exercise was successfully detected.
+        """
         pass
     
     @abstractmethod
@@ -101,9 +119,6 @@ class BicepCurls(Recognizer):
         self.count = 0
         
 class JumpingJacks(Recognizer):
-    """
-    Welcome to ur WORST NIGHTMARE
-    """
     def __init__(self):    
         self.count = 0
         self.in_jump_position = False
@@ -127,31 +142,3 @@ class JumpingJacks(Recognizer):
     
     def reset(self):
         self.count = 0
-        
-# class Lunges(Recognizer):
-#     """
-#     Welcome to ur WORST NIGHTMARE
-#     """
-#     def __init__(self):    
-#         self.count = 0
-#         self.in_jump_position = False
-    
-#     def run(self, detection_results, time_elapsed: float) -> bool:
-#         left_arm_angle = find_angle_between_landmarks(detection_results, mp_pose_landmarks.LEFT_WRIST, mp_pose_landmarks.LEFT_SHOULDER, mp_pose_landmarks.LEFT_HIP)
-#         right_arm_angle = find_angle_between_landmarks(detection_results, mp_pose_landmarks.RIGHT_WRIST, mp_pose_landmarks.RIGHT_SHOULDER, mp_pose_landmarks.RIGHT_HIP)
-        
-#         if left_arm_angle < 90 or right_arm_angle < 90:
-#             if not self.in_jump_position:
-#                 self.in_jump_position = True
-#                 self.count += 1
-#         else:
-#             self.in_jump_position = False
-            
-#         return False
-    
-#     def report_stats(self):
-#         return self.count
-    
-#     def reset(self):
-#         self.count = 0
-        

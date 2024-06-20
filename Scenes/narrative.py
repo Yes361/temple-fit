@@ -14,7 +14,7 @@ text_box.resize((450, 95))
 ui_elements = ActorContainer()
 
 next_button = Button(
-    "play_button",
+    "arrow",
     pos=(550, 500),
     on_click=lambda x, y: game_manager.switch_scene("hallway", "fields"),
 )

@@ -5,6 +5,10 @@ from helper import Actor, Rect
 
     
 class Collider(Actor):
+    """
+    Base class for colliders, inheriting from Actor.
+    Handles static and passable properties and collision detection logic.
+    """
     def __init__(self, *args, is_static=False, is_passable=False, fn=None, **kwargs):
         self.is_static = is_static
         self.is_passable = is_passable
@@ -13,9 +17,19 @@ class Collider(Actor):
     
     @abstractmethod
     def on_collide(self, collision):
+        """
+        Abstract method to handle collision logic.
+        
+        @params:
+            collision: The collision data.
+        """
         pass
         
 class ColliderRect(Rect):
+    """
+    Collider class for rectangular shapes, inheriting from Rect.
+    Handles static and passable properties.
+    """
     def __init__(self, *args, is_static=True, is_passable=False, fn=None, **kwargs):
         self.is_static = is_static
         self.is_passable = is_passable
@@ -32,6 +46,9 @@ class CollisionData:
     colliderB: ColliderRect | Collider
 
 class Collisions:
+    """
+    Manages and resolves collisions between colliders.
+    """
     def __init__(self, *args):
         self.rect_list: List[Tuple[any, Type[Collider | ColliderRect]]] = [] if len(args) == 0 else args
 
@@ -42,6 +59,12 @@ class Collisions:
         self.rect_list = [rect for rect in self.rect_list if rect != collider]
 
     def resolve_entity_collisions(self, entity: Type[Collider]):
+        """
+        Resolve collisions for a given entity with all managed colliders.
+        
+        @params:
+            entity: The entity to check for collisions.
+        """
         for collider in self.rect_list:
             if Collisions.resolve_collision(entity, collider):
                 entity.on_collide(CollisionData(entity, collider))
@@ -50,6 +73,16 @@ class Collisions:
 
     @staticmethod
     def resolve_collision(ColliderA: Type[Collider], ColliderB: Type[Collider | ColliderRect]):
+        """
+        Resolve a collision between two colliders.
+        
+        @params:
+            ColliderA: The first collider.
+            ColliderB: The second collider.
+        
+        @returns:
+            bool: True if a collision was resolved, False otherwise.
+        """
         if not ColliderA.colliderect(ColliderB):
             return False
         
