@@ -172,14 +172,13 @@ def create_room(name, world, floor, next_player_pos, left_side):
 
 def load_tutorial():
     global text_anim, sprite
-    sprite = Actor("narrative_icon", pos=(100, 580))
-    sprite.scale = 1.5
+    sprite = Actor("narrative_icon", pos=(130, 560))
+    sprite.scale = 1
     text_anim = Dialogue(
         sprite,
         {
             "MC": "character-battle-sprite",
-            "Mayor": "narrative_icon",
-            "Fairy": "narrative_icon",
+            "Fairy": "fairy",
         },
         CACHED_DIALOGUE["tutorial"],
         voice_lines=CACHED_VOICELINES["tutorial"],
