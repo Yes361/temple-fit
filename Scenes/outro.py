@@ -1,3 +1,7 @@
+"""
+Outro Scene
+"""
+
 from managers import Scene, game_manager
 from helper import Actor
 from pgzero.builtins import music

@@ -1,3 +1,7 @@
+"""
+This file contains all the level definitions and logic for 
+exploring hallways, navigation, interaction with enemies and entities, etc
+"""
 from managers import Scene, game_manager
 from Game import LevelManager, ColliderRect, Entity, Player, Dialogue
 from helper import (

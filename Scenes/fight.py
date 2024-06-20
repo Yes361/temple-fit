@@ -1,3 +1,7 @@
+"""
+This file handles the battle scene logic (i.e. Checklist, displaying Camera, )
+"""
+
 from helper import ActorContainer, Actor, Rect, schedule, Music
 from managers import Scene, game_manager
 from Game import camera, Pose, HealthBar, Entity

@@ -1,3 +1,10 @@
+"""
+This file implements the Start Screen Scene
+
+This file manages the game's start screen and initial setup, 
+including difficulty settings.
+"""
+
 from managers import Scene, game_manager
 from helper import Actor, ActorContainer, Music
 from pgzero.builtins import animate

@@ -1,3 +1,7 @@
+"""
+This file implements the scene for the beginning dialogue with the mayor
+"""
+
 from managers import Scene, game_manager
 from helper import Actor, ActorContainer, Rect, Music, CACHED_DIALOGUE, CACHED_VOICELINES
 from Game import Button, Dialogue

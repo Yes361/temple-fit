@@ -1,3 +1,9 @@
+"""
+Main module for running the game application.
+
+This file initializes the game, manages scenes, and handles user interactions.
+"""
+
 import pgzrun
 
 # Typing Hint

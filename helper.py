@@ -1,3 +1,9 @@
+"""
+This file contains various helper classes and functions essential for game
+development, including Actor, ActorContainer, Rect, Music, and constants for
+cached dialogue and voice lines.
+"""
+
 from pgzero.builtins import Actor, animate, Rect, music
 from pgzhelper import Actor
 from typing import *

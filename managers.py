@@ -1,3 +1,8 @@
+"""
+This file provides Scene and game_manager classes for handling different game
+states and transitions.
+"""
+
 from abc import abstractmethod
 from typing import *
 import pygame
