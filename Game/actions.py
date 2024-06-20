@@ -17,13 +17,13 @@ def find_angle_between_landmarks(detection_result, pointA: int, pointB: int, poi
     """
     Calculate the angle formed by three landmarks.
     
-    Args:
+    @params:
         detection_result: The result from a Mediapipe pose detection.
         pointA (int): Index of the first landmark.
         pointB (int): Index of the second landmark.
         pointC (int): Index of the third landmark.
     
-    Returns:
+    @returns:
         float: Angle between the three landmarks in degrees.
     """
     edgeAB = distance_between_landmarks(detection_result, pointA, pointB)
@@ -45,27 +45,30 @@ class Recognizer(ABC):
         """
         Process detection results and update the recognizer state.
         
-        Args:
+        @params:
             detection_results: The result from a Mediapipe pose detection.
             time_elapsed (float): Time elapsed since the last update.
         
-        Returns:
+        @returns:
             bool: Whether the exercise was successfully detected.
         """
         pass
     
     @abstractmethod
     def report_stats(self):
+        """
+        Report Internal Statistics, i.e. rep count
+        """
         pass
     
     @abstractmethod
     def reset(self):
+        """
+        Reset method to reset Recognizer to its initial state
+        """
         pass
         
 class Squats(Recognizer):
-    """
-    Welcome to ur WORST NIGHTMARE
-    """
     def __init__(self):    
         self.count = 0
         self.in_squat_position = False
@@ -91,9 +94,6 @@ class Squats(Recognizer):
         self.count = 0
         
 class BicepCurls(Recognizer):
-    """
-    Welcome to ur WORST NIGHTMARE
-    """
     def __init__(self):    
         self.count = 0
         self.in_curl_position = False

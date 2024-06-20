@@ -11,8 +11,7 @@ class Scene:
     inherit from this class and implement the required abstract methods to define the scene's behavior.
     """
     def __init__(self, scene, *args, **kwargs):
-        game_manager.subscribe(scene, self)
-        self.globals = kwargs
+        game_manager.subscribe(scene, self) # Subscribes the Scene to the Game Manager
     
     @abstractmethod
     def load_actors():
@@ -232,12 +231,15 @@ class GameManager:
         dt : float
             The time delta since the last update.
         """
+        # call update(dt) on active scenes
         for scene in self._active_scenes:
-            
             current_scene = self.scenes[scene]
             current_scene.on_update(dt)
             
+        # Retrieve the current event being handled in the scene
         current_event = self.current_event()
+        
+        # Event Handling
         self.scenes[current_event].on_mouse_hold(pygame.mouse.get_pos(), pygame.mouse.get_pressed())
         self.scenes[current_event].on_mouse_hover(pygame.mouse.get_pos())
         self.scenes[current_event].on_key_hold(dt)

@@ -148,11 +148,15 @@ def read_dialogue_lines(asset_folder_path):
         dialogue[file_name] = list(filter(lambda line: (line != '\n') and (line != ''), dialogue_lines))
     return dialogue
 
+# Store GIFS, Dialogue, and Voice lines
 CACHED_GIFS = load_gifs(r'assets/gifs')
 CACHED_DIALOGUE = read_dialogue_lines(r'assets/Dialogue')
 CACHED_VOICELINES = extract_voicelines(r'sounds')
 
 class AbstractActor:
+    """
+    AbstractActor is an abstract base class that defines the interface for actors within the game.
+    """
     @abstractmethod
     def draw(self, *args, **kwargs):
         pass
@@ -168,32 +172,6 @@ class AbstractActor:
     @abstractmethod
     def reset(self):
         pass
-    
-    @abstractmethod
-    def hide(self):
-        pass
-    
-    @abstractmethod
-    def show(self):
-        pass
-    
-    @property
-    def hidden(self) -> bool:
-        return self._hidden
-    
-    @hidden.setter
-    def hidden(self, value):
-        self._hidden = value
-        if value:
-            self.hide()
-        else:
-            self.show()
-    
-    @hidden.getter
-    def hidden(self):
-        if not (self, '_hidden'):
-            self._hidden = False
-        return self._hidden
 
 class Actor(Actor, AbstractActor):
     """
@@ -214,6 +192,7 @@ class Actor(Actor, AbstractActor):
         self.time_elapsed = 0
         self.opacity = opacity
         
+        # Save the custom properties
         removed_kwargs = {}
         for key in kwargs.copy():
             if key not in Actor._EXPECTED_INIT_KWARGS:
@@ -223,6 +202,7 @@ class Actor(Actor, AbstractActor):
         if dims is not None:
             self.dims = dims
             
+        # Set the custom properties
         for key in removed_kwargs:
             setattr(self, key, removed_kwargs[key])
         
@@ -251,6 +231,7 @@ class Actor(Actor, AbstractActor):
         self._surf = pygame.transform.scale(self._surf, dims)
     
     def draw(self, *args, **kwargs):
+        # Opacity
         if self._surf.get_alpha() != self.opacity:
             self._surf.set_alpha(self.opacity)
             
@@ -266,7 +247,7 @@ class Actor(Actor, AbstractActor):
         """
         return type(self.images) == list and len(self.images) > 0
     
-    # https://gist.github.com/Susensio/979259559e2bebcd0273f1a95d7c1e79
+    # Thanks to https://gist.github.com/Susensio/979259559e2bebcd0273f1a95d7c1e79
     @Actor.image.setter
     def image(self, image):
         if self._image_name != image:
@@ -275,6 +256,7 @@ class Actor(Actor, AbstractActor):
             
     def update(self, dt):
         self.time_elapsed += dt
+        # Plays an animation/gif
         if self.is_animation_available():
             if self._is_playing_gif:
                 self.animate_gif()
@@ -299,6 +281,14 @@ class Actor(Actor, AbstractActor):
         self._anim_instance = animate(self, tween, duration, on_finished=on_finished, **saved_attributes)
                 
     def pause_gif(self, play=None):
+        """
+        Toggle the play/pause state of a GIF animation. If the `play` parameter is provided,
+        it explicitly sets the play state of the GIF. If `play` is not provided, it toggles
+        the current play state.
+        
+        @params:
+            play : bool, optional
+        """
         if play is not None:
             self._is_playing_gif = not play
         else:
@@ -308,6 +298,7 @@ class Actor(Actor, AbstractActor):
         if self.iterations == 0:
             self.skip_gif()
 
+        # Decrement iterations if a cycle was completed
         elif super().animate() == len(self.images) - 1 and self.iterations > 0:
             self.iterations -= 1
     
@@ -324,6 +315,7 @@ class Actor(Actor, AbstractActor):
         """
         Skips to the last frame of the GIF animation.
         """
+        # Return early if an animation isn't available
         if not self.is_animation_available():
             return
         
@@ -359,9 +351,6 @@ class Actor(Actor, AbstractActor):
         self._is_playing_gif = True
         self._gif_on_finish = on_finish
         self.play_animation(CACHED_GIFS[gif], fps, iterations)
-        
-    def get_weak_ref(self):
-        return weakref.proxy(self)
     
     def copy_basic_attr(self, other: Type[Actor], attrs=['scale']):
         """
@@ -376,6 +365,9 @@ class Actor(Actor, AbstractActor):
             setattr(self, attr, value)
 
 class Rect(Rect, AbstractActor):
+    """
+    The better pgzero Rect, and shares some methods with Actor
+    """
     def __init__(self, pos, dims, /, *, scale=1, fill=(255, 255, 255), border=(255, 255, 255)):
         self.fill = fill
         self.border = border
@@ -423,11 +415,11 @@ class ActorContainer(AbstractActor):
         if len(self._actor_list) == 0:
             return self._x
         
+        # Get average x position
         x_avg = 0
         for actor in self._actor_list.values():
             x_avg += actor.x
-        x_avg /= len(self._actor_list)
-        self._x = x_avg
+        self._x = x_avg / len(self._actor_list)
         
         return self._x
     
@@ -447,11 +439,11 @@ class ActorContainer(AbstractActor):
         if len(self._actor_list) == 0:
             return self._y
         
+        # Get average y position
         y_avg = 0
         for actor in self._actor_list.values():
             y_avg += actor.y
-        y_avg /= len(self._actor_list)
-        self._y = y_avg
+        self._y = y_avg / len(self._actor_list)
         return self._y
     
     @y.setter
@@ -500,6 +492,15 @@ class ActorContainer(AbstractActor):
         del actor
         
     def has(self, name: any) -> bool:
+        """
+        Checks if the name exists in the ActorContainer
+        
+        @params:
+            name (any): The identifier for the actor
+            
+        @returns:
+            bool: True if the name exists
+        """
         return name in self._actor_list
         
     def colliderect(self, other_actor: Type[AbstractActor]):
@@ -527,13 +528,11 @@ class ActorContainer(AbstractActor):
     def update(self, dt, *args, **kwargs):
         for actor in self._actor_list.values():
             actor.update(dt, *args, **kwargs)
-            
-    def offset(self, pos):
-        dx, dy = pos
-        self.x += dx
-        self.y += dy
-            
+   
     def clear(self):
+        """
+        Clears all the Actors in the ActorContainer
+        """
         for name in self._actor_list.copy():
             actor = self._actor_list.get(name)
             if isinstance(actor, ActorContainer):
@@ -551,6 +550,7 @@ class ActorContainer(AbstractActor):
     def __getattr__(self, property):
         if property in self.__dict__:
             return self.__dict__[property]
+        # Allow Actors to be accessed as custom properties
         elif property in self._actor_list:
             # setattr(self, property, ) # Cache result?
             return self.get_weak_actor(property)
@@ -575,7 +575,7 @@ class ActorContainer(AbstractActor):
     
 class Music:
     """
-    The Better Music Class.
+    The Better Music Class. Keeps track of the piece that is currently playing
     (But doesn't support queuing and fadeout)
     """
     _current = None  
@@ -606,6 +606,9 @@ class Music:
     
     
 class GUIElement(AbstractActor):
+    """
+    Abstract base class for defining GUI elements with clickable, hoverable, and holdable behaviors.
+    """
     @abstractmethod
     def on_click(self, pos, button) -> bool:
         pass
@@ -617,11 +620,14 @@ class GUIElement(AbstractActor):
     @abstractmethod
     def on_hold(self) -> bool:
         pass
-        
-dummy_object = Actor('battle_scene_tab')
-def schedule(on_finish, duration): # monke patch
-    return animate(dummy_object, duration=duration, on_finished=on_finish, pos=(20, 20))
+
+def schedule(on_finish, duration):
+    """
+    Patch for the Clock Scheduler, which doesn't work outside of main.py
+    """
+    dummy_object = Actor('battle_scene_tab')
+    # Using the delay and callback to emulate schedule
+    return animate(dummy_object, duration=duration, on_finished=on_finish, pos=(0, 0))
         
 if __name__ == '__main__':
-    # extract_gif_frames(r'assets/gifs/ending.gif', 'images', 'ending') 
     print(CACHED_GIFS)

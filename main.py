@@ -1,16 +1,22 @@
 import pgzrun
+
+# Typing Hint
 import pgzero.screen
 import os
 
-from managers import game_manager, GameManager
-from Scenes import *
+from managers import game_manager
 from Game import camera
+
+# Import the Scenes
+from Scenes import *
 
 screen: pgzero.screen.Screen
 os.environ["SDL_VIDEO_CENTERED"] = "1"
 WIDTH = 662
 HEIGHT = 662
-TITLE = "I wanna kms"
+TITLE = "Temple-Fit"
+
+# Initialize the Camera and Scenes
 
 camera.initialize_camera(0, (600, 450))
 

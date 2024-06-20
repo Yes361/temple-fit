@@ -77,6 +77,17 @@ class PoseAnalyzer:
     def set_active_recognizer(self, *active_list):
         self.active_recognizers = active_list[0] if type(active_list[0]) == list else active_list
                 
+    def check_implemented_action(self, action):
+        """
+        Check if PoseAnalyzer supports the Action
+        
+        @params
+            action (str): Check if action is supported
+        """
+        if action.lower() not in self.ACTION_RECOGNIZERS:
+            raise NotImplementedError(f'\"{action.lower()}\" is not a supported action')
+        
+        
     def report_stats(self, action: str=None):
         """
         Report statistics of the recognized actions.
@@ -84,17 +95,24 @@ class PoseAnalyzer:
         @params:
             action (str): Specific action to report stats for.
         
-        @@returns:
+        @returns:
             dict or int: Statistics data.
         """
         if action is None:
             return {action: recognizer.report_stats() for action, recognizer in self.recognizers.items()}
         else:
-            assert action.lower() in self.ACTION_RECOGNIZERS, f'\"{action.lower()}\" is not a supported action'
+            self.check_implemented_action(action)
             return self.recognizers[action.lower()].report_stats()
+
     
     def reset_recognizer(self, action: str):
-        assert action.lower() in self.ACTION_RECOGNIZERS, f'\"{action.lower()}\" is not a supported action'
+        """
+        Reset Recognizer to its initial state
+        
+        @params:
+            action (str): The action recognizer to reset
+        """
+        self.check_implemented_action(action)
         self.recognizers[action.lower()].reset()
         
     def reset_all_recognizers(self):
@@ -144,7 +162,7 @@ class Camera(Actor):
         """
         Read a frame from the camera
         """
-        assert self._cap, 'Video aint opened yet son of a btcih'
+        assert self._cap, 'Video isn\'t initialized'
         ret, frame = self._cap.read()   
         frame = Camera.process_camera_frame(frame)
         return ret, frame
@@ -158,6 +176,7 @@ class Camera(Actor):
         
         ret, frame = self.return_camera_frame()
         
+        # Return Blank Surface
         if not ret:
             return pygame.Surface((self.width, self.height))
         
@@ -165,10 +184,13 @@ class Camera(Actor):
         
         if self.pose.is_results_available():
             PoseAnalyzer.draw_hand_landmarks(frame, detection_result)
+            
+            # If user doesn't need to reposition themselves
+            # recognize the pose using the current frame and elapsed time.
             if self.prompt_user(frame, detection_result):
                 self.pose.recognize_pose(frame, self.time_elapsed)
             
-            
+        # Convert Frame to a Pygame Surface
         self._surf = Camera.convert_frame_surface(frame, (self.width, self.height))
         super().draw()
 
