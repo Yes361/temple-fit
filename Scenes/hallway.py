@@ -10,6 +10,7 @@ from helper import (
     CACHED_VOICELINES,
 )
 from pgzero.builtins import animate, keyboard
+import random
 
 freeze_frame = False
 
@@ -29,15 +30,20 @@ player = Player(
 
 ui = Actor("battle_scene_tab", scale=0.15)
 ui.topleft = (0, 662 - ui.height)
-counter = 0
+scroll_counter = 0
 
 text_anim = None
 sprite = None
-scroll_counter_img = Actor("scroll", pos=(ui.width / 2, 662 - ui.height / 4))
-scroll_counter_img.scale = 0.15
 
-FLOOR1_SCROLLS = 8
-FLOOR2_SCROLLS = 14
+key_counter_img = Actor("key", pos=(50, 610))
+key_counter_img.scale = 0.15
+
+scroll_counter_img = Actor("scroll", pos=(110, 610))
+scroll_counter_img.scale = 0.10
+
+FIRST_SCROLLS = 8
+SECOND_SCROLLS = 6
+total_scrolls = FIRST_SCROLLS
 
 
 def fade():
@@ -72,7 +78,13 @@ class Enemy(Entity):
         if self.colliderect(player):
             fade()
             schedule(
-                lambda: game_manager.switch_scene("Battle", next=self.next, room=0, enemy_image=self.image, scale=self.scale),
+                lambda: game_manager.switch_scene(
+                    "Battle",
+                    next=self.next,
+                    room=0,
+                    enemy_image=self.image,
+                    scale=self.scale,
+                ),
                 1,
             )
 
@@ -81,13 +93,17 @@ class Enemy(Entity):
 
 class Item(Entity):
     def update(self, dt):
-        global player, counter
+        global player, scroll_counter, key_counter
         if self.hidden:
             return
 
         if self.colliderect(player):
-            levels[level_manager.current_level]["entities"].scroll.hidden = True
-            counter += 1
+            if self.image == "scroll":
+                levels[level_manager.current_level]["entities"].scroll.hidden = True
+                scroll_counter += 1
+            elif self.image == "key":
+                levels[level_manager.current_level]["entities"].key.hidden = True
+                key_counter += 1
 
 
 left_rooms = [
@@ -134,13 +150,46 @@ right_rooms = [
     ),
 ]
 
+
+def load_floor3():
+    global text_anim, sprite
+
+    level_manager.load_level("floor3", player_pos=(0, 0))
+    sprite = Actor("narrative_icon", pos=(100, 580))
+    sprite.scale = 1.5
+
+    text_anim = Dialogue(
+        sprite,
+        {
+            "MC": "character-battle-sprite",
+            "OM": "narrative_icon",
+        },
+        CACHED_DIALOGUE["outro"],
+        voice_lines=CACHED_VOICELINES["oms"],
+        time_per_char=0.02,
+        bounding_box=Rect((220, 565), (425, 75)),
+        color="white",
+        on_finish=lambda: game_manager.switch_scene(
+            "Battle", next="outro", enemy_image="dragon"
+        ),
+    )
+
+
+key_counter = 0
+
+
 def next_floor(current_floor):
-    global counter
-    if current_floor == "floor" and counter >= FLOOR1_SCROLLS:
+    global scroll_counter, total_scrolls
+    if current_floor == "floor" and key_counter == 1:
         level_manager.load_level("floor2")
-    if current_floor == "floor2" and counter >= FLOOR2_SCROLLS:
-        game_manager.switch_scene("Battle")
-    
+        total_scrolls += SECOND_SCROLLS
+    if (
+        current_floor == "floor2"
+        and key_counter == 1
+        and scroll_counter >= total_scrolls
+    ):
+        load_floor3()
+
 
 def create_room(name, world, floor, next_player_pos, left_side):
     if left_side:
@@ -170,6 +219,7 @@ def create_room(name, world, floor, next_player_pos, left_side):
         ),
     }
 
+
 def load_tutorial():
     global text_anim, sprite
     sprite = Actor("narrative_icon", pos=(130, 560))
@@ -189,26 +239,6 @@ def load_tutorial():
 
     level_manager.load_level("tutorial_start", (0, 0))
 
-def load_floor3():
-    global text_anim, sprite
-    
-    level_manager.load_level("floor3", player_pos=(0, 0))
-    sprite = Actor("narrative_icon", pos=(100, 580))
-    sprite.scale = 1.5
-    
-    text_anim = Dialogue(
-        sprite,
-        {
-            "MC": "character-battle-sprite",
-            "OM": "narrative_icon",
-        },
-        CACHED_DIALOGUE["outro"],
-        voice_lines=CACHED_VOICELINES["oms"],
-        time_per_char=0.02,
-        bounding_box=Rect((220, 565), (425, 75)),
-        color="white",
-        on_finish=lambda: game_manager.switch_scene('Battle', next='outro', enemy_image='dragon')
-    )
 
 levels = {
     "tutorial_start": {
@@ -254,7 +284,9 @@ levels = {
             ColliderRect(
                 (662 / 2, -662 / 2),
                 (81, 662),
-                fn=lambda: level_manager.load_level("tutorial_boss", player_pos=(-280, 0)),
+                fn=lambda: level_manager.load_level(
+                    "tutorial_boss", player_pos=(-280, 0)
+                ),
             ),
         ],
         "entities": ActorContainer(),
@@ -317,7 +349,7 @@ levels = {
             ColliderRect(
                 (-2160 * 0.3 / 2 + 81, -4320 * 0.3 / 2 + 80),
                 (4320 * 0.3, 10),
-                fn=next_floor,
+                fn=lambda: next_floor("floor"),
             ),
             ColliderRect(
                 (-2160 * 0.3 / 2 + 83, -4320 * 0.3 / 2 + 80 * 3 + 10),
@@ -378,43 +410,37 @@ levels = {
             ColliderRect(
                 (-2160 * 0.3 / 2 + 81, 3500 * 0.3 / 2 - 80),
                 (3500 * 0.3, 10),
-                fn=load_floor3,
+                fn=lambda: next_floor("floor2"),
             ),
             ColliderRect(
                 (-2160 * 0.3 / 2 + 83, -3500 * 0.3 / 2 + 80 * 3 + 10),
                 (81, 81),
                 fn=lambda: level_manager.load_level("room1-2", player_pos=(0, 0)),
-                # fn=lambda: print('room1')
             ),
             ColliderRect(
                 (2160 * 0.3 / 2 - 81 * 2 - 1, -3500 * 0.3 / 2 + 81 * 3 + 10),
                 (81, 81),
                 fn=lambda: level_manager.load_level("room2-2", player_pos=(0, 0)),
-                # fn=lambda: print('room2')
             ),
             ColliderRect(
                 (-2160 * 0.3 / 2 + 82, -3500 * 0.3 / 2 + 81 * 7 + 10),
                 (81, 81),
                 fn=lambda: level_manager.load_level("room3-2", player_pos=(0, 0)),
-                # fn=lambda: print('room3')
             ),
             ColliderRect(
                 (2160 * 0.3 / 2 - 81 * 2 - 1, -3500 * 0.3 / 2 + 81 * 7 + 10),
                 (81, 81),
                 fn=lambda: level_manager.load_level("room4-2", player_pos=(0, 0)),
-                # fn=lambda: print('room4')
             ),
             ColliderRect(
                 (-2160 * 0.3 / 2 + 82, -3500 * 0.3 / 2 + 81 * 11 - 25),
                 (81, 81),
                 fn=lambda: level_manager.load_level("room5-2", player_pos=(0, 0)),
-                # fn=lambda: print('room5')
             ),
             ColliderRect(
                 (2160 * 0.3 / 2 - 81 * 2 - 3, -3500 * 0.3 / 2 + 81 * 11 - 25),
                 (81, 81),
                 fn=lambda: level_manager.load_level("room6-2", player_pos=(0, 0)),
-                # fn=lambda: print('room6')
             ),
         ],
         "entities": ActorContainer(),
@@ -425,21 +451,36 @@ levels = {
     "room4-2": create_room("room4-2", "smooth_right", "floor2", (96, 48), False),
     "room5-2": create_room("room5-2", "brick_left", "floor2", (-84, 219), True),
     "room6-2": create_room("room6-2", "block_right", "floor2", (96, 219), False),
-    'floor3': {
-        'world': Actor('final_room', scale=0.3),
-        'colliders': [
+    "floor3": {
+        "world": Actor("final_room", scale=0.3),
+        "colliders": [
             ColliderRect((-2300 / 2 * 0.3, -1300 / 2 * 0.3 - 10), (2300 * 0.3, 10)),
             ColliderRect((2300 / 2 * 0.3, -1300 / 2 * 0.3), (10, 1300 * 0.3)),
             ColliderRect((-2300 / 2 * 0.3, 1300 / 2 * 0.3 - 10), (2300 * 0.3, 10)),
             ColliderRect((-2300 / 2 * 0.3 - 10, -1300 / 2 * 0.3), (10, 1300 * 0.3)),
         ],
-        'entities': ActorContainer()
-    }
-        
+        "entities": ActorContainer(),
+    },
 }
+
+
+def position_keys():
+    random_room_floor1 = f"room{random.randint(1, 8)}"
+    random_pos_floor1 = (random.randint(-200, 200), random.randint(-200, 200))
+    levels[random_room_floor1]["entities"].add(
+        "key", Item("key", pos=random_pos_floor1)
+    )
+
+    random_room_floor2 = f"room{random.randint(1, 6)}-2"
+    random_pos_floor2 = (random.randint(-200, 200), random.randint(-200, 200))
+    levels[random_room_floor2]["entities"].add(
+        "key", Item("key", pos=random_pos_floor2)
+    )
+
 
 level_manager = LevelManager((662, 662), player, levels)
 level_manager.load_level("floor", (0, 0))
+
 
 class hallway(Scene):
     SCENE_NAME = "hallway"
@@ -449,30 +490,30 @@ class hallway(Scene):
         self.globals = kwargs
 
     def on_show(self, room="fields", player_pos=(0, 0)):
-        
+
         global level_manager, text_anim, sprite
-        
-        if not Music.is_playing('in_game'):
+
+        if not Music.is_playing("in_game"):
             Music.stop()
-            Music.play('in_game')
+            Music.play("in_game")
 
         reset_opacity()
 
         if room == "fields":
-            player_pos= (0, 1000)
-        elif room == 'floor':
+            player_pos = (0, 1000)
+        elif room == "floor":
             player_pos = (0, 588)
 
         if level_manager.current_level.startswith("room"):
             levels[room]["entities"].enemy.hidden = True
-        
+
         level_manager.load_level(room, player_pos)
 
     def on_update(self, dt):
         if not freeze_frame:
             level_manager.update(dt)
 
-        if counter >= 1: # CHANGE
+        if scroll_counter >= 1:  # CHANGE
             levels["floor"]["world"].image = "floor1-open"
 
         if level_manager.current_level.startswith("tutorial") and text_anim and sprite:
@@ -481,17 +522,22 @@ class hallway(Scene):
 
         if text_anim is None or text_anim.is_complete():
             player.move()
-            
+
         print(player.pos)
 
     def on_draw(self, screen):
-        global counter
-
         level_manager.draw(screen)
         ui.draw()
+
         scroll_counter_img.draw()
-        
-        screen.draw.text(f"{counter}", (40, 615))
+        key_counter_img.draw()
+        screen.draw.text(f"{key_counter}/1", (30, 630), fontname="pixel", fontsize=30)
+        screen.draw.text(
+            f"{scroll_counter}/{total_scrolls}",
+            (80, 630),
+            fontname="pixel",
+            fontsize=30,
+        )
 
         if text_anim and sprite:
             text_anim.draw(screen)
@@ -507,10 +553,18 @@ class hallway(Scene):
                 sprite.hidden = True
 
     def reset(self):
+        global scroll_counter, key_counter
+        scroll_counter = 0
+        key_counter = 0
+
         for level in levels.values():
             entities = level["entities"]
-            if entities.has('enemy'):
+            if entities.has("enemy"):
                 entities.enemy.hidden = False
-                
-            if entities.has('scroll'):
+
+            if entities.has("scroll"):
                 entities.scroll.hidden = False
+
+            if entities.has("item"):
+                entities.remove("item")
+        position_keys()

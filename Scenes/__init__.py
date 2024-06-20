@@ -1,3 +1,4 @@
+from .utils import *
 from .start import StartScreen
 from .fight import battle
 from .hallway import hallway

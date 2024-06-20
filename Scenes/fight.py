@@ -4,6 +4,7 @@ from Game import camera, Pose, HealthBar, Entity
 from dataclasses import dataclass
 from typing import List
 import random
+from . import utils
 
 # Definitions
 
@@ -69,7 +70,6 @@ enemy.name = "The Big Bad"
 next_room = "hallway"
 next_player_pos = (0, 0)
 
-exercise = [{"exercise": (1, 2), "sets": (5, 7)}, {"exercise": (2, 4), "sets": (7, 10)}]
 
 objectives: List[Objective] = []
 
@@ -108,8 +108,8 @@ def check_uncompleted_objectives():
             obj.completed = True
             anim()
 
+            Pose.reset_all_recognizers()
             try:
-                Pose.reset_all_recognizers()
                 Pose.set_active_recognizer([objectives[idx + 1].action])
             except IndexError:
                 schedule(next_scene, 1)
@@ -166,7 +166,7 @@ class battle(Scene):
         enemy_sprite.scale = scale
 
         reset()
-        create_new_objective(exercise[room])
+        create_new_objective(utils.exercise[room])
 
     def on_hide(self):
         pass

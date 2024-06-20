@@ -539,6 +539,14 @@ class ActorContainer(AbstractActor):
                 actor.clear()            
             self.remove(name)
             
+    def on_click(self, pos, button):
+        if self.hidden:
+            return
+
+        for actor in self._actor_list.values():
+            actor.on_click(pos, button)
+            
+            
     def __getattr__(self, property):
         if property in self.__dict__:
             return self.__dict__[property]
