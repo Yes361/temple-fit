@@ -186,13 +186,13 @@ def next_floor(current_floor):
     if key_counter < 1:
         return
 
-    if current_floor == "floor":
+    if current_floor == "floor" and scroll_counter > total_scrolls and key_counter >= 1:
         level_manager.load_level("floor2", player_pos=(0, -378))
         total_scrolls += SECOND_SCROLLS
         key_counter = 0
     if (
         current_floor == "floor2"
-        and key_counter == 1
+        and key_counter >= 1
         and scroll_counter >= total_scrolls
     ):
         level_manager.load_level("floor3", player_pos=(0, 453))
