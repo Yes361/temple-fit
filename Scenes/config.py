@@ -3,26 +3,26 @@ exercise_sets = {
     "easy": {
         "sets": [
             {"exercise": (1, 2), "sets": (5, 7)},
-            {"exercise": (2, 4), "sets": (7, 10)},
-            {"exercise": (3, 6), "sets": (10, 13)},
+            {"exercise": (2, 3), "sets": (7, 9)},
+            {"exercise": (3, 4), "sets": (8, 10)},
         ],
-        'time_limit': 45
+        'time_limit': 60
     },
     "medium": {
         "sets": [
-            {"exercise": (1, 2), "sets": (5, 7)},
-            {"exercise": (2, 4), "sets": (7, 10)},
-            {"exercise": (2, 4), "sets": (7, 10)},
+            {"exercise": (2, 3), "sets": (6, 8)},
+            {"exercise": (3, 4), "sets": (8, 11)},
+            {"exercise": (3, 5), "sets": (9, 11)},
         ],
-        'time_limit': 30
+        'time_limit': 45
     },
     "hard": {
         "sets": [
-            {"exercise": (1, 2), "sets": (5, 7)},
-            {"exercise": (2, 4), "sets": (7, 10)},
-            {"exercise": (2, 4), "sets": (7, 10)},
+            {"exercise": (1, 2), "sets": (6, 8)},
+            {"exercise": (2, 4), "sets": (9, 11)},
+            {"exercise": (3, 6), "sets": (10, 13)},
         ],
-        'time_limit': 20
+        'time_limit': 30
     },
 }
 
