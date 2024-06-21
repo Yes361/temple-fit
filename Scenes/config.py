@@ -41,5 +41,3 @@ def set_difficulty(difficulty):
     time_limit = exercise_sets[difficulty]['time_limit']
 
 set_difficulty('easy')
-
-__all__ = [set_difficulty, exercise_sets, mode, exercise, time_limit]
