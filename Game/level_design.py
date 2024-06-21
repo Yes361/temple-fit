@@ -109,6 +109,6 @@ class LevelManager(AbstractActor):
         self.world.draw()
         self.player.draw(screen)
         self.entities.draw(screen)
-        self.debug(screen)
+        # self.debug(screen)
         
         self.offset_room((-self.camera[0], -self.camera[1]))
